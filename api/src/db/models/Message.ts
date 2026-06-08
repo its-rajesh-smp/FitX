@@ -54,4 +54,20 @@ export class Message extends Model {
 
     return messages.reverse();
   }
+
+  static async countByThreadId(threadId: string): Promise<number> {
+    return await this.query().where({ threadId }).resultSize();
+  }
+
+  static async getBatchAfterMessageCount(
+    threadId: string,
+    messageCount: number,
+    limit: number,
+  ): Promise<Message[]> {
+    return await this.query()
+      .where({ threadId })
+      .orderBy("createdAt", "asc")
+      .offset(messageCount)
+      .limit(limit);
+  }
 }

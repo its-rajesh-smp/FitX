@@ -10,6 +10,8 @@ import { SendChatMessageInput } from "@validators/chat/sendChatMessage";
 import { Request, Response } from "express";
 import { fitXChatAgent } from "../../../agents";
 import { db } from "../../../db";
+import { User } from "@models/User";
+import { generateThreadSummary, updateUserDetails } from "../../../services/ai";
 
 export const sendChatMessage = async (
   req: Request<object, object, SendChatMessageInput>,
@@ -26,10 +28,26 @@ export const sendChatMessage = async (
       : null;
 
     const history = existingChatThread
-      ? await Message.getRecent(existingChatThread.id)
+      ? await Message.getRecent(existingChatThread.id, 10)
       : [];
 
-    const prompt = generatePrompt(history, message);
+    const user = await User.findById(userId);
+    if (!user) throw new Error("USER_NOT_FOUND");
+
+    const userWithUpdatedDetails = await updateUserDetails({
+      user,
+      message,
+    }).catch((error) => {
+      console.error("FitX user details update failed:", error);
+      return user;
+    });
+
+    const prompt = generatePrompt(
+      history,
+      message,
+      userWithUpdatedDetails,
+      existingChatThread ?? undefined,
+    );
 
     emit({ type: "status", status: "thinking", label: "Thinking" });
 
@@ -41,9 +59,9 @@ export const sendChatMessage = async (
     const llmResponse = await streamAIResponse(result);
 
     const persisted = await db.transaction(async (trx) => {
-      const thread = existingChatThread
-        ? existingChatThread
-        : await ChatThread.create({ userId }, trx);
+      const thread =
+        existingChatThread ??
+        (await ChatThread.create({ userId, threadMemory: {} }, trx));
 
       await Message.create(
         {
@@ -65,18 +83,14 @@ export const sendChatMessage = async (
         trx,
       );
 
-      // await ChatThread.update(
-      //   thread.id,
-      //   {
-      //     threadMemory: {
-      //       lastUserMessage: message,
-      //       lastAssistantMessage: llmResponse,
-      //     },
-      //   },
-      //   trx,
-      // );
+      await ChatThread.touch(thread.id);
 
       return { thread, newLLMResponse };
+    });
+
+    await generateThreadSummary(persisted.thread).catch((error) => {
+      console.error("FitX thread summary update failed:", error);
+      return persisted.thread;
     });
 
     emit({

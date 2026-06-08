@@ -16,4 +16,5 @@ export const env = {
 
   OPENAI_API_KEY: process.env.OPENAI_API_KEY || "your_openai_api_key",
   OPENAI_MODEL: process.env.OPENAI_MODEL || "gpt-4-0613",
+  OPENAI_MEMORY_MODEL: process.env.OPENAI_MEMORY_MODEL || "gpt-4.1-nano",
 };

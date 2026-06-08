@@ -3,6 +3,7 @@ import { Message } from "@models/Message";
 import { run } from "@openai/agents";
 import { Response } from "express";
 import { fitXChatAgent } from "../../agents";
+import { User } from "@models/User";
 
 const formatHistory = (messages: Message[]): string => {
   return messages
@@ -16,25 +17,37 @@ const formatHistory = (messages: Message[]): string => {
 export const generatePrompt = (
   history: Message[],
   newMessage: string,
+  user: User,
+  thread?: ChatThread,
 ): string => {
   const historyText = formatHistory(history);
+  const userDetails = JSON.stringify(user.details ?? {});
+  const threadSummary =
+    (thread && ChatThread.getSummary(thread)) ??
+    "No short-term thread summary yet.";
 
-  return historyText
-    ? `Conversation so far:\n${historyText}\n\nUser: ${newMessage}`
-    : newMessage;
+  return `Important user details:
+${userDetails}
+
+Short-term thread summary:
+${threadSummary}
+
+Latest conversation history:
+${historyText || "No recent messages."}
+
+User: ${newMessage}`;
 };
 
-export type ChatStreamStatus =
-  | "thinking"
-  | "responding"
-  | "generating_plan"
-  | "searching_exercises"
-  | "saving_plan";
+export type ChatStreamStatus = "thinking" | "responding";
 
 export type ChatStreamEvent =
   | { type: "status"; status: ChatStreamStatus; label: string }
   | { type: "delta"; text: string }
   | { type: "completed"; thread: ChatThread; message: Message };
+
+export type ChatEventEmitter = (
+  event: ChatStreamEvent | { type: "error"; message: string },
+) => void;
 
 type FitXStreamedRunResult = Awaited<
   ReturnType<typeof run<typeof fitXChatAgent>>
@@ -47,9 +60,7 @@ export const useLLMStreaming = (res: Response) => {
   res.setHeader("Connection", "keep-alive");
   res.flushHeaders();
 
-  const emit = (
-    event: ChatStreamEvent | { type: "error"; message: string },
-  ) => {
+  const emit: ChatEventEmitter = (event) => {
     res.write(`${JSON.stringify(event)}\n`);
   };
 
@@ -86,7 +97,7 @@ export const useLLMStreaming = (res: Response) => {
   return { emit, streamAIResponse };
 };
 
-export const handleChatErrors = (error: unknown, emit: any) => {
+export const handleChatErrors = (error: unknown, emit: ChatEventEmitter) => {
   if (error instanceof Error && error.message === "CHAT_THREAD_NOT_FOUND") {
     console.error("Chat thread not found:", error);
     emit({ type: "error", message: "Chat thread not found" });

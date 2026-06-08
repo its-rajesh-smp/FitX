@@ -51,4 +51,14 @@ export class ChatThread extends Model {
       .findById(id)
       .patch({ updatedAt: new Date().toISOString() } as Partial<ChatThread>);
   }
+
+  static getSummary(thread: ChatThread): string | null {
+    const summary = thread.threadMemory?.summary;
+    return typeof summary === "string" && summary.trim() ? summary : null;
+  }
+
+  static getSummarizedMessageCount(thread: ChatThread): number {
+    const count = thread.threadMemory?.summarizedMessageCount;
+    return typeof count === "number" && count >= 0 ? count : 0;
+  }
 }

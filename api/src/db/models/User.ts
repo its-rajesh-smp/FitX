@@ -5,6 +5,7 @@ export class User extends Model {
   name!: string;
   email!: string;
   password!: string;
+  details!: Record<string, string>;
   planId?: string | null;
 
   static tableName = "users";
