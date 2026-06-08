@@ -4,12 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChatComposer } from "@/features/chat/components/ChatComposer";
 import { ChatStatusIndicator } from "@/features/chat/components/ChatStatusIndicator";
+import { HeightWeightWidget } from "@/features/chat/components/HeightWeightWidget";
 import { MarkdownMessage } from "@/features/chat/components/MarkdownMessage";
+import { QuickAnswers } from "@/features/chat/components/QuickAnswers";
 import { getChats } from "@/features/chat/services/getChats";
 import { streamChatMessage, type ChatStatus } from "@/features/chat/services/streamChatMessage";
 import type { ChatMessage, ChatThread } from "@/features/chat/types/chat";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { cn } from "@/lib/utils";
+
+const formatHumanMessage = (text: string) =>
+  text.match(/^Question: .+\nAnswer: (.+)$/s)?.[1] ?? text;
 
 export function ChatPage() {
   const queryClient = useQueryClient();
@@ -18,6 +23,8 @@ export function ChatPage() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [status, setStatus] = useState<{ type: ChatStatus; label: string } | null>(null);
   const [streamError, setStreamError] = useState<string | null>(null);
+  const [answeredWidgets, setAnsweredWidgets] = useState<Record<string, string>>({});
+  const [customQuestion, setCustomQuestion] = useState<{ key: string; question: string } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const chatsQuery = useQuery({ queryKey: ["chats"], queryFn: getChats });
   const chat = chatOverride ?? chatsQuery.data ?? { thread: null, messages: [] };
@@ -28,7 +35,19 @@ export function ChatPage() {
   }, [messages]);
 
   const send = async (text: string) => {
-    const optimistic: ChatMessage = { id: `pending-human-${Date.now()}`, userId: user?.id ?? "", threadId: thread?.id ?? "", role: "Human", content: { text }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const messageText = customQuestion
+      ? `Question: ${customQuestion.question}\nAnswer: ${text}`
+      : text;
+    const activeCustomQuestion = customQuestion;
+    if (activeCustomQuestion) {
+      setAnsweredWidgets((current) => ({
+        ...current,
+        [activeCustomQuestion.key]: text,
+      }));
+      setCustomQuestion(null);
+    }
+
+    const optimistic: ChatMessage = { id: "pending-human", userId: user?.id ?? "", threadId: thread?.id ?? "", role: "Human", content: { text: messageText }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     const pending: ChatMessage = { ...optimistic, id: "pending-assistant", role: "Assistant", content: { text: "" } };
     setChatOverride((current) => ({ thread: current?.thread ?? thread, messages: [...(current?.messages ?? messages), optimistic, pending] }));
     setIsStreaming(true);
@@ -36,7 +55,7 @@ export function ChatPage() {
 
     try {
       await streamChatMessage(
-        { message: text, ...(thread?.id && { threadId: thread.id }) },
+        { message: messageText, ...(thread?.id && { threadId: thread.id }) },
         (event) => {
           if (event.type === "status") {
             setStatus({ type: event.status, label: event.label });
@@ -45,7 +64,7 @@ export function ChatPage() {
           if (event.type === "delta") {
             setChatOverride((current) => ({
               thread: current?.thread ?? thread,
-              messages: (current?.messages ?? []).map((item) => item.id === "pending-assistant" ? { ...item, content: { text: item.content.text + event.text } } : item),
+              messages: (current?.messages ?? []).map((item) => item.id === "pending-assistant" ? { ...item, content: { ...item.content, text: item.content.text + event.text } } : item),
             }));
           }
 
@@ -72,6 +91,18 @@ export function ChatPage() {
   const newChat = () => {
     setChatOverride({ thread: null, messages: [] });
     setStreamError(null);
+    setCustomQuestion(null);
+    setAnsweredWidgets({});
+  };
+
+  const selectQuickAnswer = (widgetKey: string, question: string, answer: string) => {
+    setAnsweredWidgets((current) => ({ ...current, [widgetKey]: answer }));
+    send(`Question: ${question}\nAnswer: ${answer}`);
+  };
+
+  const requestCustomAnswer = (widgetKey: string, question: string) => {
+    setAnsweredWidgets((current) => ({ ...current, [widgetKey]: "Something else" }));
+    setCustomQuestion({ key: widgetKey, question });
   };
 
   const empty = messages.length === 0;
@@ -100,12 +131,54 @@ export function ChatPage() {
         <>
           <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-8">
             <div className="space-y-7">
-              {messages.map((message) => (
+              {messages.map((message, messageIndex) => (
                 <div key={message.id} className={cn("flex gap-3", message.role === "Human" && "justify-end")}>
                   {message.role === "Assistant" && <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-white"><Sparkles className="size-4" /></span>}
                   <div className={cn("max-w-[86%] rounded-2xl px-4 py-3 text-sm leading-7", message.role === "Human" ? "bg-primary-soft text-foreground" : "bg-transparent", message.id === "pending-assistant" && "text-muted-foreground")}>
                     {message.id === "pending-assistant" && status && <div className="mb-2"><ChatStatusIndicator status={status.type} label={status.label} /></div>}
-                    {message.role === "Assistant" ? <MarkdownMessage>{message.content.text}</MarkdownMessage> : message.content.text}
+                    {message.role === "Assistant" ? <MarkdownMessage>{message.content.text}</MarkdownMessage> : formatHumanMessage(message.content.text)}
+                    {message.role === "Assistant" && message.content.widget === "heightWeight" ? (() => {
+                      const widgetKey = message.id;
+                      const nextHumanMessage = messages
+                        .slice(messageIndex + 1)
+                        .find((item) => item.role === "Human");
+                      const persistedResponse = nextHumanMessage?.content.text
+                        .match(/^Question: (.+)\nAnswer: (.+)$/s);
+                      const persistedAnswer = persistedResponse?.[1] === message.content.text
+                        ? persistedResponse[2]
+                        : undefined;
+                      const selectedAnswer = answeredWidgets[widgetKey] ?? persistedAnswer;
+
+                      return (
+                        <HeightWeightWidget
+                          disabled={isStreaming}
+                          selectedAnswer={selectedAnswer}
+                          onSubmit={(answer) => selectQuickAnswer(widgetKey, message.content.text, answer)}
+                        />
+                      );
+                    })() : null}
+                    {message.role === "Assistant" && message.content.quickAnswers?.length ? (() => {
+                      const widgetKey = message.id;
+                      const nextHumanMessage = messages
+                        .slice(messageIndex + 1)
+                        .find((item) => item.role === "Human");
+                      const persistedResponse = nextHumanMessage?.content.text
+                        .match(/^Question: (.+)\nAnswer: (.+)$/s);
+                      const persistedAnswer = persistedResponse?.[1] === message.content.text
+                        ? persistedResponse[2]
+                        : undefined;
+                      const selectedAnswer = answeredWidgets[widgetKey] ?? persistedAnswer;
+
+                      return (
+                        <QuickAnswers
+                          answers={message.content.quickAnswers}
+                          disabled={isStreaming}
+                          selectedAnswer={selectedAnswer}
+                          onSelect={(answer) => selectQuickAnswer(widgetKey, message.content.text, answer)}
+                          onCustomAnswer={() => requestCustomAnswer(widgetKey, message.content.text)}
+                        />
+                      );
+                    })() : null}
                   </div>
                 </div>
               ))}
@@ -114,7 +187,21 @@ export function ChatPage() {
             </div>
           </div>
           <div className="sticky bottom-0 border-t bg-white/95 p-4 backdrop-blur">
-            <div className="mx-auto max-w-3xl"><ChatComposer onSend={send} isPending={isStreaming} /><p className="mt-2 text-center text-[10px] text-muted-foreground">FitX can make mistakes. Use your judgment for health and training decisions.</p></div>
+            <div className="mx-auto max-w-3xl">
+              {customQuestion && (
+                <p className="mb-2 text-xs font-medium text-primary">
+                  Type your own answer to: {customQuestion.question}
+                </p>
+              )}
+              <ChatComposer
+                key={customQuestion?.key ?? "default"}
+                onSend={send}
+                isPending={isStreaming}
+                autoFocus={Boolean(customQuestion)}
+                placeholder={customQuestion ? "Type your answer..." : "Message FitX"}
+              />
+              <p className="mt-2 text-center text-[10px] text-muted-foreground">FitX can make mistakes. Use your judgment for health and training decisions.</p>
+            </div>
           </div>
         </>
       )}

@@ -49,7 +49,7 @@ export const sendChatMessage = async (
     emit({ type: "status", status: "thinking", label: "Thinking" });
 
     const result = await run(fitXChatAgent, prompt, {
-      maxTurns: 5,
+      maxTurns: 1,
       stream: true,
     });
 
@@ -75,7 +75,15 @@ export const sendChatMessage = async (
           userId,
           threadId: thread.id,
           role: MessageRole.Assistant,
-          content: { text: llmResponse },
+          content: {
+            text: llmResponse.text,
+            ...(llmResponse.quickAnswers.length && {
+              quickAnswers: llmResponse.quickAnswers,
+            }),
+            ...(llmResponse.widget === "heightWeight" && {
+              widget: llmResponse.widget,
+            }),
+          },
         },
         trx,
       );
@@ -85,15 +93,19 @@ export const sendChatMessage = async (
       return { thread, newLLMResponse };
     });
 
-    await generateThreadSummary(persisted.thread);
-
     emit({
       type: "completed",
       thread: persisted.thread,
       message: persisted.newLLMResponse,
     });
 
-    return res.end();
+    res.end();
+
+    void generateThreadSummary(persisted.thread).catch((error) => {
+      console.error("FitX thread summary update failed:", error);
+    });
+
+    return;
   } catch (error) {
     handleChatErrors(error, emit);
     return res.end();

@@ -27,6 +27,10 @@ Rules:
 - Extract only from the latest user message. Never infer facts or store assistant suggestions.
 - Do not store greetings, temporary moods, one-off questions, or unimportant conversation.
 - Use stable camelCase keys and concise factual string values.
+- For onboarding facts, always use these canonical keys: height, weight, gender, experienceLevel, workoutLocation.
+- Store units with height and weight when the user provides them.
+- Map beginner/new/no experience to experienceLevel="Beginner", and experienced/intermediate/advanced to experienceLevel="Experienced".
+- Map gym access to workoutLocation="Gym access" and home/bodyweight/no gym to workoutLocation="Home workouts".
 - Upsert corrected facts using the same key.
 - Remove a key only when the user explicitly says that fact no longer applies.
 - Return empty arrays when no details should change.`,

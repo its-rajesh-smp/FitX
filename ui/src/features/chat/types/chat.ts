@@ -10,7 +10,11 @@ export interface ChatMessage {
   userId: string;
   threadId: string;
   role: "Assistant" | "Human";
-  content: { text: string };
+  content: {
+    text: string;
+    quickAnswers?: string[];
+    widget?: "heightWeight";
+  };
   createdAt: string;
   updatedAt: string;
 }

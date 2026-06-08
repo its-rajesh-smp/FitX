@@ -7,6 +7,8 @@ export enum MessageRole {
 
 export interface MessageContent {
   text: string;
+  quickAnswers?: string[];
+  widget?: "heightWeight";
 }
 
 export class Message extends Model {

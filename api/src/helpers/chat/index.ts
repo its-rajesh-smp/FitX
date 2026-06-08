@@ -53,6 +53,56 @@ type FitXStreamedRunResult = Awaited<
   ReturnType<typeof run<typeof fitXChatAgent>>
 >;
 
+const extractPartialJsonString = (
+  json: string,
+  field: string,
+): string | undefined => {
+  const fieldMatch = new RegExp(`"${field}"\\s*:\\s*"`).exec(json);
+  if (!fieldMatch) return;
+
+  let value = "";
+  let index = fieldMatch.index + fieldMatch[0].length;
+
+  while (index < json.length) {
+    const character = json[index];
+    if (character === '"') break;
+
+    if (character !== "\\") {
+      value += character;
+      index += 1;
+      continue;
+    }
+
+    const escape = json[index + 1];
+    if (!escape) break;
+
+    const simpleEscapes: Record<string, string> = {
+      '"': '"',
+      "\\": "\\",
+      "/": "/",
+      b: "\b",
+      f: "\f",
+      n: "\n",
+      r: "\r",
+      t: "\t",
+    };
+
+    if (escape === "u") {
+      const code = json.slice(index + 2, index + 6);
+      if (!/^[0-9a-fA-F]{4}$/.test(code)) break;
+      value += String.fromCharCode(Number.parseInt(code, 16));
+      index += 6;
+      continue;
+    }
+
+    if (!(escape in simpleEscapes)) break;
+    value += simpleEscapes[escape];
+    index += 2;
+  }
+
+  return value;
+};
+
 export const useLLMStreaming = (res: Response) => {
   res.status(200);
   res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
@@ -66,32 +116,44 @@ export const useLLMStreaming = (res: Response) => {
 
   const streamAIResponse = async (result: FitXStreamedRunResult) => {
     const textStream = result.toTextStream({ compatibleWithNodeStreams: true });
-    let response = "";
+    let rawOutput = "";
+    let streamedText = "";
     let hasStartedResponding = false;
 
     for await (const chunk of textStream) {
-      const text = chunk.toString();
+      rawOutput += chunk.toString();
+      const currentText = extractPartialJsonString(rawOutput, "text");
+      if (currentText === undefined || currentText.length <= streamedText.length) {
+        continue;
+      }
 
       if (!hasStartedResponding) {
-        emit({
-          type: "status",
-          status: "responding",
-          label: "Writing response",
-        });
+        emit({ type: "status", status: "responding", label: "Writing response" });
         hasStartedResponding = true;
       }
 
-      response += text;
-      emit({ type: "delta", text });
+      const delta = currentText.slice(streamedText.length);
+      streamedText = currentText;
+      emit({ type: "delta", text: delta });
     }
 
     await result.completed;
 
-    if (!response.trim()) {
+    if (!result.finalOutput) {
       throw new Error("EMPTY_CHAT_RESPONSE");
     }
 
-    return response;
+    if (result.finalOutput.text.length > streamedText.length) {
+      if (!hasStartedResponding) {
+        emit({ type: "status", status: "responding", label: "Writing response" });
+      }
+      emit({
+        type: "delta",
+        text: result.finalOutput.text.slice(streamedText.length),
+      });
+    }
+
+    return result.finalOutput;
   };
 
   return { emit, streamAIResponse };
