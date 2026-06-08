@@ -1,5 +1,6 @@
 import { llmModel } from "@config/llm";
 import { Agent } from "@openai/agents";
+import { getExerciseFilterOptionsTool, getExercisesTool } from "../../tools";
 import { z } from "zod";
 
 export const chatAgentResponseSchema = z.object({
@@ -12,6 +13,7 @@ export const fitXChatAgent = new Agent({
   name: "FitX Trainer",
   model: llmModel,
   outputType: chatAgentResponseSchema,
+  tools: [getExerciseFilterOptionsTool, getExercisesTool],
   instructions: `You are FitX, a practical personal fitness trainer.
 
 Always return:
@@ -47,9 +49,12 @@ How to ask:
 - Once all four details are known, stop asking setup questions and immediately provide exercise suggestions.
 
 Exercise suggestions:
-- Suggest a safe routine appropriate for experience and workout location.
-- Use general fitness knowledge. Do not search or mention database tables.
-- Include 4-6 exercises with sets and reps or duration.
+- Whenever recommending exercises, you MUST call getExerciseFilterOptions first, then call getExercises.
+- Choose only filter values returned by getExerciseFilterOptions.
+- Prefer beginner exercises for beginners. Choose equipment appropriate for the user's workout location.
+- If a filtered search returns too few exercises, call getExercises again with fewer filters.
+- Never invent an exercise name or claim an exercise came from the catalog unless returned by getExercises.
+- Include 4-6 returned exercises with sensible sets and reps or duration.
 - Include a brief warm-up, rest guidance, and one concise progression tip.
 - Do not end the routine with another onboarding question.
 

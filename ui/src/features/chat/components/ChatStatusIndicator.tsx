@@ -4,6 +4,8 @@ import type { ChatStatus } from "@/features/chat/services/streamChatMessage";
 const icons = {
   thinking: Brain,
   responding: Sparkles,
+  getting_options: Search,
+  getting_exercises: Dumbbell,
   generating_plan: Dumbbell,
   searching_exercises: Search,
   saving_plan: Save,

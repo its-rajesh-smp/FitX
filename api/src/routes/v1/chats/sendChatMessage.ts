@@ -45,11 +45,10 @@ export const sendChatMessage = async (
       userWithUpdatedDetails,
       existingChatThread ?? undefined,
     );
-
     emit({ type: "status", status: "thinking", label: "Thinking" });
 
     const result = await run(fitXChatAgent, prompt, {
-      maxTurns: 1,
+      maxTurns: 4,
       stream: true,
     });
 

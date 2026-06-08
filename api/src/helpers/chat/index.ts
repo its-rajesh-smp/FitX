@@ -38,7 +38,11 @@ ${historyText || "No recent messages."}
 User: ${newMessage}`;
 };
 
-export type ChatStreamStatus = "thinking" | "responding";
+export type ChatStreamStatus =
+  | "thinking"
+  | "responding"
+  | "getting_options"
+  | "getting_exercises";
 
 export type ChatStreamEvent =
   | { type: "status"; status: ChatStreamStatus; label: string }
@@ -53,56 +57,6 @@ type FitXStreamedRunResult = Awaited<
   ReturnType<typeof run<typeof fitXChatAgent>>
 >;
 
-const extractPartialJsonString = (
-  json: string,
-  field: string,
-): string | undefined => {
-  const fieldMatch = new RegExp(`"${field}"\\s*:\\s*"`).exec(json);
-  if (!fieldMatch) return;
-
-  let value = "";
-  let index = fieldMatch.index + fieldMatch[0].length;
-
-  while (index < json.length) {
-    const character = json[index];
-    if (character === '"') break;
-
-    if (character !== "\\") {
-      value += character;
-      index += 1;
-      continue;
-    }
-
-    const escape = json[index + 1];
-    if (!escape) break;
-
-    const simpleEscapes: Record<string, string> = {
-      '"': '"',
-      "\\": "\\",
-      "/": "/",
-      b: "\b",
-      f: "\f",
-      n: "\n",
-      r: "\r",
-      t: "\t",
-    };
-
-    if (escape === "u") {
-      const code = json.slice(index + 2, index + 6);
-      if (!/^[0-9a-fA-F]{4}$/.test(code)) break;
-      value += String.fromCharCode(Number.parseInt(code, 16));
-      index += 6;
-      continue;
-    }
-
-    if (!(escape in simpleEscapes)) break;
-    value += simpleEscapes[escape];
-    index += 2;
-  }
-
-  return value;
-};
-
 export const useLLMStreaming = (res: Response) => {
   res.status(200);
   res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
@@ -115,26 +69,30 @@ export const useLLMStreaming = (res: Response) => {
   };
 
   const streamAIResponse = async (result: FitXStreamedRunResult) => {
-    const textStream = result.toTextStream({ compatibleWithNodeStreams: true });
-    let rawOutput = "";
-    let streamedText = "";
-    let hasStartedResponding = false;
-
-    for await (const chunk of textStream) {
-      rawOutput += chunk.toString();
-      const currentText = extractPartialJsonString(rawOutput, "text");
-      if (currentText === undefined || currentText.length <= streamedText.length) {
+    for await (const event of result) {
+      if (
+        event.type !== "run_item_stream_event" ||
+        event.name !== "tool_called"
+      ) {
         continue;
       }
 
-      if (!hasStartedResponding) {
-        emit({ type: "status", status: "responding", label: "Writing response" });
-        hasStartedResponding = true;
-      }
+      const toolName =
+        "name" in event.item.rawItem ? event.item.rawItem.name : undefined;
 
-      const delta = currentText.slice(streamedText.length);
-      streamedText = currentText;
-      emit({ type: "delta", text: delta });
+      if (toolName === "getExerciseFilterOptions") {
+        emit({
+          type: "status",
+          status: "getting_options",
+          label: "Getting exercise options",
+        });
+      } else if (toolName === "getExercises") {
+        emit({
+          type: "status",
+          status: "getting_exercises",
+          label: "Getting exercises",
+        });
+      }
     }
 
     await result.completed;
@@ -143,15 +101,8 @@ export const useLLMStreaming = (res: Response) => {
       throw new Error("EMPTY_CHAT_RESPONSE");
     }
 
-    if (result.finalOutput.text.length > streamedText.length) {
-      if (!hasStartedResponding) {
-        emit({ type: "status", status: "responding", label: "Writing response" });
-      }
-      emit({
-        type: "delta",
-        text: result.finalOutput.text.slice(streamedText.length),
-      });
-    }
+    emit({ type: "status", status: "responding", label: "Writing response" });
+    emit({ type: "delta", text: result.finalOutput.text });
 
     return result.finalOutput;
   };
