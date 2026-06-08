@@ -1,5 +1,5 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { setDefaultOpenAIKey } from "@openai/agents";
+import { setDefaultOpenAIKey, setTracingDisabled } from "@openai/agents";
 import { aisdk } from "@openai/agents-extensions/ai-sdk";
 import { env } from "@config/env";
 
@@ -16,6 +16,7 @@ const createOpenAIModel = () => {
   return env.OPENAI_MODEL;
 };
 
+setTracingDisabled(!env.OPENAI_AGENTS_TRACING_ENABLED);
 setDefaultOpenAIKey(env.OPENAI_API_KEY);
 
 export const llmModel = env.AI_PROVIDER === "openai"
