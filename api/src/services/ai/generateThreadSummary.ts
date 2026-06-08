@@ -36,39 +36,46 @@ const formatMessages = (messages: Message[]) =>
 export const generateThreadSummary = async (
   thread: ChatThread,
 ): Promise<ChatThread | undefined> => {
-  const summarizedMessageCount = ChatThread.getSummarizedMessageCount(thread);
-  const totalMessageCount = await Message.countByThreadId(thread.id);
+  try {
+    const summarizedMessageCount = ChatThread.getSummarizedMessageCount(thread);
+    const totalMessageCount = await Message.countByThreadId(thread.id);
 
-  if (totalMessageCount - summarizedMessageCount < THREAD_SUMMARY_BATCH_SIZE) {
-    return thread;
-  }
+    if (
+      totalMessageCount - summarizedMessageCount <
+      THREAD_SUMMARY_BATCH_SIZE
+    ) {
+      return thread;
+    }
 
-  const nextMessageBatch = await Message.getBatchAfterMessageCount(
-    thread.id,
-    summarizedMessageCount,
-    THREAD_SUMMARY_BATCH_SIZE,
-  );
+    const nextMessageBatch = await Message.getBatchAfterMessageCount(
+      thread.id,
+      summarizedMessageCount,
+      THREAD_SUMMARY_BATCH_SIZE,
+    );
 
-  const result = await run(
-    threadSummaryAgent,
-    `Existing thread summary:
+    const result = await run(
+      threadSummaryAgent,
+      `Existing thread summary:
 ${ChatThread.getSummary(thread) ?? "No existing summary."}
 
 New conversation batch:
 ${formatMessages(nextMessageBatch)}`,
-    { maxTurns: 1 },
-  );
+      { maxTurns: 1 },
+    );
 
-  if (!result.finalOutput) {
-    throw new Error("THREAD_SUMMARY_EMPTY");
+    if (!result.finalOutput) {
+      throw new Error("THREAD_SUMMARY_EMPTY");
+    }
+
+    await ChatThread.update(thread.id, {
+      threadMemory: {
+        summary: result.finalOutput.summary,
+        summarizedMessageCount:
+          summarizedMessageCount + THREAD_SUMMARY_BATCH_SIZE,
+      },
+    });
+  } catch (error) {
+    console.log("Error generating thread summary:", error);
+    return;
   }
-
-  return await ChatThread.update(thread.id, {
-    threadMemory: {
-      ...(thread.threadMemory ?? {}),
-      summary: result.finalOutput.summary,
-      summarizedMessageCount:
-        summarizedMessageCount + THREAD_SUMMARY_BATCH_SIZE,
-    },
-  });
 };

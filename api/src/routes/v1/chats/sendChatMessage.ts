@@ -5,12 +5,12 @@ import {
 } from "@helpers/chat";
 import { ChatThread } from "@models/ChatThread";
 import { Message, MessageRole } from "@models/Message";
+import { User } from "@models/User";
 import { run } from "@openai/agents";
 import { SendChatMessageInput } from "@validators/chat/sendChatMessage";
 import { Request, Response } from "express";
 import { fitXChatAgent } from "../../../agents";
 import { db } from "../../../db";
-import { User } from "@models/User";
 import { generateThreadSummary, updateUserDetails } from "../../../services/ai";
 
 export const sendChatMessage = async (
@@ -37,9 +37,6 @@ export const sendChatMessage = async (
     const userWithUpdatedDetails = await updateUserDetails({
       user,
       message,
-    }).catch((error) => {
-      console.error("FitX user details update failed:", error);
-      return user;
     });
 
     const prompt = generatePrompt(
@@ -88,10 +85,7 @@ export const sendChatMessage = async (
       return { thread, newLLMResponse };
     });
 
-    await generateThreadSummary(persisted.thread).catch((error) => {
-      console.error("FitX thread summary update failed:", error);
-      return persisted.thread;
-    });
+    await generateThreadSummary(persisted.thread);
 
     emit({
       type: "completed",
