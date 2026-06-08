@@ -22,7 +22,7 @@ export function RegisterForm() {
     mutationFn: registerUser,
     onSuccess: (auth) => {
       setAuth(auth);
-      navigate("/plan", { replace: true });
+      navigate("/chat", { replace: true });
     },
   });
 

@@ -1,57 +1,123 @@
-import { Dumbbell, Send } from "lucide-react";
-import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Dumbbell, MessageSquarePlus, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ProgramPreview } from "@/features/chat/components/ProgramPreview";
+import { ChatComposer } from "@/features/chat/components/ChatComposer";
+import { ChatStatusIndicator } from "@/features/chat/components/ChatStatusIndicator";
+import { MarkdownMessage } from "@/features/chat/components/MarkdownMessage";
+import { getChats } from "@/features/chat/services/getChats";
+import { streamChatMessage, type ChatStatus } from "@/features/chat/services/streamChatMessage";
+import type { ChatMessage, ChatThread } from "@/features/chat/types/chat";
+import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { cn } from "@/lib/utils";
 
-const initialMessages = [
-  { role: "ai", text: "Hey Alex! I'm FitAI, your personal workout planner. To build the perfect program for you, let me ask a few quick questions. What's your main fitness goal right now?" },
-  { role: "user", text: "I want to build muscle. I've been working out on and off for about a year." },
-  { role: "ai", text: "Love that goal! Building muscle with some training history is a great starting point — you'll see results faster than a complete beginner. A few more things to dial in your plan:" },
-  { role: "user", text: "I have dumbbells at home, a pull-up bar, and some resistance bands." },
-  { role: "ai", text: "Perfect setup — honestly that's all you need. Last question: how many days per week can you commit, and roughly how long per session?" },
-  { role: "user", text: "4 days a week, around 45 minutes each." },
-  { role: "ai", text: "Based on everything you told me, here's your 4-week muscle building program:", preview: true },
-];
-
 export function ChatPage() {
-  const [messages, setMessages] = useState(initialMessages);
-  const [value, setValue] = useState("");
+  const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
+  const [chatOverride, setChatOverride] = useState<{ thread: ChatThread | null; messages: ChatMessage[] } | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [status, setStatus] = useState<{ type: ChatStatus; label: string } | null>(null);
+  const [streamError, setStreamError] = useState<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const chatsQuery = useQuery({ queryKey: ["chats"], queryFn: getChats });
+  const chat = chatOverride ?? chatsQuery.data ?? { thread: null, messages: [] };
+  const { thread, messages } = chat;
 
-  const send = () => {
-    if (!value.trim()) return;
-    setMessages((current) => [...current, { role: "user", text: value.trim() }]);
-    setValue("");
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const send = async (text: string) => {
+    const optimistic: ChatMessage = { id: `pending-human-${Date.now()}`, userId: user?.id ?? "", threadId: thread?.id ?? "", role: "Human", content: { text }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const pending: ChatMessage = { ...optimistic, id: "pending-assistant", role: "Assistant", content: { text: "" } };
+    setChatOverride((current) => ({ thread: current?.thread ?? thread, messages: [...(current?.messages ?? messages), optimistic, pending] }));
+    setIsStreaming(true);
+    setStreamError(null);
+
+    try {
+      await streamChatMessage(
+        { message: text, ...(thread?.id && { threadId: thread.id }) },
+        (event) => {
+          if (event.type === "status") {
+            setStatus({ type: event.status, label: event.label });
+          }
+
+          if (event.type === "delta") {
+            setChatOverride((current) => ({
+              thread: current?.thread ?? thread,
+              messages: (current?.messages ?? []).map((item) => item.id === "pending-assistant" ? { ...item, content: { text: item.content.text + event.text } } : item),
+            }));
+          }
+
+          if (event.type === "completed") {
+            setChatOverride((current) => {
+              const next = (current?.messages ?? []).map((item) => item.id === "pending-assistant" ? event.message : item);
+              queryClient.setQueryData(["chats"], { thread: event.thread, messages: next });
+              return { thread: event.thread, messages: next };
+            });
+          }
+
+          if (event.type === "error") throw new Error(event.message);
+        },
+      );
+    } catch (error) {
+      setStreamError(error instanceof Error ? error.message : "FitX could not respond. Please try again.");
+      setChatOverride((current) => ({ thread: current?.thread ?? thread, messages: (current?.messages ?? []).filter((item) => item.id !== "pending-assistant") }));
+    } finally {
+      setIsStreaming(false);
+      setStatus(null);
+    }
   };
 
+  const newChat = () => {
+    setChatOverride({ thread: null, messages: [] });
+    setStreamError(null);
+  };
+
+  const empty = messages.length === 0;
+
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-4 py-4 sm:px-8">
-        <div><h1 className="text-lg font-extrabold">AI Planner</h1><p className="text-xs text-muted-foreground">Adapt, plan, and ask anything</p></div>
-        <Button variant="outline">New Plan</Button>
+    <div className="flex min-h-screen flex-col bg-white">
+      <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-white/95 px-4 backdrop-blur sm:px-8">
+        <div><h1 className="font-extrabold">FitX Chat</h1><p className="text-xs text-muted-foreground">Your AI fitness companion</p></div>
+        <Button variant="outline" onClick={newChat}><MessageSquarePlus />New chat</Button>
       </header>
-      <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-8">
-        <div className="space-y-7">
-          {messages.map((message, index) => (
-            <div key={index} className={cn("flex", message.role === "user" && "justify-end")}>
-              <div className={cn("max-w-[92%] sm:max-w-[82%]", message.role === "user" && "text-right")}>
-                {message.role === "ai" && <p className="mb-2 flex items-center gap-1 text-xs font-bold text-muted-foreground"><Dumbbell className="size-3 text-primary" />FitAI</p>}
-                <div className={cn("rounded-xl px-4 py-3 text-left text-sm leading-relaxed", message.role === "ai" ? "border bg-white shadow-card" : "bg-primary-soft text-primary")}>
-                  {message.text}
-                  {message.preview && <ProgramPreview />}
-                </div>
-                <p className="mt-2 text-[10px] text-muted-foreground">{`6:${23 + index * 3} AM`}</p>
-              </div>
+
+      {empty ? (
+        <div className="flex flex-1 items-center justify-center px-4 py-10">
+          <div className="w-full max-w-2xl text-center">
+            <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary text-white shadow-lg"><Dumbbell className="size-7" /></span>
+            <h2 className="mt-6 text-3xl font-extrabold tracking-tight">How can I help, {user?.name?.split(" ")[0] ?? "there"}?</h2>
+            <p className="mx-auto mt-3 max-w-lg text-muted-foreground">Ask FitX anything about training, fitness, or building a routine that works for you.</p>
+            <div className="mt-8"><ChatComposer onSend={send} isPending={isStreaming} large /></div>
+            {streamError && <p className="mt-3 text-sm text-destructive">{streamError}</p>}
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              {["How should I start working out?", "Help me stay consistent", "What should I train today?"].map((prompt) => <button key={prompt} onClick={() => send(prompt)} className="rounded-full border px-4 py-2 text-xs text-muted-foreground hover:border-primary hover:text-primary">{prompt}</button>)}
             </div>
-          ))}
+          </div>
         </div>
-      </div>
-      <div className="sticky bottom-0 border-t bg-white p-4">
-        <form className="mx-auto flex max-w-3xl gap-2 rounded-full border bg-white p-1.5 shadow-card" onSubmit={(event) => { event.preventDefault(); send(); }}>
-          <input value={value} onChange={(event) => setValue(event.target.value)} className="min-w-0 flex-1 bg-transparent px-4 text-sm outline-none" placeholder="Ask me anything about your workouts..." />
-          <Button type="submit" size="icon" className="rounded-full"><Send /></Button>
-        </form>
-      </div>
+      ) : (
+        <>
+          <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-8">
+            <div className="space-y-7">
+              {messages.map((message) => (
+                <div key={message.id} className={cn("flex gap-3", message.role === "Human" && "justify-end")}>
+                  {message.role === "Assistant" && <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-white"><Sparkles className="size-4" /></span>}
+                  <div className={cn("max-w-[86%] rounded-2xl px-4 py-3 text-sm leading-7", message.role === "Human" ? "bg-primary-soft text-foreground" : "bg-transparent", message.id === "pending-assistant" && "text-muted-foreground")}>
+                    {message.id === "pending-assistant" && status && <div className="mb-2"><ChatStatusIndicator status={status.type} label={status.label} /></div>}
+                    {message.role === "Assistant" ? <MarkdownMessage>{message.content.text}</MarkdownMessage> : message.content.text}
+                  </div>
+                </div>
+              ))}
+              {streamError && <p className="text-center text-sm text-destructive">{streamError}</p>}
+              <div ref={bottomRef} />
+            </div>
+          </div>
+          <div className="sticky bottom-0 border-t bg-white/95 p-4 backdrop-blur">
+            <div className="mx-auto max-w-3xl"><ChatComposer onSend={send} isPending={isStreaming} /><p className="mt-2 text-center text-[10px] text-muted-foreground">FitX can make mistakes. Use your judgment for health and training decisions.</p></div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

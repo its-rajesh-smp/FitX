@@ -14,7 +14,7 @@
       "@config/*": ["./src/config/*"],
       "@models/*": ["./src/db/models/*"],
       "@validators/*": ["./src/validators/*"],
-      "@services/*": ["./src/services/*"]
+      "@helpers/*": ["./src/helpers/*"]
     }
   },
   "ts-node": {
