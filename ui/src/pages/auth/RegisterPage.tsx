@@ -1,6 +1,10 @@
-import { AuthForm } from "@/features/auth/components/forms/AuthForm";
+import { RegisterForm } from "@/features/auth/components/forms/RegisterForm";
 import { AuthPageFrame } from "@/features/auth/components/layouts/AuthPageFrame";
 
 export function RegisterPage() {
-  return <AuthPageFrame><AuthForm mode="register" /></AuthPageFrame>;
+  return (
+    <AuthPageFrame>
+      <RegisterForm />
+    </AuthPageFrame>
+  );
 }

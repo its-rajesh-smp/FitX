@@ -1,7 +1,8 @@
-import { Dumbbell, LayoutGrid, Menu, MessageSquare, X } from "lucide-react";
+import { Dumbbell, LayoutGrid, LogOut, Menu, MessageSquare, X } from "lucide-react";
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -21,6 +22,17 @@ function Brand() {
 }
 
 function SidebarContent({ close }: { close?: () => void }) {
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+  const initials = user?.name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase() ?? "FX";
+
+  const logout = () => {
+    clearAuth();
+    close?.();
+    navigate("/", { replace: true });
+  };
+
   return (
     <>
       <Brand />
@@ -44,12 +56,13 @@ function SidebarContent({ close }: { close?: () => void }) {
       </nav>
       <div className="mt-auto flex items-center gap-3 rounded-xl border bg-white p-3 shadow-xs">
         <span className="flex size-9 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-primary">
-          AJ
+          {initials}
         </span>
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold">Alex Johnson</p>
-          <p className="truncate text-xs text-muted-foreground">Intermediate · 6 day streak</p>
+          <p className="truncate text-sm font-bold">{user?.name ?? "FitAI Member"}</p>
+          <p className="truncate text-xs text-muted-foreground">{user?.email ?? "Loading profile..."}</p>
         </div>
+        <Button variant="ghost" size="icon-sm" className="ml-auto" aria-label="Log out" onClick={logout}><LogOut /></Button>
       </div>
     </>
   );

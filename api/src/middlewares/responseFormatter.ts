@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { User } from "@models/User";
 
 declare module "express-serve-static-core" {
   interface Response {
@@ -10,6 +11,10 @@ declare module "express-serve-static-core" {
       error?: any,
       { sendError }?: { sendError?: boolean },
     ) => void;
+  }
+
+  interface Request {
+    user?: Partial<User>;
   }
 }
 

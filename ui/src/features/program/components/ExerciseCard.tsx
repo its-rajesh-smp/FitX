@@ -20,23 +20,41 @@ export function ExerciseCard({
   onToggle: () => void;
 }) {
   return (
-    <article className={cn("rounded-xl border bg-white p-5 shadow-card transition", done && "border-l-4 border-l-success")}>
+    <article
+      className={cn(
+        "shadow-card rounded-xl border bg-white p-5 transition",
+        done && "border-l-success border-l-4",
+      )}
+    >
       <h2 className="text-base font-extrabold">{exercise.name}</h2>
       <div className="mt-2 flex flex-wrap gap-2">
         <Badge>{exercise.muscle}</Badge>
-        <Badge className={cn("border bg-transparent", difficultyStyles[exercise.difficulty])}>{exercise.difficulty}</Badge>
-        <Badge className="bg-muted text-muted-foreground"><Dumbbell className="mr-1 size-3" />{exercise.equipment}</Badge>
+        <Badge
+          className={cn(
+            "border bg-transparent",
+            difficultyStyles[exercise.difficulty],
+          )}
+        >
+          {exercise.difficulty}
+        </Badge>
+        <Badge className="bg-muted text-muted-foreground">
+          <Dumbbell className="mr-1 size-3" />
+          {exercise.equipment}
+        </Badge>
       </div>
       <div className="mt-4 flex gap-6 text-sm">
         <span className="font-bold">{exercise.sets}</span>
         <span className="text-muted-foreground">{exercise.rest}</span>
       </div>
-      <p className="mt-2 text-sm text-muted-foreground">{exercise.note}</p>
-      <button className="mt-4 flex items-center gap-1 text-sm font-semibold text-primary">
+      <p className="text-muted-foreground mt-2 text-sm">{exercise.note}</p>
+      <button className="text-primary mt-4 flex items-center gap-1 text-sm font-semibold">
         How to do this <ChevronDown className="size-3" />
       </button>
       <Button
-        className={cn("mt-5 h-10 w-full rounded-lg", done && "bg-success-soft text-success hover:bg-success-soft/80")}
+        className={cn(
+          "mt-5 h-10 w-full rounded-lg",
+          done && "bg-success-soft text-success hover:bg-success-soft/80",
+        )}
         onClick={onToggle}
       >
         {done ? "Done ✓" : "Mark as Done"}

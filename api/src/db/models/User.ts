@@ -1,4 +1,4 @@
-import { Model } from "objection";
+import { Model, Pojo } from "objection";
 
 export class User extends Model {
   id!: string;
@@ -9,8 +9,18 @@ export class User extends Model {
 
   static tableName = "users";
 
+  $formatJson(json: Pojo): Pojo {
+    json = super.$formatJson(json);
+    delete json.password;
+    return json;
+  }
+
   static async create(userData: Partial<Omit<User, "id">>): Promise<User> {
     return await this.query().insert(userData);
+  }
+
+  static async findByEmail(email: string): Promise<User | undefined> {
+    return await this.query().findOne({ email });
   }
 
   static async findById(id: string): Promise<User | undefined> {
