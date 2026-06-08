@@ -5,6 +5,17 @@ export interface ChatThread {
   updatedAt: string;
 }
 
+export interface ChatExercise {
+  id: string;
+  name: string;
+  level: string | null;
+  equipment: string | null;
+  primaryMuscles: string[];
+  secondaryMuscles: string[];
+  instructions: string[];
+  recommendation: string;
+}
+
 export interface ChatMessage {
   id: string;
   userId: string;
@@ -14,6 +25,7 @@ export interface ChatMessage {
     text: string;
     quickAnswers?: string[];
     widget?: "heightWeight";
+    exercises?: ChatExercise[];
   };
   createdAt: string;
   updatedAt: string;

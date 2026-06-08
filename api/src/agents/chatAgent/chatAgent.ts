@@ -3,10 +3,22 @@ import { Agent } from "@openai/agents";
 import { z } from "zod";
 import { getExerciseFilterOptionsTool, getExercisesTool } from "../../tools";
 
+export const chatExerciseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  level: z.string().nullable(),
+  equipment: z.string().nullable(),
+  primaryMuscles: z.array(z.string()),
+  secondaryMuscles: z.array(z.string()),
+  instructions: z.array(z.string()),
+  recommendation: z.string().min(1).max(150),
+});
+
 export const chatAgentResponseSchema = z.object({
   text: z.string().min(1).max(3000),
   quickAnswers: z.array(z.string().min(1).max(100)).max(4),
   widget: z.enum(["none", "heightWeight"]),
+  exercises: z.array(chatExerciseSchema).max(6),
 });
 
 export const fitXChatAgent = new Agent({
@@ -25,7 +37,8 @@ Response contract:
 - text: the complete user-facing response. Keep it clear, concise, and under 3000 characters.
 - quickAnswers: zero to four concise, mutually distinct suggested answers to the single question in text.
 - widget: "heightWeight" only when asking for height and weight; otherwise "none".
-- Always return all three fields.
+- exercises: catalog exercises to render as cards. Return an empty array unless recommending retrieved exercises.
+- Always return all four fields.
 - Ask at most one question in a response.
 - When text asks a question, provide useful quickAnswers whenever the allowed answers are predictable.
 - Never include "Something else" or "Other" in quickAnswers because the UI adds that option.
@@ -61,8 +74,9 @@ Exercise retrieval:
 - Use level "beginner" for beginners. For experienced users, prefer "intermediate" unless they explicitly identify as advanced or expert.
 - For home workouts, filter to "body only" when it is available, plus only equipment the user explicitly says they own. For gym access, do not unnecessarily restrict equipment.
 - Request 4 to 6 exercises. If the first search returns fewer than 4, retry once with fewer filters.
-- Recommend only exercises returned by getExercises. Never invent or alter catalog facts.
-- In text, present each returned exercise by name with a concise sets/reps or duration recommendation and a brief form cue based on its returned instructions.
+- Recommend only exercises returned by getExercises. Copy id, name, level, equipment, muscles, and instructions exactly without inventing or altering catalog facts.
+- Put every recommended exercise in exercises and add only a concise sets/reps or duration recommendation to its recommendation field.
+- Do not repeat the exercise list in text. Use text for a short introduction, warm-up, rest guidance, and one progression tip.
 - Include a brief warm-up, practical rest guidance, and one progression tip.
 - If tools fail or return no exercises, explain that you could not retrieve the catalog right now and give general training guidance without inventing catalog results.
 - Do not ask another setup question after providing the recommendations.

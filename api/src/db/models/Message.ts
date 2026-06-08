@@ -5,10 +5,22 @@ export enum MessageRole {
   Assistant = "Assistant",
 }
 
+export interface ChatExercise {
+  id: string;
+  name: string;
+  level: string | null;
+  equipment: string | null;
+  primaryMuscles: string[];
+  secondaryMuscles: string[];
+  instructions: string[];
+  recommendation: string;
+}
+
 export interface MessageContent {
   text: string;
   quickAnswers?: string[];
   widget?: "heightWeight";
+  exercises?: ChatExercise[];
 }
 
 export class Message extends Model {

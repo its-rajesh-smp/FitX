@@ -43,6 +43,7 @@ export const getExercisesTool = tool({
     return {
       count: exercises.length,
       exercises: exercises.map((exercise) => ({
+        id: exercise.id,
         name: exercise.name,
         level: exercise.level,
         equipment: exercise.equipment,

@@ -3,6 +3,7 @@ import { Dumbbell, MessageSquarePlus, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChatComposer } from "@/features/chat/components/ChatComposer";
+import { ChatExerciseCards } from "@/features/chat/components/ChatExerciseCards";
 import { ChatStatusIndicator } from "@/features/chat/components/ChatStatusIndicator";
 import { HeightWeightWidget } from "@/features/chat/components/HeightWeightWidget";
 import { MarkdownMessage } from "@/features/chat/components/MarkdownMessage";
@@ -137,6 +138,9 @@ export function ChatPage() {
                   <div className={cn("max-w-[86%] rounded-2xl px-4 py-3 text-sm leading-7", message.role === "Human" ? "bg-primary-soft text-foreground" : "bg-transparent", message.id === "pending-assistant" && "text-muted-foreground")}>
                     {message.id === "pending-assistant" && status && <div className="mb-2"><ChatStatusIndicator status={status.type} label={status.label} /></div>}
                     {message.role === "Assistant" ? <MarkdownMessage>{message.content.text}</MarkdownMessage> : formatHumanMessage(message.content.text)}
+                    {message.role === "Assistant" && message.content.exercises?.length ? (
+                      <ChatExerciseCards exercises={message.content.exercises} />
+                    ) : null}
                     {message.role === "Assistant" && message.content.widget === "heightWeight" ? (() => {
                       const widgetKey = message.id;
                       const nextHumanMessage = messages
