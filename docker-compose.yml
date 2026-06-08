@@ -1,0 +1,31 @@
+services:
+  api-service:
+    container_name: template_api
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    command: ["pnpm", "run", "dev"]
+    env_file:
+      - ./api/.env
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    ports:
+      - "8080:8080" # HOST_PORT : CONTAINER_PORT
+    networks:
+      - template_network
+  db:
+    container_name: template-postgres
+    image: postgres:16.6
+    env_file:
+      - ./api/.env
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgresql/data:/var/lib/postgresql/data
+    networks:
+      - template_network
+
+networks:
+  template_network:
+    driver: bridge

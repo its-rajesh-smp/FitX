@@ -1,0 +1,26 @@
+# Building Stage
+FROM node:22-alpine AS builder
+
+# To use pnpm, we need to enable corepack
+RUN corepack enable
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+
+RUN pnpm run build
+
+# Production Stage
+FROM node:22-alpine AS production
+
+WORKDIR /app
+
+# Copy only necessary files from builder
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/package.json ./
+
+CMD ["pnpm", "start"]

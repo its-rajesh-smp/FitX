@@ -1,0 +1,8 @@
+node_modules
+dist
+.pulumi
+.env
+node_modules
+postgresql
+.codex
+.playwright-mcp
