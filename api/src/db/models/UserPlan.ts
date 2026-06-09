@@ -43,6 +43,6 @@ export class UserPlan extends Model {
   ): Promise<UserPlan | undefined> {
     return await this.query()
       .findOne({ userId })
-      .withGraphFetched("days(orderByOrder).exercises");
+      .withGraphFetched("days(orderByOrder).exercises.exercise");
   }
 }

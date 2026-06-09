@@ -1,62 +1,102 @@
-import { ArrowRight, Check, Circle, Dumbbell, Flame, Timer } from "lucide-react";
+import { ArrowRight, Check, Circle, Dumbbell, Timer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { programDays } from "@/features/program/data/program";
+import { useAuthStore } from "@/features/auth/stores/useAuthStore";
+import { useProgram } from "@/features/program/hooks/useProgram";
+import type { ProgramDay } from "@/features/program/types/program";
+
+const getMuscles = (day: ProgramDay) =>
+  [...new Set(day.exercises.flatMap(({ exercise }) => exercise.primaryMuscles))]
+    .join(", ") || "Full body";
+
+const getEquipment = (day: ProgramDay) =>
+  [
+    ...new Set(
+      day.exercises.map(({ exercise }) => exercise.equipment ?? "Body only"),
+    ),
+  ].join(", ");
 
 export function PlanPage() {
+  const user = useAuthStore((state) => state.user);
+  const programQuery = useProgram();
+  const days = programQuery.data?.days ?? [];
+  const currentDay = days.find((day) => !day.isCompleted) ?? days[0];
+  const completedDays = days.filter((day) => day.isCompleted).length;
+  const progress = days.length ? (completedDays / days.length) * 100 : 0;
+
+  if (programQuery.isLoading) {
+    return <div className="mx-auto max-w-5xl px-4 py-10 text-muted-foreground">Loading your program...</div>;
+  }
+
+  if (programQuery.isError) {
+    return <div className="mx-auto max-w-5xl px-4 py-10 text-destructive">Unable to load your program right now.</div>;
+  }
+
+  if (!currentDay) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-8 lg:py-12">
+        <section className="rounded-xl border bg-white p-8 text-center shadow-card">
+          <Dumbbell className="mx-auto size-10 text-primary" />
+          <h1 className="mt-4 text-3xl font-extrabold">Your program is ready for a plan</h1>
+          <p className="mx-auto mt-2 max-w-lg text-muted-foreground">
+            Ask FitX to create a workout plan and it will appear here.
+          </p>
+          <Button asChild className="mt-6 h-11 px-6">
+            <Link to="/chat">Create a plan with FitX <ArrowRight /></Link>
+          </Button>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-8 lg:py-12">
       <section>
-        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Good morning, Alex <span aria-hidden>👋</span></h1>
-        <p className="mt-2 text-muted-foreground">Week 2 of your muscle building program · <span className="font-bold text-foreground"><Flame className="mr-1 inline size-4 text-orange-500" />6 day streak</span></p>
-        <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full w-[38%] rounded-full bg-primary" /></div>
-        <p className="mt-2 text-xs text-muted-foreground">6 of 16 days complete</p>
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+          Your workout program{user?.name ? `, ${user.name}` : ""}
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          {completedDays} of {days.length} workout days complete
+        </p>
+        <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+        </div>
       </section>
 
       <section className="mt-8 flex flex-col gap-5 rounded-xl border-l-4 border-l-primary bg-white p-6 shadow-card sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Badge>TODAY</Badge>
-          <h2 className="mt-3 text-2xl font-extrabold">Leg Day</h2>
-          <p className="text-muted-foreground">Quads, Hamstrings, Glutes & Calves</p>
+          <Badge>NEXT WORKOUT</Badge>
+          <h2 className="mt-3 text-2xl font-extrabold">{currentDay.name}</h2>
+          <p className="text-muted-foreground">{getMuscles(currentDay)}</p>
           <div className="mt-5 flex flex-wrap gap-6 text-sm text-muted-foreground">
-            <span><Dumbbell className="mr-1 inline size-4" />5 exercises</span>
-            <span><Timer className="mr-1 inline size-4" />~37 min</span>
-            <span>Dumbbells, Bodyweight</span>
+            <span><Dumbbell className="mr-1 inline size-4" />{currentDay.exercises.length} exercises</span>
+            <span><Timer className="mr-1 inline size-4" />~{currentDay.exercises.length * 7} min</span>
+            <span>{getEquipment(currentDay)}</span>
           </div>
         </div>
         <Button asChild className="h-11 rounded-lg px-6">
-          <Link to="/plan/day-7">Start Workout <ArrowRight /></Link>
+          <Link to={`/plan/${currentDay.id}`}>Start Workout <ArrowRight /></Link>
         </Button>
-      </section>
-
-      <section className="mt-8">
-        <p className="text-xs font-bold tracking-widest text-muted-foreground">THIS WEEK</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {programDays.slice(4, 8).map((day, index) => (
-            <Link key={day.day} to={`/plan/day-${day.day}`} className={`rounded-xl border bg-white p-4 shadow-card transition hover:-translate-y-0.5 ${index === 2 ? "border-2 border-primary" : ""}`}>
-              <div className="flex justify-between text-xs font-bold text-muted-foreground">
-                {["MON", "TUE", "THU", "FRI"][index]}
-                {index < 2 ? <span className="flex size-4 items-center justify-center rounded-full bg-success text-white"><Check className="size-3" /></span> : index === 2 ? <span className="size-4 rounded-full bg-primary" /> : <Circle className="size-4" />}
-              </div>
-              <p className="mt-4 font-bold">{day.title}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{day.muscles.split(" & ")[0]}</p>
-            </Link>
-          ))}
-        </div>
       </section>
 
       <section className="mt-10">
         <h2 className="font-extrabold">Full Program</h2>
         <div className="mt-4 overflow-hidden rounded-xl border bg-white shadow-card">
-          {programDays.map((day) => (
-            <Link key={day.day} to={`/plan/day-${day.day}`} className={`flex items-center gap-3 border-b px-4 py-3.5 last:border-0 hover:bg-primary-soft/40 ${day.day === 7 ? "bg-primary-soft/60" : ""}`}>
-              {day.day <= 6 ? <span className="flex size-4 items-center justify-center rounded-full border border-success text-success"><Check className="size-3" /></span> : day.day === 7 ? <span className="size-4 rounded-full bg-primary" /> : <Circle className="size-4 text-muted-foreground" />}
+          {days.map((day) => (
+            <Link key={day.id} to={`/plan/${day.id}`} className={`flex items-center gap-3 border-b px-4 py-3.5 last:border-0 hover:bg-primary-soft/40 ${day.id === currentDay.id ? "bg-primary-soft/60" : ""}`}>
+              {day.isCompleted ? (
+                <span className="flex size-4 items-center justify-center rounded-full border border-success text-success"><Check className="size-3" /></span>
+              ) : day.id === currentDay.id ? (
+                <span className="size-4 rounded-full bg-primary" />
+              ) : (
+                <Circle className="size-4 text-muted-foreground" />
+              )}
               <div className="min-w-0">
-                <p className="text-sm font-bold">Day {day.day} · {day.title}</p>
-                <p className="truncate text-xs text-muted-foreground">{day.muscles}</p>
+                <p className="text-sm font-bold">Day {day.order} · {day.name}</p>
+                <p className="truncate text-xs text-muted-foreground">{getMuscles(day)}</p>
               </div>
-              <span className="ml-auto text-xs text-muted-foreground">Week {day.week}</span>
+              <span className="ml-auto text-xs text-muted-foreground">{day.exercises.length} exercises</span>
             </Link>
           ))}
         </div>

@@ -1,6 +1,5 @@
 import { Model } from "objection";
-import { PlanDay } from "./PlanDay";
-import { UserPlan } from "./UserPlan";
+import { Exercise } from "./Exercise";
 
 export class UserExercise extends Model {
   id!: string;
@@ -13,6 +12,14 @@ export class UserExercise extends Model {
   isCompleted!: boolean;
 
   static tableName = "user_exercises";
+
+  static relationMappings = {
+    exercise: {
+      relation: Model.BelongsToOneRelation,
+      modelClass: Exercise,
+      join: { from: "user_exercises.exerciseId", to: "exercises.id" },
+    },
+  };
 
   static async create(
     exerciseData: Partial<Omit<UserExercise, "id">>,

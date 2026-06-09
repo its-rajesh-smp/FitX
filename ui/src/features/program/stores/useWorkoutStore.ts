@@ -1,28 +1,21 @@
 import { create } from "zustand";
 
 type WorkoutState = {
-  completed: Record<number, number[]>;
-  toggleExercise: (day: number, exercise: number) => void;
+  completed: Record<string, string[]>;
+  toggleExercise: (dayId: string, exerciseId: string) => void;
 };
 
 export const useWorkoutStore = create<WorkoutState>((set) => ({
-  completed: {
-    1: [0, 1, 2, 3, 4],
-    2: [0, 1, 2, 3, 4],
-    3: [0, 1, 2, 3, 4],
-    4: [0, 1, 2, 3, 4],
-    5: [0, 1, 2, 3, 4],
-    6: [0, 1, 2, 3, 4],
-  },
-  toggleExercise: (day, exercise) =>
+  completed: {},
+  toggleExercise: (dayId, exerciseId) =>
     set((state) => {
-      const current = state.completed[day] ?? [];
+      const current = state.completed[dayId] ?? [];
       return {
         completed: {
           ...state.completed,
-          [day]: current.includes(exercise)
-            ? current.filter((item) => item !== exercise)
-            : [...current, exercise],
+          [dayId]: current.includes(exerciseId)
+            ? current.filter((item) => item !== exerciseId)
+            : [...current, exerciseId],
         },
       };
     }),
