@@ -1,4 +1,4 @@
-import { verifyJwtToken } from "@utils/jwt";
+import { verifyJwtToken } from "../utils/jwt";
 import { NextFunction, Request, Response } from "express";
 
 export const verifyUser = async (

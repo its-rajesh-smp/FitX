@@ -18,9 +18,8 @@ The API is deployed as one Express Vercel Function. Database migrations are
 not run inside serverless requests. Use Supabase's `POSTGRES_URL_NON_POOLING`
 URL on port `5432` when running migrations and seeds:
 
-The TypeScript source can use its configured path aliases. The API build runs
-`tsc-alias` after TypeScript so the JavaScript deployed from `dist` contains
-runtime-safe relative imports.
+The API uses relative internal imports so both Vercel's source compilation and
+the generated JavaScript resolve modules without path-alias runtime helpers.
 
 ```powershell
 cd api

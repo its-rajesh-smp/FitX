@@ -1,5 +1,5 @@
-import { memoryLlmModel } from "@config/llm";
-import { User } from "@models/User";
+import { memoryLlmModel } from "../../config/llm";
+import { User } from "../../db/models/User";
 import { Agent, run } from "@openai/agents";
 import { z } from "zod";
 

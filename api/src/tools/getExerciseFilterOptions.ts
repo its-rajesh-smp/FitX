@@ -1,5 +1,5 @@
-import type { FitXAgentContext } from "@helpers/chat";
-import { Exercise } from "@models/Exercise";
+import type { FitXAgentContext } from "../helpers/chat";
+import { Exercise } from "../db/models/Exercise";
 import { RunContext, tool } from "@openai/agents";
 import { z } from "zod";
 

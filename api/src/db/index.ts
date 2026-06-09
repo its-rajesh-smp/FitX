@@ -1,4 +1,4 @@
-import { env } from "@config/env";
+import { env } from "../config/env";
 import knex, { Knex } from "knex";
 import { Model } from "objection";
 import knexConfig from "./knexfile";

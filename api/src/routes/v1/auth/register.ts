@@ -1,8 +1,8 @@
-import { User } from "@models/User";
-import { UserPlan } from "@models/UserPlan";
-import { hashPassword } from "@utils/bcrypt";
-import { createJwtToken } from "@utils/jwt";
-import { RegisterUserInput } from "@validators/auth/register";
+import { User } from "../../../db/models/User";
+import { UserPlan } from "../../../db/models/UserPlan";
+import { hashPassword } from "../../../utils/bcrypt";
+import { createJwtToken } from "../../../utils/jwt";
+import { RegisterUserInput } from "../../../validators/auth/register";
 import { Request, Response } from "express";
 
 export const register = async (

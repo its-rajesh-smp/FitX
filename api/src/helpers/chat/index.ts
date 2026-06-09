@@ -1,9 +1,9 @@
-import { ChatThread } from "@models/ChatThread";
-import { Message } from "@models/Message";
+import { ChatThread } from "../../db/models/ChatThread";
+import { Message } from "../../db/models/Message";
 import { run } from "@openai/agents";
 import { Response } from "express";
 import { fitXChatAgent } from "../../agents";
-import { User } from "@models/User";
+import { User } from "../../db/models/User";
 
 const formatHistory = (messages: Message[]): string => {
   return messages

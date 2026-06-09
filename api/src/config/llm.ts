@@ -1,7 +1,7 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { setDefaultOpenAIKey, setTracingDisabled } from "@openai/agents";
 import { aisdk } from "@openai/agents-extensions/ai-sdk";
-import { env } from "@config/env";
+import { env } from "./env";
 
 const createGeminiModel = () => {
   const googleProvider = createGoogleGenerativeAI({

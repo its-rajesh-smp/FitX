@@ -1,5 +1,5 @@
 import { validate } from "../../../middlewares/zod";
-import { sendChatMessageSchema } from "@validators/chat/sendChatMessage";
+import { sendChatMessageSchema } from "../../../validators/chat/sendChatMessage";
 import { Router } from "express";
 import { getChats } from "./getChats";
 import { sendChatMessage } from "./sendChatMessage";

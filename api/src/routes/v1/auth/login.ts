@@ -1,7 +1,7 @@
-import { User } from "@models/User";
-import { verifyPassword } from "@utils/bcrypt";
-import { createJwtToken } from "@utils/jwt";
-import { LoginUserInput } from "@validators/auth/login";
+import { User } from "../../../db/models/User";
+import { verifyPassword } from "../../../utils/bcrypt";
+import { createJwtToken } from "../../../utils/jwt";
+import { LoginUserInput } from "../../../validators/auth/login";
 import { Request, Response } from "express";
 
 export const login = async (

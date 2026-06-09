@@ -1,5 +1,5 @@
-import { ChatThread } from "@models/ChatThread";
-import { Message } from "@models/Message";
+import { ChatThread } from "../../../db/models/ChatThread";
+import { Message } from "../../../db/models/Message";
 import { Request, Response } from "express";
 
 export const getChats = async (req: Request, res: Response) => {

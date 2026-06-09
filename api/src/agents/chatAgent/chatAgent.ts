@@ -1,5 +1,5 @@
-import { llmModel } from "@config/llm";
-import type { FitXAgentContext } from "@helpers/chat";
+import { llmModel } from "../../config/llm";
+import type { FitXAgentContext } from "../../helpers/chat";
 import { Agent } from "@openai/agents";
 import { z } from "zod";
 import { getExerciseFilterOptionsTool, getExercisesTool } from "../../tools";

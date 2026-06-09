@@ -1,6 +1,6 @@
-import { memoryLlmModel } from "@config/llm";
-import { ChatThread } from "@models/ChatThread";
-import { Message, MessageRole } from "@models/Message";
+import { memoryLlmModel } from "../../config/llm";
+import { ChatThread } from "../../db/models/ChatThread";
+import { Message, MessageRole } from "../../db/models/Message";
 import { Agent, run } from "@openai/agents";
 import { z } from "zod";
 

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { User } from "@models/User";
+import { User } from "../db/models/User";
 
 declare module "express-serve-static-core" {
   interface Response {

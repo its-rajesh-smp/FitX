@@ -1,4 +1,4 @@
-import { env } from "@config/env";
+import { env } from "../config/env";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 export interface AuthTokenPayload extends JwtPayload {

@@ -1,5 +1,5 @@
-import { loginUserSchema } from "@validators/auth/login";
-import { registerUserSchema } from "@validators/auth/register";
+import { loginUserSchema } from "../../../validators/auth/login";
+import { registerUserSchema } from "../../../validators/auth/register";
 import { Router } from "express";
 import { validate } from "../../../middlewares/zod";
 import { login } from "./login";

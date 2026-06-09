@@ -1,4 +1,4 @@
-import { UserExercise } from "@models/UserExercise";
+import { UserExercise } from "../../../db/models/UserExercise";
 import { Request, Response } from "express";
 
 export const toggleUserExercise = async (

@@ -1,4 +1,4 @@
-import { UserPlan } from "@models/UserPlan";
+import { UserPlan } from "../../../db/models/UserPlan";
 import { Request, Response } from "express";
 
 export const getCurrentPlan = async (req: Request, res: Response) => {

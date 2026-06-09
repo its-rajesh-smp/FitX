@@ -2,12 +2,12 @@ import {
   generatePrompt,
   handleChatErrors,
   useLLMStreaming,
-} from "@helpers/chat";
-import { ChatThread } from "@models/ChatThread";
-import { Message, MessageRole } from "@models/Message";
-import { User } from "@models/User";
+} from "../../../helpers/chat";
+import { ChatThread } from "../../../db/models/ChatThread";
+import { Message, MessageRole } from "../../../db/models/Message";
+import { User } from "../../../db/models/User";
 import { run } from "@openai/agents";
-import { SendChatMessageInput } from "@validators/chat/sendChatMessage";
+import { SendChatMessageInput } from "../../../validators/chat/sendChatMessage";
 import { Request, Response } from "express";
 import { fitXChatAgent } from "../../../agents";
 import { db } from "../../../db";
