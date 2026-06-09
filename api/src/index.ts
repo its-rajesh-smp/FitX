@@ -1,8 +1,6 @@
 import { env } from "./config/env";
-import { createExpressApp } from "./app";
+import app from "./app";
 import { runDBMigrations } from "./db";
-
-const app = createExpressApp();
 
 const main = async () => {
   await runDBMigrations();

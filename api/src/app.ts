@@ -10,3 +10,7 @@ export const createExpressApp = () => {
 
   return app;
 };
+
+const app = createExpressApp();
+
+export default app;
