@@ -5,23 +5,17 @@ import path from "path";
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-const connection =
-  process.env.DATABASE_URL ||
-  process.env.POSTGRES_URL || {
-    host: process.env.POSTGRES_HOST,
-    port: Number(process.env.POSTGRES_PORT || 5432),
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    database: process.env.POSTGRES_DATABASE || process.env.POSTGRES_DB,
-  };
+const connection = {
+  host: process.env.POSTGRES_HOST,
+  port: Number(process.env.POSTGRES_PORT || 5432),
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: process.env.POSTGRES_DATABASE || process.env.POSTGRES_DB,
+};
 
 const config: Knex.Config = {
   client: "pg",
   connection,
-  pool: {
-    min: 0,
-    max: Number(process.env.POSTGRES_POOL_MAX || (process.env.VERCEL ? 1 : 5)),
-  },
   migrations: {
     directory: "./migrations",
     extension: "ts",
