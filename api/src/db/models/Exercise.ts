@@ -28,7 +28,9 @@ export class Exercise extends Model {
 
   static tableName = "exercises";
 
-  static async create(exerciseData: Partial<Omit<Exercise, "id">>): Promise<Exercise> {
+  static async create(
+    exerciseData: Partial<Omit<Exercise, "id">>,
+  ): Promise<Exercise> {
     return await this.query().insert(exerciseData);
   }
 
@@ -40,16 +42,16 @@ export class Exercise extends Model {
     return await this.query();
   }
 
-  static async update(id: string, exerciseData: Partial<Omit<Exercise, "id">>): Promise<Exercise | undefined> {
+  static async update(
+    id: string,
+    exerciseData: Partial<Omit<Exercise, "id">>,
+  ): Promise<Exercise | undefined> {
     return await this.query().patchAndFetchById(id, exerciseData);
   }
 
   static async getFilterOptions(): Promise<ExerciseFilterOptions> {
     const [levels, equipments, muscles] = await Promise.all([
-      this.query()
-        .distinct("level")
-        .whereNotNull("level")
-        .orderBy("level"),
+      this.query().distinct("level").whereNotNull("level").orderBy("level"),
       this.query()
         .distinct("equipment")
         .whereNotNull("equipment")
@@ -75,13 +77,8 @@ export class Exercise extends Model {
     level,
     equipments = [],
     muscles = [],
-    searchTerms = [],
     limit = 6,
   }: ExerciseFilters): Promise<Exercise[]> {
-    const normalizedSearchTerms = searchTerms
-      .map((term) => term.toLowerCase().replace(/[^a-z0-9]/g, ""))
-      .filter(Boolean);
-
     return await this.query()
       .select(
         "id",
@@ -102,28 +99,8 @@ export class Exercise extends Model {
             [muscles, muscles],
           );
         }
-        if (normalizedSearchTerms.length) {
-          query.where((searchQuery) => {
-            normalizedSearchTerms.forEach((term) => {
-              searchQuery.orWhereRaw(
-                "regexp_replace(lower(name), '[^a-z0-9]+', '', 'g') like ?",
-                [`%${term}%`],
-              );
-            });
-          });
-        }
       })
-      .modify((query) => {
-        if (normalizedSearchTerms.length) {
-          query.orderByRaw(
-            "case when regexp_replace(lower(name), '[^a-z0-9]+', '', 'g') = any(?::text[]) then 0 else 1 end",
-            [normalizedSearchTerms],
-          );
-          query.orderByRaw(
-            "length(regexp_replace(lower(name), '[^a-z0-9]+', '', 'g'))",
-          );
-        }
-      })
+
       .orderByRaw("random()")
       .limit(Math.min(Math.max(limit, 1), 8));
   }

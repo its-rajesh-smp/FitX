@@ -27,7 +27,7 @@ const dayInputSchema = z.object({
 export const createPlanTool = tool({
   name: "createPlan",
   description:
-    "Create a full workout plan with meaningful workout names, scheduled dates, and ordered exercises. Replaces any existing plan.",
+    "Create a full workout plan with meaningful workout names, scheduled dates, and ordered exercises.",
   parameters: z.object({
     days: z
       .array(dayInputSchema)
@@ -40,10 +40,7 @@ export const createPlanTool = tool({
         { message: "Each workout day must have a unique scheduled date." },
       ),
   }),
-  execute: async (
-    { days },
-    runContext?: RunContext<FitXAgentContext>,
-  ) => {
+  execute: async ({ days }, runContext?: RunContext<FitXAgentContext>) => {
     if (!runContext) throw new Error("FITX_AGENT_CONTEXT_REQUIRED");
     const { userId, emit } = runContext.context;
 

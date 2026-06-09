@@ -7,7 +7,6 @@ const exerciseFiltersSchema = z.object({
   level: z.enum(["beginner", "intermediate", "expert"]).nullable(),
   equipments: z.array(z.string()).max(5),
   muscles: z.array(z.string()).max(8),
-  searchTerms: z.array(z.string()).max(5),
   limit: z.number().int().min(1).max(8),
 });
 
@@ -17,7 +16,7 @@ export const getExercisesTool = tool({
     "Get exercises from the FitX catalog using valid filters and optional user-provided name search terms.",
   parameters: exerciseFiltersSchema,
   execute: async (
-    { level, equipments, muscles, searchTerms, limit },
+    { level, equipments, muscles, limit },
     runContext?: RunContext<FitXAgentContext>,
   ) => {
     if (!runContext) throw new Error("FITX_AGENT_CONTEXT_REQUIRED");
@@ -28,31 +27,16 @@ export const getExercisesTool = tool({
       label: "Getting exercises",
     });
 
-    const options = await Exercise.getFilterOptions();
-    const invalidEquipments = equipments.filter(
-      (equipment) => !options.equipments.includes(equipment),
-    );
-    const invalidMuscles = muscles.filter(
-      (muscle) => !options.muscles.includes(muscle),
-    );
-
-    if (invalidEquipments.length || invalidMuscles.length) {
-      return {
-        error: "Invalid exercise filters",
-        invalidEquipments,
-        invalidMuscles,
-        instruction:
-          "Call getExerciseFilterOptions and retry with valid filter values.",
-      };
-    }
+    console.log("Filters:", { level, equipments, muscles, limit });
 
     const exercises = await Exercise.findByFilters({
       ...(level && { level }),
       equipments,
       muscles,
-      searchTerms,
       limit,
     });
+
+    console.log("Exercises:", exercises.length);
 
     return {
       count: exercises.length,
