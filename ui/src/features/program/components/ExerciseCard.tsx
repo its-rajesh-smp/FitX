@@ -1,4 +1,4 @@
-import { ChevronDown, Dumbbell } from "lucide-react";
+import { Check, ChevronDown, Dumbbell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ProgramExercise } from "@/features/program/types/program";
@@ -12,61 +12,80 @@ const difficultyStyles = {
 
 export function ExerciseCard({
   exercise,
-  done,
-  onToggle,
+  expanded,
+  isPending,
+  onToggleExpanded,
+  onToggleCompleted,
 }: {
   exercise: ProgramExercise;
-  done: boolean;
-  onToggle: () => void;
+  expanded: boolean;
+  isPending: boolean;
+  onToggleExpanded: () => void;
+  onToggleCompleted: () => void;
 }) {
   return (
-    <article
-      className={cn(
-        "shadow-card rounded-xl border bg-white p-5 transition",
-        done && "border-l-success border-l-4",
-      )}
-    >
-      <h2 className="text-base font-extrabold">{exercise.exercise.name}</h2>
-      <div className="mt-2 flex flex-wrap gap-2">
-        <Badge>{exercise.exercise.primaryMuscles[0] ?? "Full body"}</Badge>
-        <Badge
+    <article className={cn("border-b last:border-b-0", exercise.isCompleted && "bg-success-soft/30")}>
+      <button
+        type="button"
+        aria-expanded={expanded}
+        onClick={onToggleExpanded}
+        className="flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-primary-soft/30"
+      >
+        <span
           className={cn(
-            "border bg-transparent",
-            difficultyStyles[
-              exercise.exercise.level as keyof typeof difficultyStyles
-            ],
+            "flex size-5 shrink-0 items-center justify-center rounded-full border text-white",
+            exercise.isCompleted ? "border-success bg-success" : "border-muted-foreground/40",
           )}
         >
-          {exercise.exercise.level ?? "All levels"}
-        </Badge>
-        <Badge className="bg-muted text-muted-foreground">
-          <Dumbbell className="mr-1 size-3" />
-          {exercise.exercise.equipment ?? "Body only"}
-        </Badge>
-      </div>
-      <div className="mt-4 flex gap-6 text-sm">
-        <span className="font-bold">
-          {exercise.sets ?? "-"} sets x {exercise.reps ?? "-"} reps
+          {exercise.isCompleted && <Check className="size-3" />}
         </span>
-        <span className="text-muted-foreground">
-          {exercise.rest ? `${exercise.rest}s rest` : "Rest as needed"}
-        </span>
-      </div>
-      <p className="text-muted-foreground mt-2 text-sm">
-        {exercise.exercise.instructions[0] ?? "Focus on controlled form."}
-      </p>
-      <button className="text-primary mt-4 flex items-center gap-1 text-sm font-semibold">
-        How to do this <ChevronDown className="size-3" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold">{exercise.exercise.name}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            <span>{exercise.exercise.primaryMuscles.join(", ") || "Full body"}</span>
+            <span className="font-medium text-foreground">
+              {exercise.sets ?? "-"} sets x {exercise.reps ?? "-"} reps
+            </span>
+            <span>{exercise.rest ? `${exercise.rest}s rest` : "Rest as needed"}</span>
+          </div>
+        </div>
+        <ChevronDown className={cn("size-4 shrink-0 text-muted-foreground transition-transform", expanded && "rotate-180")} />
       </button>
-      <Button
-        className={cn(
-          "mt-5 h-10 w-full rounded-lg",
-          done && "bg-success-soft text-success hover:bg-success-soft/80",
-        )}
-        onClick={onToggle}
-      >
-        {done ? "Done ✓" : "Mark as Done"}
-      </Button>
+
+      {expanded && (
+        <div className="space-y-4 border-t bg-muted/20 px-4 py-4 pl-12">
+          <div className="flex flex-wrap gap-2">
+            <Badge
+              className={cn(
+                "border bg-white capitalize",
+                difficultyStyles[exercise.exercise.level as keyof typeof difficultyStyles],
+              )}
+            >
+              {exercise.exercise.level ?? "All levels"}
+            </Badge>
+            <Badge className="bg-muted text-muted-foreground">
+              <Dumbbell className="mr-1 size-3" />
+              {exercise.exercise.equipment ?? "Body only"}
+            </Badge>
+          </div>
+
+          {exercise.exercise.instructions.length > 0 && (
+            <ol className="list-decimal space-y-1 pl-4 text-xs leading-5 text-muted-foreground">
+              {exercise.exercise.instructions.map((instruction, index) => (
+                <li key={`${exercise.id}-${index}`}>{instruction}</li>
+              ))}
+            </ol>
+          )}
+
+          <Button
+            variant={exercise.isCompleted ? "secondary" : "default"}
+            disabled={isPending}
+            onClick={onToggleCompleted}
+          >
+            {exercise.isCompleted ? "Mark as not done" : "Mark as done"}
+          </Button>
+        </div>
+      )}
     </article>
   );
 }

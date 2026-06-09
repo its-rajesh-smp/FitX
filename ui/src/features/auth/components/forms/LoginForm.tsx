@@ -20,7 +20,7 @@ export function LoginForm() {
     mutationFn: loginUser,
     onSuccess: (auth) => {
       setAuth(auth);
-      navigate("/plan", { replace: true });
+      navigate("/chat", { replace: true });
     },
   });
 

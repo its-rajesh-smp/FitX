@@ -20,7 +20,7 @@ export const sendChatMessage = async (
   const { threadId, message } = req.body;
   const userId = req.user?.id!;
 
-  const { emit, streamAIResponse } = useLLMStreaming(res);
+  const { emit, streamAIResponse, didPlanMutate } = useLLMStreaming(res);
 
   try {
     const existingChatThread = threadId
@@ -102,6 +102,9 @@ export const sendChatMessage = async (
       thread: persisted.thread,
       message: persisted.newLLMResponse,
     });
+    if (didPlanMutate()) {
+      emit({ type: "plan_updated" });
+    }
 
     res.end();
 

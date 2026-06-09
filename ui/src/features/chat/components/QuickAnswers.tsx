@@ -1,6 +1,4 @@
-import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 const CUSTOM_ANSWER = "Something else";
 
@@ -19,39 +17,25 @@ export function QuickAnswers({
 }) {
   const options = [...answers, CUSTOM_ANSWER];
 
+  if (selectedAnswer) return null;
+
   return (
     <div className="mt-3 flex flex-wrap gap-2">
-      {options.map((option) => {
-        const selected =
-          selectedAnswer === option ||
-          (Boolean(selectedAnswer) &&
-            !answers.includes(selectedAnswer!) &&
-            option === CUSTOM_ANSWER);
-
-        return (
+      {options.map((option) => (
           <Button
             key={option}
             type="button"
-            variant={selected ? "default" : "outline"}
+            variant="outline"
             size="sm"
-            className={cn("rounded-full", selected && "pointer-events-none")}
-            disabled={disabled || Boolean(selectedAnswer)}
+            className="rounded-full"
+            disabled={disabled}
             onClick={() =>
               option === CUSTOM_ANSWER ? onCustomAnswer() : onSelect(option)
             }
           >
-            {selected && <Check className="size-3.5" />}
             {option}
           </Button>
-        );
-      })}
-
-      {selectedAnswer && !answers.includes(selectedAnswer) && (
-        <p className="w-full text-xs text-muted-foreground">
-          Your answer:{" "}
-          <span className="font-medium text-foreground">{selectedAnswer}</span>
-        </p>
-      )}
+      ))}
     </div>
   );
 }

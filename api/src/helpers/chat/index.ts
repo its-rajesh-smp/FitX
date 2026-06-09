@@ -54,6 +54,7 @@ export type ChatStreamStatus =
 export type ChatStreamEvent =
   | { type: "status"; status: ChatStreamStatus; label: string }
   | { type: "delta"; text: string }
+  | { type: "plan_updated" }
   | { type: "completed"; thread: ChatThread; message: Message };
 
 export type ChatEventEmitter = (
@@ -70,6 +71,7 @@ type FitXStreamedRunResult = Awaited<
 >;
 
 export const useLLMStreaming = (res: Response) => {
+  let planMutated = false;
   res.status(200);
   res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
   res.setHeader("Cache-Control", "no-cache, no-transform");
@@ -77,6 +79,12 @@ export const useLLMStreaming = (res: Response) => {
   res.flushHeaders();
 
   const emit: ChatEventEmitter = (event) => {
+    if (
+      event.type === "status" &&
+      (event.status === "generating_plan" || event.status === "updating_plan")
+    ) {
+      planMutated = true;
+    }
     res.write(`${JSON.stringify(event)}\n`);
   };
 
@@ -97,7 +105,7 @@ export const useLLMStreaming = (res: Response) => {
     return result.finalOutput;
   };
 
-  return { emit, streamAIResponse };
+  return { emit, streamAIResponse, didPlanMutate: () => planMutated };
 };
 
 export const handleChatErrors = (error: unknown, emit: ChatEventEmitter) => {

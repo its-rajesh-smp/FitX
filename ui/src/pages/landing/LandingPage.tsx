@@ -47,7 +47,7 @@ export function LandingPage() {
         <div className="flex items-center gap-2">
           {token ? (
             <Button asChild>
-              <Link to="/plan">
+              <Link to="/chat">
                 My program <ArrowRight />
               </Link>
             </Button>
@@ -79,7 +79,7 @@ export function LandingPage() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button size="lg" asChild className="h-12 rounded-lg px-6">
-              <Link to={token ? "/plan" : "/register"}>
+              <Link to={token ? "/chat" : "/register"}>
                 {token ? "Continue training" : "Build my free plan"}{" "}
                 <ArrowRight />
               </Link>

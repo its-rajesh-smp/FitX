@@ -74,8 +74,8 @@ export function ProgramPreview() {
       </p>
       <div className="p-4">
         <Button asChild className="h-10 w-full rounded-lg">
-          <Link to="/plan">
-            Start this plan <ArrowRight />
+          <Link to="/chat">
+            Open workout planner <ArrowRight />
           </Link>
         </Button>
       </div>

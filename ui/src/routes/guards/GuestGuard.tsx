@@ -3,5 +3,5 @@ import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 
 export function GuestGuard() {
   const token = useAuthStore((state) => state.token);
-  return token ? <Navigate to="/plan" replace /> : <Outlet />;
+  return token ? <Navigate to="/chat" replace /> : <Outlet />;
 }
