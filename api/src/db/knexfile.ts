@@ -1,25 +1,42 @@
+import dotenv from "dotenv";
 import { Knex } from "knex";
 import { knexSnakeCaseMappers } from "objection";
+import path from "path";
+
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+
+const connection =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL || {
+    host: process.env.POSTGRES_HOST,
+    port: Number(process.env.POSTGRES_PORT || 5432),
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DB,
+  };
+
+const config: Knex.Config = {
+  client: "pg",
+  connection,
+  pool: {
+    min: 0,
+    max: Number(process.env.POSTGRES_POOL_MAX || 5),
+  },
+  migrations: {
+    directory: "./migrations",
+    extension: "ts",
+  },
+  seeds: {
+    directory: "./seeds",
+    extension: "ts",
+  },
+  ...knexSnakeCaseMappers(),
+};
 
 const knexConfig: { [key: string]: Knex.Config } = {
-  development: {
-    client: "pg",
-    connection: {
-      host: process.env.POSTGRES_HOST,
-      user: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-    },
-    migrations: {
-      directory: "./migrations",
-      extension: "ts",
-    },
-    seeds: {
-      directory: "./seeds",
-      extension: "ts",
-    },
-    ...knexSnakeCaseMappers(),
-  },
+  development: config,
+  test: config,
+  production: config,
 };
 
 export default knexConfig;

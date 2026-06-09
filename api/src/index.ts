@@ -1,11 +1,11 @@
-import { env } from "@config/env";
 import "tsconfig-paths/register"; // Enables path aliases
+import { env } from "./config/env";
 import { createExpressApp } from "./app";
 import { runDBMigrations } from "./db";
 
-const main = async () => {
-  const app = createExpressApp();
+const app = createExpressApp();
 
+const main = async () => {
   await runDBMigrations();
 
   app.listen(env.PORT, () => {
@@ -13,6 +13,10 @@ const main = async () => {
   });
 };
 
-main().catch((error) => {
-  console.error("Error starting the server:", error);
-});
+if (!process.env.VERCEL) {
+  main().catch((error) => {
+    console.error("Error starting the server:", error);
+  });
+}
+
+export default app;
