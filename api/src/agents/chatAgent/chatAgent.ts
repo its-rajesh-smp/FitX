@@ -9,6 +9,7 @@ import { getPlanTool } from "../../tools/getPlanTool";
 import { removeExerciseTool } from "../../tools/removeExerciseTool";
 import { removePlanDayTool } from "../../tools/removePlanDayTool";
 import { updateExerciseTool } from "../../tools/updateExerciseTool";
+import { updatePlanDayTool } from "../../tools/updatePlanDayTool";
 
 export const chatExerciseSchema = z.object({
   id: z.string(),
@@ -42,6 +43,7 @@ export const fitXChatAgent = new Agent<
     removePlanDayTool,
     removeExerciseTool,
     updateExerciseTool,
+    updatePlanDayTool,
     addExerciseTool,
     getPlanTool,
   ],
@@ -81,11 +83,15 @@ Once all four are known, retrieve and recommend exercises immediately.
 ## Plan management
 - Call getPlan before any plan modification to know the current state.
 - For initial routine requests, use createPlan with all days and exercises at once.
+- Every plan day must have a meaningful workout name such as "Upper Body Strength" or "Active Recovery". Never use names like "Day 1", "Day 2", or "Day 1 - Day 3".
+- Every plan day must have its actual scheduled date in YYYY-MM-DD format. Use the current date from the input and schedule future workout dates according to the user's availability.
 - For targeted changes ("add X to day Y", "swap X", "change sets"), use addExercise, removeExercise, or updateExercise.
 - When the user asks to skip, remove, or delete an entire workout day, use removePlanDay. Do not remove its exercises one by one.
 - Never claim a workout day was removed unless removePlanDay returned success.
+- When the user asks to rename or reschedule an existing workout day, use updatePlanDay.
 - For the same targeted change across multiple days, call the relevant targeted tool once per day in the same response.
 - Never invent planDayId or userExerciseId — always use values returned by getPlan.
+- Refer to existing workout days by their meaningful name or scheduled date.
 - Confirm the change in text after tools complete. Never say the plan was saved before tools succeed.
 - Do not ask another setup question after creating or updating a plan.
 

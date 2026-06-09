@@ -10,6 +10,7 @@ export class UserExercise extends Model {
   sets?: number | null;
   rest?: number | null;
   isCompleted!: boolean;
+  order!: number;
 
   static tableName = "user_exercises";
 
@@ -18,6 +19,12 @@ export class UserExercise extends Model {
       relation: Model.BelongsToOneRelation,
       modelClass: Exercise,
       join: { from: "user_exercises.exerciseId", to: "exercises.id" },
+    },
+  };
+
+  static modifiers = {
+    orderByOrder(builder: any) {
+      builder.orderBy("order");
     },
   };
 

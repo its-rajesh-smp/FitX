@@ -28,7 +28,10 @@ export async function up(knex: Knex): Promise<void> {
     table.integer("reps");
     table.integer("sets");
     table.integer("rest");
+
     table.boolean("is_completed").notNullable().defaultTo(false);
+
+    table.integer("order").notNullable();
 
     table.timestamps(true, true);
   });

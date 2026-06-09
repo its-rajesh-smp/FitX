@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Circle, Dumbbell, Timer } from "lucide-react";
+import { ArrowRight, Circle, Dumbbell, Timer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,13 +17,20 @@ const getEquipment = (day: ProgramDay) =>
     ),
   ].join(", ");
 
+const formatScheduledDate = (scheduledAt: string) =>
+  new Date(`${scheduledAt.slice(0, 10)}T00:00:00`).toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+
 export function PlanPage() {
   const user = useAuthStore((state) => state.user);
   const programQuery = useProgram();
   const days = programQuery.data?.days ?? [];
-  const currentDay = days.find((day) => !day.isCompleted) ?? days[0];
-  const completedDays = days.filter((day) => day.isCompleted).length;
-  const progress = days.length ? (completedDays / days.length) * 100 : 0;
+  const today = new Date().toISOString().slice(0, 10);
+  const currentDay =
+    days.find((day) => day.scheduledAt.slice(0, 10) >= today) ?? days[0];
 
   if (programQuery.isLoading) {
     return <div className="mx-auto max-w-5xl px-4 py-10 text-muted-foreground">Loading your program...</div>;
@@ -57,17 +64,15 @@ export function PlanPage() {
           Your workout program{user?.name ? `, ${user.name}` : ""}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          {completedDays} of {days.length} workout days complete
+          {days.length} scheduled workout {days.length === 1 ? "day" : "days"}
         </p>
-        <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
-        </div>
       </section>
 
       <section className="mt-8 flex flex-col gap-5 rounded-xl border-l-4 border-l-primary bg-white p-6 shadow-card sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Badge>NEXT WORKOUT</Badge>
           <h2 className="mt-3 text-2xl font-extrabold">{currentDay.name}</h2>
+          <p className="text-sm font-medium text-primary">{formatScheduledDate(currentDay.scheduledAt)}</p>
           <p className="text-muted-foreground">{getMuscles(currentDay)}</p>
           <div className="mt-5 flex flex-wrap gap-6 text-sm text-muted-foreground">
             <span><Dumbbell className="mr-1 inline size-4" />{currentDay.exercises.length} exercises</span>
@@ -85,18 +90,19 @@ export function PlanPage() {
         <div className="mt-4 overflow-hidden rounded-xl border bg-white shadow-card">
           {days.map((day) => (
             <Link key={day.id} to={`/plan/${day.id}`} className={`flex items-center gap-3 border-b px-4 py-3.5 last:border-0 hover:bg-primary-soft/40 ${day.id === currentDay.id ? "bg-primary-soft/60" : ""}`}>
-              {day.isCompleted ? (
-                <span className="flex size-4 items-center justify-center rounded-full border border-success text-success"><Check className="size-3" /></span>
-              ) : day.id === currentDay.id ? (
+              {day.id === currentDay.id ? (
                 <span className="size-4 rounded-full bg-primary" />
               ) : (
                 <Circle className="size-4 text-muted-foreground" />
               )}
               <div className="min-w-0">
-                <p className="text-sm font-bold">Day {day.order} · {day.name}</p>
+                <p className="text-sm font-bold">{day.name}</p>
                 <p className="truncate text-xs text-muted-foreground">{getMuscles(day)}</p>
               </div>
-              <span className="ml-auto text-xs text-muted-foreground">{day.exercises.length} exercises</span>
+              <span className="ml-auto text-right text-xs text-muted-foreground">
+                {formatScheduledDate(day.scheduledAt)}
+                <span className="block">{day.exercises.length} exercises</span>
+              </span>
             </Link>
           ))}
         </div>

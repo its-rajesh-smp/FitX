@@ -6,8 +6,7 @@ export class PlanDay extends Model {
   userId!: string;
   userPlanId!: string;
   name!: string;
-  order!: number;
-  isCompleted!: boolean;
+  scheduledAt!: Date;
 
   static tableName = "plan_days";
 
@@ -20,8 +19,8 @@ export class PlanDay extends Model {
   };
 
   static modifiers = {
-    orderByOrder(builder: any) {
-      builder.orderBy("order");
+    orderByScheduledAt(builder: any) {
+      builder.orderBy("scheduledAt");
     },
   };
 

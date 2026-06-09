@@ -13,16 +13,32 @@ const exerciseInputSchema = z.object({
 });
 
 const dayInputSchema = z.object({
-  name: z.string(),
+  name: z
+    .string()
+    .min(1)
+    .max(100)
+    .refine((name) => !/^day\s*\d+(?:\s*-\s*day\s*\d+)?$/i.test(name.trim()), {
+      message: "Use a meaningful workout name, not a generic day label.",
+    }),
+  scheduledAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   exercises: z.array(exerciseInputSchema).min(1).max(8),
 });
 
 export const createPlanTool = tool({
   name: "createPlan",
   description:
-    "Create a full workout plan for the user with days and exercises. Replaces any existing plan.",
+    "Create a full workout plan with meaningful workout names, scheduled dates, and ordered exercises. Replaces any existing plan.",
   parameters: z.object({
-    days: z.array(dayInputSchema).min(1).max(7),
+    days: z
+      .array(dayInputSchema)
+      .min(1)
+      .max(7)
+      .refine(
+        (days) =>
+          new Set(days.map(({ scheduledAt }) => scheduledAt)).size ===
+          days.length,
+        { message: "Each workout day must have a unique scheduled date." },
+      ),
   }),
   execute: async (
     { days },
@@ -46,16 +62,15 @@ export const createPlanTool = tool({
 
     const plan = await UserPlan.create({ userId, isCompleted: false });
 
-    for (const [index, day] of days.entries()) {
+    for (const day of days) {
       const planDay = await PlanDay.create({
         userId,
         userPlanId: plan.id,
         name: day.name,
-        order: index + 1,
-        isCompleted: false,
+        scheduledAt: new Date(day.scheduledAt),
       });
 
-      for (const exercise of day.exercises) {
+      for (const [index, exercise] of day.exercises.entries()) {
         await UserExercise.create({
           userId,
           planDayId: planDay.id,
@@ -64,6 +79,7 @@ export const createPlanTool = tool({
           reps: exercise.reps,
           rest: exercise.rest,
           isCompleted: false,
+          order: index + 1,
         });
       }
     }

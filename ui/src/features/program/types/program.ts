@@ -15,14 +15,14 @@ export interface ProgramExercise {
   reps: number | null;
   rest: number | null;
   isCompleted: boolean;
+  order: number;
   exercise: CatalogExercise;
 }
 
 export interface ProgramDay {
   id: string;
   name: string;
-  order: number;
-  isCompleted: boolean;
+  scheduledAt: string;
   exercises: ProgramExercise[];
 }
 

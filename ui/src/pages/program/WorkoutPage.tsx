@@ -37,6 +37,13 @@ export function WorkoutPage() {
   const progress = day.exercises.length
     ? (completed.length / day.exercises.length) * 100
     : 0;
+  const scheduledDate = new Date(
+    `${day.scheduledAt.slice(0, 10)}T00:00:00`,
+  ).toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-8 lg:py-10">
@@ -52,7 +59,7 @@ export function WorkoutPage() {
         </section>
       )}
       <header className="mt-7">
-        <div className="flex items-center gap-3"><Badge>DAY {day.order}</Badge><span className="text-xs text-muted-foreground">{day.exercises.length} exercises</span></div>
+        <div className="flex items-center gap-3"><Badge>{scheduledDate}</Badge><span className="text-xs text-muted-foreground">{day.exercises.length} exercises</span></div>
         <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{day.name}</h1>
         <div className="mt-3 flex flex-wrap gap-2">{muscles.map((muscle) => <Badge key={muscle}>{muscle}</Badge>)}</div>
         <p className="mt-7 text-sm text-muted-foreground">{completed.length} of {day.exercises.length} exercises done</p>

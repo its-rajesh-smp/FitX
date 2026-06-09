@@ -25,8 +25,12 @@ export const generatePrompt = (
   const threadSummary =
     (thread && ChatThread.getSummary(thread)) ??
     "No short-term thread summary yet.";
+  const currentDate = new Date().toISOString().slice(0, 10);
 
-  return `Important user details:
+  return `Current date:
+${currentDate}
+
+Important user details:
 ${userDetails}
 
 Short-term thread summary:

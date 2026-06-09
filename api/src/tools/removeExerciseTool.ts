@@ -2,6 +2,7 @@ import type { FitXAgentContext } from "@helpers/chat";
 import { UserExercise } from "@models/UserExercise";
 import { RunContext, tool } from "@openai/agents";
 import { z } from "zod";
+import { db } from "../db";
 
 export const removeExerciseTool = tool({
   name: "removeExercise",
@@ -28,7 +29,23 @@ export const removeExerciseTool = tool({
       return { error: "Exercise not found or does not belong to user." };
     }
 
-    await UserExercise.query().deleteById(userExerciseId);
+    await db.transaction(async (trx) => {
+      await UserExercise.query(trx).deleteById(userExerciseId);
+
+      const remainingExercises = await UserExercise.query(trx)
+        .where({ planDayId: exercise.planDayId })
+        .orderBy("order");
+
+      for (const [index, remainingExercise] of remainingExercises.entries()) {
+        const order = index + 1;
+        if (remainingExercise.order !== order) {
+          await UserExercise.query(trx)
+            .patch({ order })
+            .where({ id: remainingExercise.id });
+        }
+      }
+    });
+
     return { success: true };
   },
 });

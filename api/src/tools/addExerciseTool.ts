@@ -33,6 +33,10 @@ export const addExerciseTool = tool({
       return { error: "Plan day not found or does not belong to user." };
     }
 
+    const order =
+      (await UserExercise.query().where({ planDayId }).max("order as order").first())
+        ?.order ?? 0;
+
     const created = await UserExercise.create({
       userId,
       planDayId,
@@ -41,6 +45,7 @@ export const addExerciseTool = tool({
       reps,
       rest,
       isCompleted: false,
+      order: Number(order) + 1,
     });
 
     return { success: true, userExerciseId: created.id };

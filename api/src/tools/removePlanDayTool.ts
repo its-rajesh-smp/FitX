@@ -31,19 +31,6 @@ export const removePlanDayTool = tool({
 
     await db.transaction(async (trx) => {
       await PlanDay.query(trx).deleteById(day.id);
-
-      const remainingDays = await PlanDay.query(trx)
-        .where({ userPlanId: day.userPlanId })
-        .orderBy("order");
-
-      for (const [index, remainingDay] of remainingDays.entries()) {
-        const order = index + 1;
-        if (remainingDay.order !== order) {
-          await PlanDay.query(trx)
-            .patch({ order })
-            .where({ id: remainingDay.id });
-        }
-      }
     });
 
     return {
