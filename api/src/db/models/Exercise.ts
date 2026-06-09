@@ -4,6 +4,7 @@ export interface ExerciseFilters {
   level?: "beginner" | "intermediate" | "expert";
   equipments?: string[];
   muscles?: string[];
+  searchTerms?: string[];
   limit?: number;
 }
 
@@ -74,8 +75,13 @@ export class Exercise extends Model {
     level,
     equipments = [],
     muscles = [],
+    searchTerms = [],
     limit = 6,
   }: ExerciseFilters): Promise<Exercise[]> {
+    const normalizedSearchTerms = searchTerms
+      .map((term) => term.toLowerCase().replace(/[^a-z0-9]/g, ""))
+      .filter(Boolean);
+
     return await this.query()
       .select(
         "id",
@@ -94,6 +100,27 @@ export class Exercise extends Model {
           query.whereRaw(
             "(jsonb_exists_any(primary_muscles, ?::text[]) or jsonb_exists_any(secondary_muscles, ?::text[]))",
             [muscles, muscles],
+          );
+        }
+        if (normalizedSearchTerms.length) {
+          query.where((searchQuery) => {
+            normalizedSearchTerms.forEach((term) => {
+              searchQuery.orWhereRaw(
+                "regexp_replace(lower(name), '[^a-z0-9]+', '', 'g') like ?",
+                [`%${term}%`],
+              );
+            });
+          });
+        }
+      })
+      .modify((query) => {
+        if (normalizedSearchTerms.length) {
+          query.orderByRaw(
+            "case when regexp_replace(lower(name), '[^a-z0-9]+', '', 'g') = any(?::text[]) then 0 else 1 end",
+            [normalizedSearchTerms],
+          );
+          query.orderByRaw(
+            "length(regexp_replace(lower(name), '[^a-z0-9]+', '', 'g'))",
           );
         }
       })

@@ -7,6 +7,7 @@ import { addExerciseTool } from "../../tools/addExerciseTool";
 import { createPlanTool } from "../../tools/createPlanTool";
 import { getPlanTool } from "../../tools/getPlanTool";
 import { removeExerciseTool } from "../../tools/removeExerciseTool";
+import { removePlanDayTool } from "../../tools/removePlanDayTool";
 import { updateExerciseTool } from "../../tools/updateExerciseTool";
 
 export const chatExerciseSchema = z.object({
@@ -38,6 +39,7 @@ export const fitXChatAgent = new Agent<
     getExerciseFilterOptionsTool,
     getExercisesTool,
     createPlanTool,
+    removePlanDayTool,
     removeExerciseTool,
     updateExerciseTool,
     addExerciseTool,
@@ -71,6 +73,7 @@ Once all four are known, retrieve and recommend exercises immediately.
 ## Exercise recommendations
 - Always call getExerciseFilterOptions before getExercises
 - Use only filter values returned by getExerciseFilterOptions
+- When the user names exercises, pass those names in getExercises searchTerms and use only returned exercise ids
 - Beginners → "beginner"; experienced → "intermediate" unless they say advanced/expert
 - Home workouts → "body only" equipment plus only what the user explicitly owns
 - Return 4–6 exercises in the exercises field; use text for intro, warm-up, rest, and one progression tip
@@ -79,6 +82,9 @@ Once all four are known, retrieve and recommend exercises immediately.
 - Call getPlan before any plan modification to know the current state.
 - For initial routine requests, use createPlan with all days and exercises at once.
 - For targeted changes ("add X to day Y", "swap X", "change sets"), use addExercise, removeExercise, or updateExercise.
+- When the user asks to skip, remove, or delete an entire workout day, use removePlanDay. Do not remove its exercises one by one.
+- Never claim a workout day was removed unless removePlanDay returned success.
+- For the same targeted change across multiple days, call the relevant targeted tool once per day in the same response.
 - Never invent planDayId or userExerciseId — always use values returned by getPlan.
 - Confirm the change in text after tools complete. Never say the plan was saved before tools succeed.
 - Do not ask another setup question after creating or updating a plan.

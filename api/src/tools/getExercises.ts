@@ -7,16 +7,17 @@ const exerciseFiltersSchema = z.object({
   level: z.enum(["beginner", "intermediate", "expert"]).nullable(),
   equipments: z.array(z.string()).max(5),
   muscles: z.array(z.string()).max(8),
+  searchTerms: z.array(z.string()).max(5),
   limit: z.number().int().min(1).max(8),
 });
 
 export const getExercisesTool = tool({
   name: "getExercises",
   description:
-    "Get exercises from the FitX exercise catalog using filters from getExerciseFilterOptions.",
+    "Get exercises from the FitX catalog using valid filters and optional user-provided name search terms.",
   parameters: exerciseFiltersSchema,
   execute: async (
-    { level, equipments, muscles, limit },
+    { level, equipments, muscles, searchTerms, limit },
     runContext?: RunContext<FitXAgentContext>,
   ) => {
     if (!runContext) throw new Error("FITX_AGENT_CONTEXT_REQUIRED");
@@ -49,6 +50,7 @@ export const getExercisesTool = tool({
       ...(level && { level }),
       equipments,
       muscles,
+      searchTerms,
       limit,
     });
 
