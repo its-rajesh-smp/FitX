@@ -48,6 +48,7 @@ export const sendChatMessage = async (
     emit({ type: "status", status: "thinking", label: "Thinking" });
 
     const result = await run(fitXChatAgent, prompt, {
+      context: { userId, emit },
       maxTurns: 4,
       stream: true,
     });

@@ -6,9 +6,9 @@ export type ChatStatus =
   | "responding"
   | "getting_options"
   | "getting_exercises"
+  | "getting_plan"
   | "generating_plan"
-  | "searching_exercises"
-  | "saving_plan";
+  | "updating_plan";
 
 export type ChatStreamEvent =
   | { type: "status"; status: ChatStatus; label: string }

@@ -1,4 +1,5 @@
 import { Model } from "objection";
+import { UserExercise } from "./UserExercise";
 
 export class PlanDay extends Model {
   id!: string;
@@ -9,6 +10,20 @@ export class PlanDay extends Model {
   isCompleted!: boolean;
 
   static tableName = "plan_days";
+
+  static relationMappings = {
+    exercises: {
+      relation: Model.HasManyRelation,
+      modelClass: UserExercise,
+      join: { from: "plan_days.id", to: "user_exercises.planDayId" },
+    },
+  };
+
+  static modifiers = {
+    orderByOrder(builder: any) {
+      builder.orderBy("order");
+    },
+  };
 
   static async create(dayData: Partial<Omit<PlanDay, "id">>): Promise<PlanDay> {
     return await this.query().insert(dayData);
@@ -22,7 +37,14 @@ export class PlanDay extends Model {
     return await this.query();
   }
 
-  static async update(id: string, dayData: Partial<Omit<PlanDay, "id">>): Promise<PlanDay | undefined> {
+  static async update(
+    id: string,
+    dayData: Partial<Omit<PlanDay, "id">>,
+  ): Promise<PlanDay | undefined> {
     return await this.query().patchAndFetchById(id, dayData);
+  }
+
+  static async deleteByPlanId(planId: string): Promise<number> {
+    return await this.query().delete().where("userPlanId", planId);
   }
 }

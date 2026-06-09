@@ -6,9 +6,9 @@ const icons = {
   responding: Sparkles,
   getting_options: Search,
   getting_exercises: Dumbbell,
+  getting_plan: Search,
   generating_plan: Dumbbell,
-  searching_exercises: Search,
-  saving_plan: Save,
+  updating_plan: Save,
 };
 
 export function ChatStatusIndicator({ status, label }: { status: ChatStatus; label: string }) {

@@ -1,4 +1,6 @@
 import { Model } from "objection";
+import { PlanDay } from "./PlanDay";
+import { UserPlan } from "./UserPlan";
 
 export class UserExercise extends Model {
   id!: string;
@@ -12,7 +14,9 @@ export class UserExercise extends Model {
 
   static tableName = "user_exercises";
 
-  static async create(exerciseData: Partial<Omit<UserExercise, "id">>): Promise<UserExercise> {
+  static async create(
+    exerciseData: Partial<Omit<UserExercise, "id">>,
+  ): Promise<UserExercise> {
     return await this.query().insert(exerciseData);
   }
 
@@ -24,7 +28,10 @@ export class UserExercise extends Model {
     return await this.query();
   }
 
-  static async update(id: string, exerciseData: Partial<Omit<UserExercise, "id">>): Promise<UserExercise | undefined> {
+  static async update(
+    id: string,
+    exerciseData: Partial<Omit<UserExercise, "id">>,
+  ): Promise<UserExercise | undefined> {
     return await this.query().patchAndFetchById(id, exerciseData);
   }
 }

@@ -1,5 +1,6 @@
+import type { FitXAgentContext } from "@helpers/chat";
 import { Exercise } from "@models/Exercise";
-import { tool } from "@openai/agents";
+import { RunContext, tool } from "@openai/agents";
 import { z } from "zod";
 
 const exerciseFiltersSchema = z.object({
@@ -12,9 +13,20 @@ const exerciseFiltersSchema = z.object({
 export const getExercisesTool = tool({
   name: "getExercises",
   description:
-    "Get real exercises from the FitX exercise catalog. Call getExerciseFilterOptions first, then use only values returned by it.",
+    "Get exercises from the FitX exercise catalog using filters from getExerciseFilterOptions.",
   parameters: exerciseFiltersSchema,
-  execute: async ({ level, equipments, muscles, limit }) => {
+  execute: async (
+    { level, equipments, muscles, limit },
+    runContext?: RunContext<FitXAgentContext>,
+  ) => {
+    if (!runContext) throw new Error("FITX_AGENT_CONTEXT_REQUIRED");
+
+    runContext.context.emit({
+      type: "status",
+      status: "getting_exercises",
+      label: "Getting exercises",
+    });
+
     const options = await Exercise.getFilterOptions();
     const invalidEquipments = equipments.filter(
       (equipment) => !options.equipments.includes(equipment),

@@ -42,7 +42,10 @@ export type ChatStreamStatus =
   | "thinking"
   | "responding"
   | "getting_options"
-  | "getting_exercises";
+  | "getting_exercises"
+  | "getting_plan"
+  | "generating_plan"
+  | "updating_plan";
 
 export type ChatStreamEvent =
   | { type: "status"; status: ChatStreamStatus; label: string }
@@ -53,8 +56,13 @@ export type ChatEventEmitter = (
   event: ChatStreamEvent | { type: "error"; message: string },
 ) => void;
 
+export interface FitXAgentContext {
+  userId: string;
+  emit: ChatEventEmitter;
+}
+
 type FitXStreamedRunResult = Awaited<
-  ReturnType<typeof run<typeof fitXChatAgent>>
+  ReturnType<typeof run<typeof fitXChatAgent, FitXAgentContext>>
 >;
 
 export const useLLMStreaming = (res: Response) => {
@@ -69,30 +77,8 @@ export const useLLMStreaming = (res: Response) => {
   };
 
   const streamAIResponse = async (result: FitXStreamedRunResult) => {
-    for await (const event of result) {
-      if (
-        event.type !== "run_item_stream_event" ||
-        event.name !== "tool_called"
-      ) {
-        continue;
-      }
-
-      const toolName =
-        "name" in event.item.rawItem ? event.item.rawItem.name : undefined;
-
-      if (toolName === "getExerciseFilterOptions") {
-        emit({
-          type: "status",
-          status: "getting_options",
-          label: "Getting exercise options",
-        });
-      } else if (toolName === "getExercises") {
-        emit({
-          type: "status",
-          status: "getting_exercises",
-          label: "Getting exercises",
-        });
-      }
+    for await (const _event of result) {
+      // Consume the stream while tools emit their own request-specific statuses.
     }
 
     await result.completed;

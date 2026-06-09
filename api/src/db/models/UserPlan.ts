@@ -1,4 +1,5 @@
 import { Model } from "objection";
+import { PlanDay } from "./PlanDay";
 
 export class UserPlan extends Model {
   id!: string;
@@ -7,7 +8,18 @@ export class UserPlan extends Model {
 
   static tableName = "user_plans";
 
-  static async create(planData: Partial<Omit<UserPlan, "id">>): Promise<UserPlan> {
+  // UserPlan
+  static relationMappings = {
+    days: {
+      relation: Model.HasManyRelation,
+      modelClass: PlanDay,
+      join: { from: "user_plans.id", to: "plan_days.userPlanId" },
+    },
+  };
+
+  static async create(
+    planData: Partial<Omit<UserPlan, "id">>,
+  ): Promise<UserPlan> {
     return await this.query().insert(planData);
   }
 
@@ -19,7 +31,18 @@ export class UserPlan extends Model {
     return await this.query();
   }
 
-  static async update(id: string, planData: Partial<Omit<UserPlan, "id">>): Promise<UserPlan | undefined> {
+  static async update(
+    id: string,
+    planData: Partial<Omit<UserPlan, "id">>,
+  ): Promise<UserPlan | undefined> {
     return await this.query().patchAndFetchById(id, planData);
+  }
+
+  static async findByUserIdWithDetails(
+    userId: string,
+  ): Promise<UserPlan | undefined> {
+    return await this.query()
+      .findOne({ userId })
+      .withGraphFetched("days(orderByOrder).exercises");
   }
 }
