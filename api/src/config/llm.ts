@@ -19,9 +19,8 @@ const createOpenAIModel = () => {
 setTracingDisabled(!env.OPENAI_AGENTS_TRACING_ENABLED);
 setDefaultOpenAIKey(env.OPENAI_API_KEY);
 
-export const llmModel = env.AI_PROVIDER === "openai"
-  ? createOpenAIModel()
-  : createGeminiModel();
+export const llmModel =
+  env.AI_PROVIDER === "openai" ? createOpenAIModel() : createGeminiModel();
 
 export const memoryLlmModel = env.OPENAI_MEMORY_MODEL;
 export const llmProviderName = env.AI_PROVIDER;

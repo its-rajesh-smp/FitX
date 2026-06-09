@@ -7,7 +7,7 @@ const exerciseFiltersSchema = z.object({
   level: z.enum(["beginner", "intermediate", "expert"]).nullable(),
   equipments: z.array(z.string()).max(5),
   muscles: z.array(z.string()).max(8),
-  limit: z.number().int().min(1).max(8),
+  limit: z.number().int().min(1).max(30),
 });
 
 export const getExercisesTool = tool({
@@ -24,7 +24,7 @@ export const getExercisesTool = tool({
     runContext.context.emit({
       type: "status",
       status: "getting_exercises",
-      label: "Getting exercises",
+      label: "Finding exercises for you...",
     });
 
     console.log("Filters:", { level, equipments, muscles, limit });
@@ -47,7 +47,7 @@ export const getExercisesTool = tool({
         equipment: exercise.equipment,
         primaryMuscles: exercise.primaryMuscles,
         secondaryMuscles: exercise.secondaryMuscles,
-        instructions: exercise.instructions.slice(0, 4),
+        instructions: exercise.instructions,
       })),
     };
   },

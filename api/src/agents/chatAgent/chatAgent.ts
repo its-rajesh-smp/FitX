@@ -36,6 +36,9 @@ export const fitXChatAgent = new Agent<
   name: "FitX Trainer",
   model: llmModel,
   outputType: chatAgentResponseSchema,
+  modelSettings: {
+    temperature: 0.7,
+  },
   tools: [
     getExerciseFilterOptionsTool,
     getExercisesTool,
