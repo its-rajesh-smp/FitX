@@ -12,7 +12,7 @@ const connection =
     port: Number(process.env.POSTGRES_PORT || 5432),
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
-    database: process.env.POSTGRES_DB,
+    database: process.env.POSTGRES_DATABASE || process.env.POSTGRES_DB,
   };
 
 const config: Knex.Config = {
@@ -20,7 +20,7 @@ const config: Knex.Config = {
   connection,
   pool: {
     min: 0,
-    max: Number(process.env.POSTGRES_POOL_MAX || 5),
+    max: Number(process.env.POSTGRES_POOL_MAX || (process.env.VERCEL ? 1 : 5)),
   },
   migrations: {
     directory: "./migrations",

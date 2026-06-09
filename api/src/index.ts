@@ -1,5 +1,4 @@
-import "tsconfig-paths/register"; // Enables path aliases
-import { env } from "./config/env";
+import { env } from "@config/env";
 import { createExpressApp } from "./app";
 import { runDBMigrations } from "./db";
 
