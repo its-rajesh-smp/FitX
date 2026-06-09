@@ -51,6 +51,7 @@ export function ChatPage() {
   const [streamError, setStreamError] = useState<string | null>(null);
   const [answeredWidgets, setAnsweredWidgets] = useState<Record<string, string>>({});
   const [customQuestion, setCustomQuestion] = useState<{ key: string; question: string } | null>(null);
+  const [composerFocusSignal, setComposerFocusSignal] = useState(0);
   const [mobilePlannerOpen, setMobilePlannerOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(() => window.matchMedia("(min-width: 1024px)").matches);
   const [isCompactChat, setIsCompactChat] = useState(() => window.innerWidth < 640);
@@ -137,15 +138,17 @@ export function ChatPage() {
     });
   }, [hasPlan, isDesktop, updateUserLayout, userId]);
 
-  const send = async (text: string) => {
-    const messageText = customQuestion
-      ? `Question: ${customQuestion.question}\nAnswer: ${text}`
+  const send = async (
+    text: string,
+    answerContext = customQuestion,
+  ) => {
+    const messageText = answerContext
+      ? `Question: ${answerContext.question}\nAnswer: ${text}`
       : text;
-    const activeCustomQuestion = customQuestion;
-    if (activeCustomQuestion) {
+    if (answerContext) {
       setAnsweredWidgets((current) => ({
         ...current,
-        [activeCustomQuestion.key]: text,
+        [answerContext.key]: text,
       }));
       setCustomQuestion(null);
     }
@@ -196,13 +199,12 @@ export function ChatPage() {
   };
 
   const selectQuickAnswer = (widgetKey: string, question: string, answer: string) => {
-    setAnsweredWidgets((current) => ({ ...current, [widgetKey]: answer }));
-    send(`Question: ${question}\nAnswer: ${answer}`);
+    send(answer, { key: widgetKey, question });
   };
 
   const requestCustomAnswer = (widgetKey: string, question: string) => {
-    setAnsweredWidgets((current) => ({ ...current, [widgetKey]: "Something else" }));
     setCustomQuestion({ key: widgetKey, question });
+    setComposerFocusSignal((current) => current + 1);
   };
 
   const empty = messages.length === 0;
@@ -330,7 +332,10 @@ export function ChatPage() {
                       const persistedAnswer = persistedResponse?.[1] === message.content.text
                         ? persistedResponse[2]
                         : undefined;
-                      const selectedAnswer = answeredWidgets[widgetKey] ?? persistedAnswer;
+                      const selectedAnswer =
+                        answeredWidgets[widgetKey] ??
+                        persistedAnswer ??
+                        (nextHumanMessage ? "Answered" : undefined);
 
                       return (
                         <HeightWeightWidget
@@ -376,10 +381,10 @@ export function ChatPage() {
           <div className="sticky bottom-0 border-t bg-white/95 p-4 backdrop-blur">
             <div className="mx-auto max-w-3xl">
               <ChatComposer
-                key={customQuestion?.key ?? "default"}
                 onSend={send}
                 isPending={isStreaming}
-                autoFocus={Boolean(customQuestion)}
+                focusSignal={composerFocusSignal}
+                highlighted={Boolean(customQuestion)}
                 placeholder={customQuestion ? "Type your answer..." : "Message FitX"}
               />
               <p className="mt-2 text-center text-[10px] text-muted-foreground">FitX can make mistakes. Use your judgment for health and training decisions.</p>

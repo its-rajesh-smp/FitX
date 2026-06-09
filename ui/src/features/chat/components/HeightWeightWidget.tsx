@@ -45,12 +45,7 @@ export function HeightWeightWidget({
   };
 
   if (selectedAnswer) {
-    return (
-      <div className="mt-3 rounded-xl border bg-primary-soft/50 px-4 py-3 text-sm">
-        <span className="text-muted-foreground">Your measurements: </span>
-        <span className="font-semibold">{selectedAnswer}</span>
-      </div>
-    );
+    return null;
   }
 
   return (
