@@ -7,7 +7,11 @@ import { z } from "zod";
 import { db } from "../db";
 
 const exerciseInputSchema = z.object({
-  exerciseId: z.string(),
+  exerciseId: z
+    .string()
+    .describe(
+      "The exact exercise id. Get this from the getExercises tool. DO not create by your own.",
+    ),
   sets: z.number().int().positive().nullable(),
   reps: z.number().int().positive().nullable(),
   rest: z.number().int().positive().nullable(), // seconds
@@ -38,8 +42,12 @@ const planDaysInputSchema = z
 
 export const createPlanTool = tool({
   name: "createPlan",
-  description:
-    "Create a complete seven-day weekly workout plan. Provide every dayNumber exactly once: 0 is Sunday through 6 is Saturday. The current dayNumber provided in the prompt must contain exercises so the plan starts today. Other rest days must have an empty exercises array.",
+  description: `Create a complete seven-day weekly workout plan.
+
+BEFORE CALLING THIS TOOL:
+- Always call getExercises first with limit=20 to get valid exercise IDs.
+- Never invent or reuse exercise IDs from memory.
+  `,
   parameters: z.object({
     days: planDaysInputSchema,
   }),
