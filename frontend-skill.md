@@ -2,6 +2,7 @@
 
 name: react-frontend
 description: Use this skill when building or modifying React frontend applications following established project conventions. Triggers include: creating new pages, components, hooks, or features; making API calls; structuring folders; or writing any React/TypeScript code in this project. Covers folder structure, component design, API patterns, styling rules, and reusable hook patterns. Do NOT use for backend code, plain HTML/CSS projects, or non-React frameworks.
+
 ---
 
 This skill defines the conventions and patterns for building React frontend applications in this project. Always follow these rules when creating or modifying any frontend code.
@@ -52,7 +53,7 @@ root/
 1. Always use **axios**.
 2. Always create **hooks for GET requests** (e.g. `useUser`, `useAppointments`).
 3. Always use **try/catch** and handle both `loading` and `error` states.
-4. If the project uses **TanStack Query**, always use it for API calls — do not use raw `useEffect` fetching.
+4. If the project uses **TanStack Query**, always use it for API calls — do not use raw `useEffect` for fetching.
 5. Never use fetch and .then and .catch for api calls. Since they make the codebase hard to read because of promise hell.
 
 \---
@@ -63,6 +64,7 @@ root/
 2. **Separate UI from logic**: UI components (in `components/ui/`) must be stateless — they only render, never manage state.
 3. Break components into small, maintainable units. One component should do one thing.
 4. **Prefer array methods** over for loops (`map`, `filter`, `reduce`, etc.) to keep code concise.
+5. **Prefer different folders** Don't just dump all the types, utils or helpers in the same component. Follow and maintain the folder stricture.
 
 \---
 
@@ -85,19 +87,19 @@ root/
 
 ```ts
 // Example Zustand store
-import { create } from "zustand"
+import { create } from "zustand";
 
 interface AuthStore {
-  user: User | null
-  setUser: (user: User | null) => void
-  clear: () => void
+  user: User | null;
+  setUser: (user: User | null) => void;
+  clear: () => void;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
   clear: () => set({ user: null }),
-}))
+}));
 ```
 
 \---
@@ -112,14 +114,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
 ```ts
 // Schema
-import { z } from "zod"
+import { z } from "zod";
 
 export const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-})
+});
 
-export type LoginFormValues = z.infer<typeof loginSchema>
+export type LoginFormValues = z.infer<typeof loginSchema>;
 ```
 
 ```tsx
@@ -165,17 +167,17 @@ export function LoginForm() {
 
 ```tsx
 // pages/ErrorPage.tsx
-import { useRouteError, isRouteErrorResponse, useNavigate } from "react-router"
+import { useRouteError, isRouteErrorResponse, useNavigate } from "react-router";
 
 export function ErrorPage() {
-  const error = useRouteError()
-  const navigate = useNavigate()
+  const error = useRouteError();
+  const navigate = useNavigate();
 
   const message = isRouteErrorResponse(error)
     ? error.statusText
     : error instanceof Error
-    ? error.message
-    : "An unexpected error occurred."
+      ? error.message
+      : "An unexpected error occurred.";
 
   return (
     <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -184,7 +186,7 @@ export function ErrorPage() {
         Go back
       </button>
     </div>
-  )
+  );
 }
 ```
 
@@ -217,39 +219,14 @@ Keep these in src/utils/error.ts
 
 ```ts
 const getAPIError = (err: unknown, defaultMessage: string): string => {
-  if (axios.isAxiosError(err)) return err.message
-  if (err instanceof Error) return err.message
-  return defaultMessage
-}
+  if (axios.isAxiosError(err)) return err.message;
+  if (err instanceof Error) return err.message;
+  return defaultMessage;
+};
 
 const isAxiosCanceledError = (err: unknown): boolean => {
-  return axios.isCancel(err)
-}
-```
-
-\---
-
-## Data-Fetching Hook Pattern
-
-Hooks should compose `usePagination` and `useDebounce` internally and return `{ data, loading, error, pagination }`.
-
-### Service function
-
-Keep these in src/features/appointment/services/getAppointments.ts
-
-```ts
-interface GetAppointmentsParams {
-  endpoint: string
-  queryParams: Record<string, string | number | boolean>
-  controller: AbortController
-}
-
-const getAppointments = async ({ endpoint, queryParams, controller }: GetAppointmentsParams) => {
-  return await axios.get<AppointmentsResponse>(endpoint, {
-    params: queryParams,
-    signal: controller.signal,
-  })
-}
+  return axios.isCancel(err);
+};
 ```
 
 ### Example hook — `useAppointments`
@@ -308,4 +285,3 @@ export function useAppointments({ search }: UseAppointmentsOption) {
   }
 }
 ```
-
