@@ -1,11 +1,23 @@
 import { Model, Pojo } from "objection";
 
+import {
+  EXERCISE_EQUIPMENT,
+  EXERCISE_LEVELS,
+  EXERCISE_MUSCLES,
+} from "../../constants/exerciseFilters";
+
+export interface UserDetails {
+  experienceLevel?: (typeof EXERCISE_LEVELS)[number];
+  targetMuscles?: (typeof EXERCISE_MUSCLES)[number][];
+  availableEquipment?: (typeof EXERCISE_EQUIPMENT)[number][];
+}
+
 export class User extends Model {
   id!: string;
   name!: string;
   email!: string;
   password!: string;
-  details!: Record<string, string>;
+  details!: UserDetails | null;
   planId?: string | null;
 
   static tableName = "users";
@@ -32,7 +44,10 @@ export class User extends Model {
     return await this.query();
   }
 
-  static async update(id: string, userData: Partial<Omit<User, "id">>): Promise<User | undefined> {
+  static async update(
+    id: string,
+    userData: Partial<Omit<User, "id">>,
+  ): Promise<User | undefined> {
     return await this.query().patchAndFetchById(id, userData);
   }
 }

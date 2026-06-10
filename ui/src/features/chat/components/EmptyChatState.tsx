@@ -3,7 +3,7 @@ import type { SendChatMessage } from "@/features/chat/types/chatUi";
 import { APP } from "@/constants/app";
 
 const STARTER_PROMPTS = [
-  "Build me a weekly strength plan",
+  "Build me a weekly workout plan",
   "How should I start working out?",
   "What should I workout today?",
 ];

@@ -1,29 +1,9 @@
-import { memoryLlmModel } from "../../config/llm";
+import { run } from "@openai/agents";
+import { chatThreadSummaryAgent } from "../../agents";
 import { ChatThread } from "../../db/models/ChatThread";
 import { Message, MessageRole } from "../../db/models/Message";
-import { Agent, run } from "@openai/agents";
-import { z } from "zod";
 
 const THREAD_SUMMARY_BATCH_SIZE = 10;
-
-const threadSummarySchema = z.object({
-  summary: z.string().min(1).max(4000),
-});
-
-const threadSummaryAgent = new Agent({
-  name: "FitX Thread Summarizer",
-  model: memoryLlmModel,
-  outputType: threadSummarySchema,
-  instructions: `Maintain a compact short-term summary of a FitX chat thread.
-
-Preserve:
-- The user's current intent and open questions.
-- Important decisions, advice already given, and unresolved next steps.
-- Context needed to continue the conversation naturally.
-
-Do not copy the conversation verbatim. Remove greetings, repetition, and obsolete details.
-Return one concise summary under 1200 words.`,
-});
 
 const formatMessages = (messages: Message[]) =>
   messages
@@ -54,7 +34,7 @@ export const generateThreadSummary = async (
     );
 
     const result = await run(
-      threadSummaryAgent,
+      chatThreadSummaryAgent,
       `Existing thread summary:
 ${ChatThread.getSummary(thread) ?? "No existing summary."}
 

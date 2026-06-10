@@ -30,7 +30,7 @@ const normalizeWidget = (
         response.text,
       )) ||
     (response.widget.type === "equipment_multi_select" &&
-      /\b(equipment|body only|dumbbell|barbell|machine|bands|have available|access to)\b/i.test(
+      /\b(equipment|body only|dumbbell|barbell|machine|bands|gym|home|have available|access to)\b/i.test(
         response.text,
       ));
 
