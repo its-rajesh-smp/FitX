@@ -5,7 +5,7 @@ import { APP } from "@/constants/app";
 const STARTER_PROMPTS = [
   "Build me a weekly strength plan",
   "How should I start working out?",
-  "What should I train today?",
+  "What should I workout today?",
 ];
 
 interface EmptyChatStateProps {

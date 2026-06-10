@@ -1,11 +1,7 @@
-import {
-  PanelLeftClose,
-  PanelLeftOpen,
-  PanelRightOpen,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { APP } from "@/constants/app";
 import { UserMenu } from "@/features/chat/components/UserMenu";
+import { PanelLeftClose, PanelLeftOpen, PanelRightOpen } from "lucide-react";
 
 interface ChatHeaderProps {
   hasPlan: boolean;
@@ -17,6 +13,17 @@ interface ChatHeaderProps {
   onLogout: () => void;
 }
 
+const getPanelLabel = (
+  isDesktop: boolean,
+  chatCollapsed: boolean,
+  mobilePlannerOpen: boolean,
+) => {
+  if (isDesktop) {
+    return chatCollapsed ? "Show chat" : "Hide chat";
+  }
+  return mobilePlannerOpen ? "Close workout planner" : "Open workout planner";
+};
+
 export function ChatHeader({
   hasPlan,
   isDesktop,
@@ -26,21 +33,13 @@ export function ChatHeader({
   onToggleMobilePlanner,
   onLogout,
 }: ChatHeaderProps) {
-  const panelLabel = isDesktop
-    ? chatCollapsed
-      ? "Show chat"
-      : "Hide chat"
-    : mobilePlannerOpen
-      ? "Close workout planner"
-      : "Open workout planner";
-
   return (
     <header className="z-20 flex h-14 shrink-0 items-center justify-between border-b bg-white/95 px-3 backdrop-blur sm:px-4">
       <div className="flex items-center gap-2.5">
         <img src={APP.icon} alt="" className="size-8" />
         <div>
           <h1 className="text-sm font-bold">{APP.name}</h1>
-          <p className="text-[10px] text-muted-foreground">AI fitness coach</p>
+          <p className="text-muted-foreground text-[10px]">AI fitness coach</p>
         </div>
       </div>
 
@@ -49,21 +48,18 @@ export function ChatHeader({
           <Button
             variant="outline"
             onClick={isDesktop ? onToggleChat : onToggleMobilePlanner}
-            aria-label={panelLabel}
           >
             {isDesktop ? (
-              chatCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />
+              chatCollapsed ? (
+                <PanelLeftOpen />
+              ) : (
+                <PanelLeftClose />
+              )
             ) : (
               <PanelRightOpen />
             )}
             <span className="hidden sm:inline">
-              {isDesktop
-                ? chatCollapsed
-                  ? "Show chat"
-                  : "Hide chat"
-                : mobilePlannerOpen
-                  ? "Close Planner"
-                  : "Workout Planner"}
+              {getPanelLabel(isDesktop, chatCollapsed, mobilePlannerOpen)}
             </span>
           </Button>
         )}
