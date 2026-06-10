@@ -12,6 +12,7 @@ export type ChatStatus =
 export type ChatStreamEvent =
   | { type: "status"; status: ChatStatus; label: string }
   | { type: "delta"; text: string }
+  | { type: "text_snapshot"; text: string }
   | { type: "plan_updated" }
   | { type: "completed"; thread: ChatThread; message: ChatMessage }
   | { type: "error"; message: string };

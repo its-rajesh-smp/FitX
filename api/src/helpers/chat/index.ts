@@ -88,6 +88,7 @@ export type ChatStreamStatus =
 export type ChatStreamEvent =
   | { type: "status"; status: ChatStreamStatus; label: string }
   | { type: "delta"; text: string }
+  | { type: "text_snapshot"; text: string }
   | { type: "plan_updated" }
   | { type: "completed"; thread: ChatThread; message: Message };
 
@@ -104,6 +105,33 @@ export interface FitXAgentContext {
 type FitXStreamedRunResult = Awaited<
   ReturnType<typeof run<typeof fitXChatAgent, FitXAgentContext>>
 >;
+
+const extractPartialJsonText = (json: string): string => {
+  const textKey = json.match(/"text"\s*:\s*"/);
+  if (!textKey?.index && textKey?.index !== 0) return "";
+
+  const start = textKey.index + textKey[0].length;
+  let escaped = false;
+  let encoded = "";
+
+  for (let index = start; index < json.length; index += 1) {
+    const character = json[index];
+
+    if (!escaped && character === '"') break;
+    encoded += character;
+
+    if (escaped) escaped = false;
+    else if (character === "\\") escaped = true;
+  }
+
+  if (escaped) return "";
+
+  try {
+    return JSON.parse(`"${encoded}"`);
+  } catch {
+    return "";
+  }
+};
 
 export const useLLMStreaming = (res: Response) => {
   let planMutated = false;
@@ -124,8 +152,29 @@ export const useLLMStreaming = (res: Response) => {
   };
 
   const streamAIResponse = async (result: FitXStreamedRunResult) => {
-    for await (const _event of result) {
-      // Consume the stream while tools emit their own request-specific statuses.
+    let rawOutput = "";
+    let streamedText = "";
+
+    for await (const event of result) {
+      if (
+        event.type !== "raw_model_stream_event" ||
+        event.data.type !== "output_text_delta"
+      ) {
+        continue;
+      }
+
+      rawOutput += event.data.delta;
+      const nextText = extractPartialJsonText(rawOutput);
+      if (!nextText.startsWith(streamedText)) continue;
+
+      const delta = nextText.slice(streamedText.length);
+      if (!delta) continue;
+
+      if (!streamedText) {
+        emit({ type: "status", status: "responding", label: "Writing response" });
+      }
+      streamedText = nextText;
+      emit({ type: "delta", text: delta });
     }
 
     await result.completed;
@@ -134,8 +183,10 @@ export const useLLMStreaming = (res: Response) => {
       throw new Error("EMPTY_CHAT_RESPONSE");
     }
 
-    emit({ type: "status", status: "responding", label: "Writing response" });
-    emit({ type: "delta", text: result.finalOutput.text });
+    if (!streamedText) {
+      emit({ type: "status", status: "responding", label: "Writing response" });
+    }
+    emit({ type: "text_snapshot", text: result.finalOutput.text });
 
     return result.finalOutput;
   };

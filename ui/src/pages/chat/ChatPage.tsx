@@ -179,6 +179,13 @@ export function ChatPage() {
             }));
           }
 
+          if (event.type === "text_snapshot") {
+            setChatOverride((current) => ({
+              thread: current?.thread ?? thread,
+              messages: (current?.messages ?? []).map((item) => item.id === "pending-assistant" ? { ...item, content: { ...item.content, text: event.text } } : item),
+            }));
+          }
+
           if (event.type === "completed") {
             setChatOverride((current) => {
               const next = (current?.messages ?? []).map((item) => item.id === "pending-assistant" ? event.message : item);
