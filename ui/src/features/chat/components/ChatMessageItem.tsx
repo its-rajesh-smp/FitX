@@ -1,6 +1,7 @@
 import { Sparkles } from "lucide-react";
 import { ChatStatusIndicator } from "@/features/chat/components/ChatStatusIndicator";
 import { MarkdownMessage } from "@/features/chat/components/MarkdownMessage";
+import { PlanShortcut } from "@/features/chat/components/PlanShortcut";
 import { QuickAnswers } from "@/features/chat/components/QuickAnswers";
 import { ChatWidgetRenderer } from "@/features/chat/components/widgets/ChatWidgetRenderer";
 import {
@@ -22,6 +23,8 @@ interface ChatMessageItemProps {
   isStreaming: boolean;
   status: ActiveChatStatus | null;
   answeredWidgets: Record<string, string>;
+  showPlanShortcut: boolean;
+  onOpenPlan: () => void;
   onSend: SendChatMessage;
   onSelectQuickAnswer: (
     widgetKey: string,
@@ -39,11 +42,14 @@ export function ChatMessageItem({
   isStreaming,
   status,
   answeredWidgets,
+  showPlanShortcut,
+  onOpenPlan,
   onSend,
   onSelectQuickAnswer,
   onRequestCustomAnswer,
 }: ChatMessageItemProps) {
   const isAssistant = message.role === "Assistant";
+  const isPendingAssistant = message.id.startsWith("pending-assistant-");
   const persisted = getPersistedAnswer(message, index, messages);
   const selectedAnswer =
     answeredWidgets[message.id] ??
@@ -67,10 +73,10 @@ export function ChatMessageItem({
           "rounded-2xl py-3 text-sm leading-7",
           isCompact ? "max-w-full px-1" : "max-w-[88%] px-4",
           !isAssistant && "rounded-tr-md bg-primary px-4 text-white",
-          message.id === "pending-assistant" && "text-muted-foreground",
+          isPendingAssistant && "text-muted-foreground",
         )}
       >
-        {message.id === "pending-assistant" && status && (
+        {isPendingAssistant && status && (
           <div className="mb-2">
             <ChatStatusIndicator status={status.type} label={status.label} />
           </div>
@@ -106,8 +112,10 @@ export function ChatMessageItem({
             }
           />
         )}
+        {isAssistant && showPlanShortcut && (
+          <PlanShortcut onOpen={onOpenPlan} />
+        )}
       </div>
     </div>
   );
 }
-

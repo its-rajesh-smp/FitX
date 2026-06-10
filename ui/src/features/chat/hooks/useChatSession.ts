@@ -61,11 +61,14 @@ export function useChatSession() {
   }, [queryClient]);
 
   const updatePendingAssistant = useCallback(
-    (update: (message: ChatMessage) => ChatMessage) => {
+    (
+      pendingAssistantId: string,
+      update: (message: ChatMessage) => ChatMessage,
+    ) => {
       setChatOverride((current) => ({
         thread: current?.thread ?? thread,
         messages: (current?.messages ?? []).map((message) =>
-          message.id === "pending-assistant" ? update(message) : message,
+          message.id === pendingAssistantId ? update(message) : message,
         ),
       }));
     },
@@ -73,7 +76,7 @@ export function useChatSession() {
   );
 
   const handleStreamEvent = useCallback(
-    (event: ChatStreamEvent) => {
+    (event: ChatStreamEvent, pendingAssistantId: string) => {
       switch (event.type) {
         case "status":
           setStatus({ type: event.status, label: event.label });
@@ -82,7 +85,7 @@ export function useChatSession() {
           }
           break;
         case "delta":
-          updatePendingAssistant((message) => ({
+          updatePendingAssistant(pendingAssistantId, (message) => ({
             ...message,
             content: {
               ...message.content,
@@ -91,7 +94,7 @@ export function useChatSession() {
           }));
           break;
         case "text_snapshot":
-          updatePendingAssistant((message) => ({
+          updatePendingAssistant(pendingAssistantId, (message) => ({
             ...message,
             content: { ...message.content, text: event.text },
           }));
@@ -99,7 +102,7 @@ export function useChatSession() {
         case "completed":
           setChatOverride((current) => {
             const nextMessages = (current?.messages ?? []).map((message) =>
-              message.id === "pending-assistant" ? event.message : message,
+              message.id === pendingAssistantId ? event.message : message,
             );
             const nextChat = { thread: event.thread, messages: nextMessages };
             queryClient.setQueryData(["chats"], nextChat);
@@ -130,8 +133,10 @@ export function useChatSession() {
     }
 
     const now = new Date().toISOString();
+    const optimisticId = `pending-human-${crypto.randomUUID()}`;
+    const pendingAssistantId = `pending-assistant-${crypto.randomUUID()}`;
     const optimisticMessage: ChatMessage = {
-      id: "pending-human",
+      id: optimisticId,
       userId: user?.id ?? "",
       threadId: thread?.id ?? "",
       role: "Human",
@@ -141,7 +146,7 @@ export function useChatSession() {
     };
     const pendingAssistant: ChatMessage = {
       ...optimisticMessage,
-      id: "pending-assistant",
+      id: pendingAssistantId,
       role: "Assistant",
       content: { text: "" },
     };
@@ -164,7 +169,7 @@ export function useChatSession() {
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           ...(thread?.id && { threadId: thread.id }),
         },
-        handleStreamEvent,
+        (event) => handleStreamEvent(event, pendingAssistantId),
       );
     } catch (error) {
       setStreamError(
@@ -176,7 +181,7 @@ export function useChatSession() {
       setChatOverride((current) => ({
         thread: current?.thread ?? thread,
         messages: (current?.messages ?? []).filter(
-          (message) => message.id !== "pending-assistant",
+          (message) => message.id !== pendingAssistantId,
         ),
       }));
     } finally {

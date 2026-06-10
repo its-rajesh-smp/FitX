@@ -50,6 +50,11 @@ export function useChatPanels(userId: string | undefined, hasPlan: boolean) {
     if (panel.isCollapsed()) panel.expand();
     else panel.collapse();
   };
+  const openMobilePlanner = useCallback(() => setMobilePlannerOpen(true), []);
+  const openPlanner = useCallback(() => {
+    if (isDesktop) plannerPanelRef.current?.expand();
+    else setMobilePlannerOpen(true);
+  }, [isDesktop]);
   const toggleMobilePlanner = () =>
     setMobilePlannerOpen((current) => !current);
 
@@ -72,6 +77,8 @@ export function useChatPanels(userId: string | undefined, hasPlan: boolean) {
       [],
     ),
     toggleChat,
+    openPlanner,
+    openMobilePlanner,
     toggleMobilePlanner,
   };
 }

@@ -1,11 +1,11 @@
 import {
-  LogOut,
   PanelLeftClose,
   PanelLeftOpen,
   PanelRightOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { APP } from "@/constants/app";
+import { UserMenu } from "@/features/chat/components/UserMenu";
 
 interface ChatHeaderProps {
   hasPlan: boolean;
@@ -67,16 +67,8 @@ export function ChatHeader({
             </span>
           </Button>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Log out"
-          onClick={onLogout}
-        >
-          <LogOut />
-        </Button>
+        <UserMenu onLogout={onLogout} />
       </div>
     </header>
   );
 }
-

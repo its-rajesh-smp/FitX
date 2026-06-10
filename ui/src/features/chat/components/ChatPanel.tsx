@@ -20,6 +20,8 @@ interface ChatPanelProps {
   answeredWidgets: Record<string, string>;
   customQuestion: AnswerContext | null;
   composerFocusSignal: number;
+  hasPlan: boolean;
+  onOpenPlan: () => void;
   onSend: SendChatMessage;
   onSelectQuickAnswer: (
     widgetKey: string,
@@ -40,6 +42,8 @@ export function ChatPanel({
   answeredWidgets,
   customQuestion,
   composerFocusSignal,
+  hasPlan,
+  onOpenPlan,
   onSend,
   onSelectQuickAnswer,
   onRequestCustomAnswer,
@@ -59,27 +63,28 @@ export function ChatPanel({
           onSend={onSend}
         />
       ) : (
-        <>
-          <ChatConversation
-            messages={messages}
-            isCompact={isCompact}
-            isStreaming={isStreaming}
-            status={status}
-            streamError={streamError}
-            answeredWidgets={answeredWidgets}
-            onSend={onSend}
-            onSelectQuickAnswer={onSelectQuickAnswer}
-            onRequestCustomAnswer={onRequestCustomAnswer}
-          />
-          <ChatComposerDock
-            isStreaming={isStreaming}
-            customQuestion={customQuestion}
-            focusSignal={composerFocusSignal}
-            onSend={onSend}
-          />
-        </>
+        <ChatConversation
+          messages={messages}
+          isCompact={isCompact}
+          isStreaming={isStreaming}
+          status={status}
+          streamError={streamError}
+          answeredWidgets={answeredWidgets}
+          hasPlan={hasPlan}
+          onOpenPlan={onOpenPlan}
+          onSend={onSend}
+          onSelectQuickAnswer={onSelectQuickAnswer}
+          onRequestCustomAnswer={onRequestCustomAnswer}
+        />
+      )}
+      {!isEmpty && (
+        <ChatComposerDock
+          isStreaming={isStreaming}
+          customQuestion={customQuestion}
+          focusSignal={composerFocusSignal}
+          onSend={onSend}
+        />
       )}
     </main>
   );
 }
-

@@ -23,7 +23,7 @@ export function ChatPage() {
   const chat = useChatSession();
   const hasPlan = hasCompletePlan(chat.programQuery.data);
   const panels = useChatPanels(chat.user?.id, hasPlan);
-  const { updateUserLayout } = panels;
+  const { isDesktop, openMobilePlanner, updateUserLayout } = panels;
   const isInitialLoading =
     chat.chatsQuery.isPending || chat.programQuery.isPending;
   const { contentRef, isCompact } = useCompactChat(isInitialLoading);
@@ -46,6 +46,16 @@ export function ChatPage() {
     chat.user?.id,
     hasPlan,
     updateUserLayout,
+  ]);
+
+  useEffect(() => {
+    if (chat.plannerRefreshSignal > 0 && hasPlan && !isDesktop)
+      openMobilePlanner();
+  }, [
+    chat.plannerRefreshSignal,
+    hasPlan,
+    isDesktop,
+    openMobilePlanner,
   ]);
 
   const logout = () => {
@@ -107,6 +117,8 @@ export function ChatPage() {
             answeredWidgets={chat.answeredWidgets}
             customQuestion={chat.customQuestion}
             composerFocusSignal={chat.composerFocusSignal}
+            hasPlan={hasPlan}
+            onOpenPlan={panels.openPlanner}
             onSend={chat.send}
             onSelectQuickAnswer={chat.selectQuickAnswer}
             onRequestCustomAnswer={chat.requestCustomAnswer}

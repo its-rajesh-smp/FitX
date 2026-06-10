@@ -6,7 +6,6 @@ const STARTER_PROMPTS = [
   "Build me a weekly strength plan",
   "How should I start working out?",
   "What should I train today?",
-  "Help me stay consistent",
 ];
 
 interface EmptyChatStateProps {
@@ -29,7 +28,7 @@ export function EmptyChatState({
         <h2 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">
           How can I help, {firstName ?? "there"}?
         </h2>
-        <p className="mx-auto mt-3 max-w-lg text-[15px] leading-6 text-muted-foreground">
+        <p className="text-muted-foreground mx-auto mt-3 max-w-lg text-[15px] leading-6">
           Ask FitX anything about training, nutrition, or building a routine
           that works for you.
         </p>
@@ -37,14 +36,14 @@ export function EmptyChatState({
           <ChatComposer onSend={onSend} isPending={isStreaming} large />
         </div>
         {streamError && (
-          <p className="mt-3 text-sm text-destructive">{streamError}</p>
+          <p className="text-destructive mt-3 text-sm">{streamError}</p>
         )}
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           {STARTER_PROMPTS.map((prompt) => (
             <button
               key={prompt}
               onClick={() => void onSend(prompt)}
-              className="rounded-full border px-4 py-2 text-xs text-muted-foreground transition hover:border-primary/50 hover:bg-primary-soft/40 hover:text-primary"
+              className="text-muted-foreground hover:border-primary/50 hover:bg-primary-soft/40 hover:text-primary rounded-full border px-4 py-2 text-xs transition"
             >
               {prompt}
             </button>
@@ -54,4 +53,3 @@ export function EmptyChatState({
     </div>
   );
 }
-

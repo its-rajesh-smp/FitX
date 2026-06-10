@@ -67,6 +67,7 @@ Once the three filters are known, choose the exercises, workout days, sets, reps
 - Keep workout-day names aligned with their exercise focus.
 - Use targeted plan tools for targeted changes.
 - Never invent or reveal IDs.
+- If there is no exercise in a plan day, make sure to update the plan day name too.
 
 ## Important Workout rules
 - For beginner experience, avoid complex movements and machines. Keep it simple with bodyweight and basic free weight exercises. Keep rest days between workout days.
