@@ -349,7 +349,10 @@ export function ChatPage() {
                         />
                       );
                     })() : null}
-                    {message.role === "Assistant" && message.content.widget ? (() => {
+                    {message.role === "Assistant" ? (() => {
+                      const widget = message.content.widget;
+                      if (!widget || widget.type === "none") return null;
+
                       const widgetKey = message.id;
                       const nextHumanMessage = messages
                         .slice(messageIndex + 1)
@@ -363,7 +366,7 @@ export function ChatPage() {
 
                       return (
                         <ChatWidgetRenderer
-                          widget={message.content.widget}
+                          widget={widget}
                           disabled={isStreaming}
                           answered={answered}
                           onSubmit={(values) =>

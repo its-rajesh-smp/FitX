@@ -9,7 +9,7 @@ export interface MessageContent {
   text: string;
   quickAnswers?: string[];
   widget?: {
-    type: "muscle_multi_select" | "equipment_multi_select";
+    type: "none" | "muscle_multi_select" | "equipment_multi_select";
   };
 }
 

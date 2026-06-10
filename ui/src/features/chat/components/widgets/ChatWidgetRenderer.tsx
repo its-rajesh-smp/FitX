@@ -16,6 +16,8 @@ export function ChatWidgetRenderer({
   if (answered) return null;
 
   switch (widget.type) {
+    case "none":
+      return null;
     case "muscle_multi_select":
       return <MuscleMultiSelectWidget disabled={disabled} onSubmit={onSubmit} />;
     case "equipment_multi_select":
