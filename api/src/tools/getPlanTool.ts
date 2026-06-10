@@ -15,12 +15,17 @@ export const getPlanTool = tool({
     emit({
       type: "status",
       status: "getting_plan",
-      label: "Reviewing your workout plan",
+      label: "Getting your workout plan",
     });
 
     const plan = await UserPlan.findByUserIdWithDetails(userId);
-    console.log(plan);
     if (!plan) return { exists: false };
+
+    emit({
+      type: "status",
+      status: "getting_plan",
+      label: "Checking your plan",
+    });
 
     return { exists: true, plan };
   },

@@ -34,8 +34,12 @@ export const addExerciseTool = tool({
     }
 
     const order =
-      (await UserExercise.query().where({ planDayId }).max("order as order").first())
-        ?.order ?? 0;
+      (
+        await UserExercise.query()
+          .where({ planDayId })
+          .max("order as order")
+          .first()
+      )?.order ?? 0;
 
     const created = await UserExercise.create({
       userId,

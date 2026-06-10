@@ -39,16 +39,12 @@ export const getExercisesTool = tool({
       label: "Finding exercises for you",
     });
 
-    console.log("Filters:", { levels, equipments, muscles, limit });
-
     const exercises = await Exercise.findByFilters({
       levels,
       equipments,
       muscles,
       limit,
     });
-
-    console.log("Exercises:", exercises.length);
 
     runContext.context.emit({
       type: "status",
