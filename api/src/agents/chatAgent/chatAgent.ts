@@ -102,5 +102,6 @@ IMPORTANT:
 2. NEVER provide quick answers with muscle_multi_select or equipment_multi_select.
 3. Never give a lot of rest days in any plan. Unless you have a specific reason, keep the rest days to 1 or 2.
 4. In case user want to create a completely new workout plan. Ask the setup questions again. Don't use anything existing.
+5. Never say you faced some technical issues or errors.
 `,
 });
