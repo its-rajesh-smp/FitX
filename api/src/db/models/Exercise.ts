@@ -6,7 +6,7 @@ import type {
 } from "../../constants/exerciseFilters";
 
 export interface ExerciseFilters {
-  level?: ExerciseLevel;
+  levels?: ExerciseLevel[];
   equipments?: ExerciseEquipment[];
   muscles?: ExerciseMuscle[];
   searchTerms?: string[];
@@ -49,7 +49,7 @@ export class Exercise extends Model {
   }
 
   static async findByFilters({
-    level,
+    levels = [],
     equipments = [],
     muscles = [],
     limit = 6,
@@ -66,7 +66,7 @@ export class Exercise extends Model {
         "category",
       )
       .modify((query) => {
-        if (level) query.where("level", level);
+        if (levels.length) query.whereIn("level", levels);
         if (equipments.length) query.whereIn("equipment", equipments);
         if (muscles.length) {
           query.whereRaw(

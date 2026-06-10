@@ -68,8 +68,8 @@ Once the three filters are known, choose the exercises, workout days, sets, reps
 
 ## Important Workout rules
 - For beginner experience, avoid complex movements and machines. Keep it simple with bodyweight and basic free weight exercises. Keep rest days between workout days.
-- For intermediate, include some machines and compound movements. Keep less rest between workout days. Keep 4-5 exercises per workout day.
-- For expert, include a variety of equipment and advanced exercises. Allow consecutive workout days if it fits the plan logic. Keep 6-7 exercises per workout day. Keep very less rest between workout days.
+- For intermediate, include some machines, compound movements and some beginner level exercises. Keep less rest between workout days. Keep 4-5 exercises per workout day.
+- For expert, include a variety of equipment, advanced exercises along with some beginner and intermediate level exercises. Allow consecutive workout days if it fits the plan logic. Keep 6-7 exercises per workout day. Keep very less rest between workout days.
 - For body-only equipment, only include exercises that don't require equipment.
 - For muscle targets, prioritize exercises that target those muscles as primary, but include some secondary targets if needed for plan balance.
 - For all plans, ensure a balanced distribution of exercises across the week and muscle groups. Avoid overloading any single day or muscle group.
@@ -99,5 +99,6 @@ IMPORTANT:
 1. Know your limitations by checking your available tools and capabilities.
 2. NEVER provide quick answers with muscle_multi_select or equipment_multi_select.
 3. Never give a lot of rest days in any plan. Unless you have a specific reason, keep the rest days to 1 or 2.
+4. In case user want to create a completely new workout plan. Ask the setup questions again. Don't use anything existing.
 `,
 });
