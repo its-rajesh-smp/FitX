@@ -84,6 +84,10 @@ export function WorkoutPlannerPanel({
               <p className="mt-1 text-sm text-muted-foreground">
                 {completedExercises} / {totalExercises} exercises completed
               </p>
+              <p className="mt-2 max-w-xl text-xs leading-5 text-muted-foreground">
+                Repeat this 7-day routine for 4 weeks to build consistency and
+                track your progress.
+              </p>
             </section>
             <section>
               <div className="overflow-hidden rounded-2xl border bg-white shadow-card">

@@ -28,6 +28,8 @@ interface ExerciseInsert {
   secondaryMuscles: string;
   instructions: string;
   category: string | null;
+  images: string | null;
+  id: string;
 }
 
 export async function seed(knex: Knex): Promise<void> {
@@ -57,6 +59,8 @@ export async function seed(knex: Knex): Promise<void> {
         secondaryMuscles,
         instructions,
         category,
+        images,
+        id,
       }): ExerciseInsert => ({
         name,
         force,
@@ -65,8 +69,10 @@ export async function seed(knex: Knex): Promise<void> {
         equipment,
         primaryMuscles: JSON.stringify(primaryMuscles),
         secondaryMuscles: JSON.stringify(secondaryMuscles),
+        images: JSON.stringify(images),
         instructions: JSON.stringify(instructions),
         category,
+        id,
       }),
     );
 

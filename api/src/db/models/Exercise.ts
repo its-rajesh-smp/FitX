@@ -24,6 +24,7 @@ export class Exercise extends Model {
   secondaryMuscles!: string[];
   instructions!: string[];
   category?: string | null;
+  images?: string[];
 
   static tableName = "exercises";
 
