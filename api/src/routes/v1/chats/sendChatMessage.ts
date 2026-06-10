@@ -21,6 +21,10 @@ const normalizeWidget = (
 ) => {
   const widgetMatchesQuestion =
     response.widget.type === "none" ||
+    (response.widget.type === "experience_level" &&
+      /\b(experience|worked out|work out|workout|training|exercise regularly|fitness level)\b/i.test(
+        response.text,
+      )) ||
     (response.widget.type === "muscle_multi_select" &&
       /\b(muscle|muscles|body part|body parts|target area|target areas|want to train|want to target|focus on)\b/i.test(
         response.text,

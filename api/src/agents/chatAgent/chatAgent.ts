@@ -11,7 +11,12 @@ import { updateExerciseTool } from "../../tools/updateExerciseTool";
 import { updatePlanDayTool } from "../../tools/updatePlanDayTool";
 
 const chatWidgetSchema = z.object({
-  type: z.enum(["none", "muscle_multi_select", "equipment_multi_select"]),
+  type: z.enum([
+    "none",
+    "experience_level",
+    "muscle_multi_select",
+    "equipment_multi_select",
+  ]),
 });
 
 export const chatAgentResponseSchema = z.object({
@@ -48,7 +53,7 @@ export const fitXChatAgent = new Agent<
 
 ## Setup
 Only these three exercise filters are required. Ask one missing question per response, in this order:
-1. Experience level: Beginner (just starting), Intermediate (less than 6 months), or Expert (more than 6 months). These should be mapped to something helpful like "just starting", "less than 6 months", or "more than 6 months".
+1. Experience level: Beginner (never really worked out), Intermediate (worked out inconsistently for less than 6 months), or Expert (works out regularly for 6+ months).
 2. Body parts or muscles they want to train.
 3. Available equipment. "body only" means no equipment.
 
@@ -88,10 +93,10 @@ Once the three filters are known, choose the exercises, workout days, sets, reps
 
 ## Widgets
 - Always return exactly one widget type.
-- Return the none widget for experience-level questions and whenever no selection widget is needed.
+- When asking for experience level, return the experience_level widget.
 - When asking for target muscles, return the muscle_multi_select widget.
 - When asking for available equipment, return the equipment_multi_select widget.
-- Return no quick answers with muscle_multi_select or equipment_multi_select.
+- Return no quick answers with selection widgets.
 - The none widget may include relevant quick answers.
 
 Capabilities:
@@ -100,7 +105,7 @@ Capabilities:
 
 IMPORTANT:
 1. Know your limitations by checking your available tools and capabilities.
-2. NEVER provide quick answers with muscle_multi_select or equipment_multi_select.
+2. Never provide quick answers with selection widgets.
 3. Never give a lot of rest days in any plan. Unless you have a specific reason, keep the rest days to 1 or 2.
 4. In case user want to create a completely new workout plan. Ask the setup questions again. Don't use anything existing.
 5. Never say you faced some technical issues or errors.

@@ -31,9 +31,12 @@ Rules:
 - Do not store any other facts.
 - Use stable camelCase keys and concise factual string values.
 - For exercise setup, always use these canonical keys: experienceLevel, targetMuscles, availableEquipment.
-- Map just starting exercise to experienceLevel="beginner", less than 6 months to experienceLevel="intermediate", and more than 6 months to experienceLevel="expert".
+- Map "Never really worked out before" to experienceLevel="beginner".
+- Map "Worked out before, but not consistently (less than 6 months)" to experienceLevel="intermediate".
+- Map "I work out regularly (6+ months)" to experienceLevel="expert".
 - Valid experience levels: ${EXERCISE_LEVELS.join(", ")}.
 - Valid target muscles: ${EXERCISE_MUSCLES.join(", ")}.
+- A Full Body, Upper Body, or Lower Body prefix describes the targetMuscles that follow it; store only the valid comma-separated muscles, without the prefix.
 - Valid equipment: ${EXERCISE_EQUIPMENT.join(", ")}.
 - Store targetMuscles and availableEquipment as concise comma-separated valid catalog values.
 - Upsert corrected facts using the same key.

@@ -7,6 +7,7 @@ export interface ChatThread {
 
 export type ChatWidget =
   | { type: "none" }
+  | { type: "experience_level" }
   | { type: "muscle_multi_select" }
   | { type: "equipment_multi_select" };
 
