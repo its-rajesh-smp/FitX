@@ -1,13 +1,13 @@
-import { Dumbbell } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import appIcon from "@/assets/logo.png";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { useEffect, useRef, useState } from "react";
 
 const Pulse = ({ className }: { className: string }) => (
-  <div className={`animate-pulse rounded-lg bg-muted ${className}`} />
+  <div className={`bg-muted animate-pulse rounded-lg ${className}`} />
 );
 
 export function ChatLayoutSkeleton({
@@ -27,9 +27,9 @@ export function ChatLayoutSkeleton({
     <div className="flex h-screen min-h-0 flex-col overflow-hidden bg-white">
       <header className="flex h-14 shrink-0 items-center justify-between border-b px-3 sm:px-4">
         <div className="flex items-center gap-2.5">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-white">
-            <Dumbbell className="size-4" />
-          </span>
+          <div className="flex size-8 items-center justify-center rounded-lg text-white">
+            <img src={appIcon} />
+          </div>
           <div className="space-y-1.5">
             <Pulse className="h-3 w-12" />
             <Pulse className="h-2 w-20" />
@@ -41,7 +41,11 @@ export function ChatLayoutSkeleton({
       <ResizablePanelGroup
         orientation="horizontal"
         className="min-h-0 flex-1"
-        defaultLayout={showPlanner ? panelLayout ?? { chat: 44, planner: 56 } : { chat: 100 }}
+        defaultLayout={
+          showPlanner
+            ? (panelLayout ?? { chat: 44, planner: 56 })
+            : { chat: 100 }
+        }
         disabled
       >
         <ResizablePanel id="chat" className="flex min-w-0 flex-col">
@@ -78,7 +82,10 @@ function ChatSkeleton({ hasChat }: { hasChat: boolean }) {
 
   if (!hasChat) {
     return (
-      <div ref={contentRef} className="flex flex-1 items-center justify-center px-4">
+      <div
+        ref={contentRef}
+        className="flex flex-1 items-center justify-center px-4"
+      >
         <div className="w-full max-w-2xl space-y-5">
           <Pulse className="mx-auto size-12" />
           <Pulse className="mx-auto h-8 w-3/5" />
@@ -126,7 +133,7 @@ function ChatSkeleton({ hasChat }: { hasChat: boolean }) {
 
 function PlannerSkeleton() {
   return (
-    <aside className="flex h-full min-h-0 flex-col bg-canvas">
+    <aside className="bg-canvas flex h-full min-h-0 flex-col">
       <div className="flex h-14 items-center border-b bg-white px-4">
         <div className="space-y-1.5">
           <Pulse className="h-3 w-28" />
@@ -140,7 +147,10 @@ function PlannerSkeleton() {
         </div>
         <div className="overflow-hidden rounded-2xl border bg-white">
           {[0, 1, 2, 3].map((row) => (
-            <div key={row} className="flex items-center gap-3 border-b p-4 last:border-0">
+            <div
+              key={row}
+              className="flex items-center gap-3 border-b p-4 last:border-0"
+            >
               <Pulse className="size-3 rounded-full" />
               <div className="flex-1 space-y-2">
                 <Pulse className="h-3 w-40" />

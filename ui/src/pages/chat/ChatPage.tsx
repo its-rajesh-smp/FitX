@@ -1,7 +1,30 @@
+import appIcon from "@/assets/logo.png";
+import { Button } from "@/components/ui/button";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { useAuthStore } from "@/features/auth/stores/useAuthStore";
+import { ChatComposer } from "@/features/chat/components/ChatComposer";
+import { ChatLayoutSkeleton } from "@/features/chat/components/ChatLayoutSkeleton";
+import { ChatStatusIndicator } from "@/features/chat/components/ChatStatusIndicator";
+import { MarkdownMessage } from "@/features/chat/components/MarkdownMessage";
+import { QuickAnswers } from "@/features/chat/components/QuickAnswers";
+import { ChatWidgetRenderer } from "@/features/chat/components/widgets/ChatWidgetRenderer";
+import { getChats } from "@/features/chat/services/getChats";
+import {
+  streamChatMessage,
+  type ChatStatus,
+} from "@/features/chat/services/streamChatMessage";
+import { useChatLayoutStore } from "@/features/chat/stores/useChatLayoutStore";
+import type { ChatMessage, ChatThread } from "@/features/chat/types/chat";
+import { WorkoutPlannerPanel } from "@/features/program/components/WorkoutPlannerPanel";
+import { useProgram } from "@/features/program/hooks/useProgram";
+import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CheckCircle2,
-  Dumbbell,
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
@@ -9,29 +32,19 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import type { Layout, PanelImperativeHandle, PanelSize } from "react-resizable-panels";
-import { useNavigate } from "react-router-dom";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { ChatComposer } from "@/features/chat/components/ChatComposer";
-import { ChatLayoutSkeleton } from "@/features/chat/components/ChatLayoutSkeleton";
-import { ChatStatusIndicator } from "@/features/chat/components/ChatStatusIndicator";
-import { ChatWidgetRenderer } from "@/features/chat/components/widgets/ChatWidgetRenderer";
-import { MarkdownMessage } from "@/features/chat/components/MarkdownMessage";
-import { QuickAnswers } from "@/features/chat/components/QuickAnswers";
-import { getChats } from "@/features/chat/services/getChats";
-import { streamChatMessage, type ChatStatus } from "@/features/chat/services/streamChatMessage";
-import { useChatLayoutStore } from "@/features/chat/stores/useChatLayoutStore";
-import type { ChatMessage, ChatThread } from "@/features/chat/types/chat";
-import { useAuthStore } from "@/features/auth/stores/useAuthStore";
-import { WorkoutPlannerPanel } from "@/features/program/components/WorkoutPlannerPanel";
-import { useProgram } from "@/features/program/hooks/useProgram";
-import { cn } from "@/lib/utils";
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import type {
+  Layout,
+  PanelImperativeHandle,
+  PanelSize,
+} from "react-resizable-panels";
+import { useNavigate } from "react-router-dom";
 
 const formatHumanMessage = (text: string) =>
   text.match(/^Question: .+\nAnswer: (.+)$/s)?.[1] ?? text;
@@ -45,17 +58,34 @@ export function ChatPage() {
   const cachedLayout = useChatLayoutStore((state) =>
     userId ? state.users[userId] : undefined,
   );
-  const updateUserLayout = useChatLayoutStore((state) => state.updateUserLayout);
-  const [chatOverride, setChatOverride] = useState<{ thread: ChatThread | null; messages: ChatMessage[] } | null>(null);
+  const updateUserLayout = useChatLayoutStore(
+    (state) => state.updateUserLayout,
+  );
+  const [chatOverride, setChatOverride] = useState<{
+    thread: ChatThread | null;
+    messages: ChatMessage[];
+  } | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [status, setStatus] = useState<{ type: ChatStatus; label: string } | null>(null);
+  const [status, setStatus] = useState<{
+    type: ChatStatus;
+    label: string;
+  } | null>(null);
   const [streamError, setStreamError] = useState<string | null>(null);
-  const [answeredWidgets, setAnsweredWidgets] = useState<Record<string, string>>({});
-  const [customQuestion, setCustomQuestion] = useState<{ key: string; question: string } | null>(null);
+  const [answeredWidgets, setAnsweredWidgets] = useState<
+    Record<string, string>
+  >({});
+  const [customQuestion, setCustomQuestion] = useState<{
+    key: string;
+    question: string;
+  } | null>(null);
   const [composerFocusSignal, setComposerFocusSignal] = useState(0);
   const [mobilePlannerOpen, setMobilePlannerOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(() => window.matchMedia("(min-width: 1024px)").matches);
-  const [isCompactChat, setIsCompactChat] = useState(() => window.innerWidth < 640);
+  const [isDesktop, setIsDesktop] = useState(
+    () => window.matchMedia("(min-width: 1024px)").matches,
+  );
+  const [isCompactChat, setIsCompactChat] = useState(
+    () => window.innerWidth < 640,
+  );
   const [chatCollapsed, setChatCollapsed] = useState(false);
   const [plannerCollapsed, setPlannerCollapsed] = useState(false);
   const [isPlannerUpdating, setIsPlannerUpdating] = useState(false);
@@ -68,7 +98,8 @@ export function ChatPage() {
   const hasPositionedInitialMessages = useRef(false);
   const chatsQuery = useQuery({ queryKey: ["chats"], queryFn: getChats });
   const programQuery = useProgram();
-  const chat = chatOverride ?? chatsQuery.data ?? { thread: null, messages: [] };
+  const chat = chatOverride ??
+    chatsQuery.data ?? { thread: null, messages: [] };
   const { thread, messages } = chat;
   const planDays = programQuery.data?.days ?? [];
   const hasPlan = Boolean(
@@ -89,7 +120,8 @@ export function ChatPage() {
   }, [messages]);
 
   useEffect(() => {
-    if (!user?.id || !chatsQuery.data || programQuery.data === undefined) return;
+    if (!user?.id || !chatsQuery.data || programQuery.data === undefined)
+      return;
 
     updateUserLayout(user.id, {
       hasChat: chatsQuery.data.messages.length > 0,
@@ -127,7 +159,10 @@ export function ChatPage() {
   useEffect(() => {
     if (!showPlanUpdatedToast) return;
 
-    const timeout = window.setTimeout(() => setShowPlanUpdatedToast(false), 3000);
+    const timeout = window.setTimeout(
+      () => setShowPlanUpdatedToast(false),
+      3000,
+    );
     return () => window.clearTimeout(timeout);
   }, [showPlanUpdatedToast]);
 
@@ -139,17 +174,20 @@ export function ChatPage() {
     setPlannerCollapsed(size.inPixels < 1);
   }, []);
 
-  const handleLayoutChanged = useCallback((layout: Layout) => {
-    if (!userId || !isDesktop || !hasPlan) return;
-    if (layout.chat === undefined || layout.planner === undefined) return;
+  const handleLayoutChanged = useCallback(
+    (layout: Layout) => {
+      if (!userId || !isDesktop || !hasPlan) return;
+      if (layout.chat === undefined || layout.planner === undefined) return;
 
-    updateUserLayout(userId, {
-      panelLayout: {
-        chat: layout.chat,
-        planner: layout.planner,
-      },
-    });
-  }, [hasPlan, isDesktop, updateUserLayout, userId]);
+      updateUserLayout(userId, {
+        panelLayout: {
+          chat: layout.chat,
+          planner: layout.planner,
+        },
+      });
+    },
+    [hasPlan, isDesktop, updateUserLayout, userId],
+  );
 
   const handlePlanUpdated = useCallback(async () => {
     try {
@@ -161,10 +199,7 @@ export function ChatPage() {
     }
   }, [queryClient]);
 
-  const send = async (
-    text: string,
-    answerContext = customQuestion,
-  ) => {
+  const send = async (text: string, answerContext = customQuestion) => {
     const messageText = answerContext
       ? `Question: ${answerContext.question}\nAnswer: ${text}`
       : text;
@@ -176,9 +211,25 @@ export function ChatPage() {
       setCustomQuestion(null);
     }
 
-    const optimistic: ChatMessage = { id: "pending-human", userId: user?.id ?? "", threadId: thread?.id ?? "", role: "Human", content: { text: messageText }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-    const pending: ChatMessage = { ...optimistic, id: "pending-assistant", role: "Assistant", content: { text: "" } };
-    setChatOverride((current) => ({ thread: current?.thread ?? thread, messages: [...(current?.messages ?? messages), optimistic, pending] }));
+    const optimistic: ChatMessage = {
+      id: "pending-human",
+      userId: user?.id ?? "",
+      threadId: thread?.id ?? "",
+      role: "Human",
+      content: { text: messageText },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    const pending: ChatMessage = {
+      ...optimistic,
+      id: "pending-assistant",
+      role: "Assistant",
+      content: { text: "" },
+    };
+    setChatOverride((current) => ({
+      thread: current?.thread ?? thread,
+      messages: [...(current?.messages ?? messages), optimistic, pending],
+    }));
     setIsStreaming(true);
     setStreamError(null);
 
@@ -203,21 +254,40 @@ export function ChatPage() {
           if (event.type === "delta") {
             setChatOverride((current) => ({
               thread: current?.thread ?? thread,
-              messages: (current?.messages ?? []).map((item) => item.id === "pending-assistant" ? { ...item, content: { ...item.content, text: item.content.text + event.text } } : item),
+              messages: (current?.messages ?? []).map((item) =>
+                item.id === "pending-assistant"
+                  ? {
+                      ...item,
+                      content: {
+                        ...item.content,
+                        text: item.content.text + event.text,
+                      },
+                    }
+                  : item,
+              ),
             }));
           }
 
           if (event.type === "text_snapshot") {
             setChatOverride((current) => ({
               thread: current?.thread ?? thread,
-              messages: (current?.messages ?? []).map((item) => item.id === "pending-assistant" ? { ...item, content: { ...item.content, text: event.text } } : item),
+              messages: (current?.messages ?? []).map((item) =>
+                item.id === "pending-assistant"
+                  ? { ...item, content: { ...item.content, text: event.text } }
+                  : item,
+              ),
             }));
           }
 
           if (event.type === "completed") {
             setChatOverride((current) => {
-              const next = (current?.messages ?? []).map((item) => item.id === "pending-assistant" ? event.message : item);
-              queryClient.setQueryData(["chats"], { thread: event.thread, messages: next });
+              const next = (current?.messages ?? []).map((item) =>
+                item.id === "pending-assistant" ? event.message : item,
+              );
+              queryClient.setQueryData(["chats"], {
+                thread: event.thread,
+                messages: next,
+              });
               return { thread: event.thread, messages: next };
             });
           }
@@ -230,16 +300,29 @@ export function ChatPage() {
         },
       );
     } catch (error) {
-      setStreamError(error instanceof Error ? error.message : "FitX could not respond. Please try again.");
+      setStreamError(
+        error instanceof Error
+          ? error.message
+          : "FitX could not respond. Please try again.",
+      );
       setIsPlannerUpdating(false);
-      setChatOverride((current) => ({ thread: current?.thread ?? thread, messages: (current?.messages ?? []).filter((item) => item.id !== "pending-assistant") }));
+      setChatOverride((current) => ({
+        thread: current?.thread ?? thread,
+        messages: (current?.messages ?? []).filter(
+          (item) => item.id !== "pending-assistant",
+        ),
+      }));
     } finally {
       setIsStreaming(false);
       setStatus(null);
     }
   };
 
-  const selectQuickAnswer = (widgetKey: string, question: string, answer: string) => {
+  const selectQuickAnswer = (
+    widgetKey: string,
+    question: string,
+    answer: string,
+  ) => {
     send(answer, { key: widgetKey, question });
   };
 
@@ -283,10 +366,16 @@ export function ChatPage() {
     <div className="flex h-screen min-h-0 flex-col overflow-hidden bg-white">
       <header className="z-20 flex h-14 shrink-0 items-center justify-between border-b bg-white/95 px-3 backdrop-blur sm:px-4">
         <div className="flex items-center gap-2.5">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-white">
-            <Dumbbell className="size-4" />
-          </span>
-          <div><h1 className="text-sm font-bold">FitX</h1><p className="text-[10px] text-muted-foreground">AI fitness coach</p></div>
+          <div className="flex size-8 items-center justify-center rounded-lg text-white">
+            <img src={appIcon} />
+          </div>
+
+          <div>
+            <h1 className="text-sm font-bold">FitX</h1>
+            <p className="text-muted-foreground text-[10px]">
+              AI fitness coach
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-1.5">
           {hasPlan && (
@@ -296,7 +385,11 @@ export function ChatPage() {
               aria-label={panelControlLabel}
             >
               {isDesktop ? (
-                chatCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />
+                chatCollapsed ? (
+                  <PanelLeftOpen />
+                ) : (
+                  <PanelLeftClose />
+                )
               ) : (
                 <PanelRightOpen />
               )}
@@ -311,7 +404,14 @@ export function ChatPage() {
               </span>
             </Button>
           )}
-          <Button variant="ghost" size="icon" aria-label="Log out" onClick={logout}><LogOut /></Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Log out"
+            onClick={logout}
+          >
+            <LogOut />
+          </Button>
         </div>
       </header>
 
@@ -320,7 +420,7 @@ export function ChatPage() {
         className="min-h-0 flex-1"
         defaultLayout={
           hasPlan && isDesktop
-            ? cachedLayout?.panelLayout ?? { chat: 44, planner: 56 }
+            ? (cachedLayout?.panelLayout ?? { chat: 44, planner: 56 })
             : { chat: 100 }
         }
         onLayoutChanged={handleLayoutChanged}
@@ -335,108 +435,205 @@ export function ChatPage() {
           onResize={handleChatResize}
           className="flex min-w-0 flex-col bg-white"
         >
-        <main ref={chatContentRef} className="flex min-h-0 min-w-0 flex-1 flex-col bg-white">
-        {empty ? (
-        <div className="flex flex-1 items-center justify-center px-4 py-10">
-          <div className="w-full max-w-2xl text-center">
-            <span className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/20"><Dumbbell className="size-6" /></span>
-            <h2 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">How can I help, {user?.name?.split(" ")[0] ?? "there"}?</h2>
-            <p className="mx-auto mt-3 max-w-lg text-[15px] leading-6 text-muted-foreground">Ask FitX anything about training, nutrition, or building a routine that works for you.</p>
-            <div className="mt-8"><ChatComposer onSend={send} isPending={isStreaming} large /></div>
-            {streamError && <p className="mt-3 text-sm text-destructive">{streamError}</p>}
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
-              {["Build me a weekly strength plan", "How should I start working out?", "What should I train today?", "Help me stay consistent"].map((prompt) => <button key={prompt} onClick={() => send(prompt)} className="rounded-full border px-4 py-2 text-xs text-muted-foreground transition hover:border-primary/50 hover:bg-primary-soft/40 hover:text-primary">{prompt}</button>)}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-8 sm:px-6">
-            <div className="mx-auto w-full max-w-2xl">
-            <div className="space-y-7">
-              {messages.map((message, messageIndex) => (
-                <div key={message.id} className={cn("flex gap-3", message.role === "Human" && "justify-end")}>
-                  {message.role === "Assistant" && !isCompactChat && <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-white"><Sparkles className="size-4" /></span>}
-                  <div className={cn("rounded-2xl py-3 text-sm leading-7", isCompactChat ? "max-w-full px-1" : "max-w-[88%] px-4", message.role === "Human" ? "rounded-tr-md bg-primary px-4 text-white" : "bg-transparent", message.id === "pending-assistant" && "text-muted-foreground")}>
-                    {message.id === "pending-assistant" && status && <div className="mb-2"><ChatStatusIndicator status={status.type} label={status.label} /></div>}
-                    {message.role === "Assistant" ? <MarkdownMessage>{message.content.text}</MarkdownMessage> : formatHumanMessage(message.content.text)}
-                    {message.role === "Assistant" && message.content.quickAnswers?.length ? (() => {
-                      const widgetKey = message.id;
-                      const nextHumanMessage = messages
-                        .slice(messageIndex + 1)
-                        .find((item) => item.role === "Human");
-                      const persistedResponse = nextHumanMessage?.content.text
-                        .match(/^Question: (.+)\nAnswer: (.+)$/s);
-                      const persistedAnswer = persistedResponse?.[1] === message.content.text
-                        ? persistedResponse[2]
-                        : undefined;
-                      const selectedAnswer =
-                        answeredWidgets[widgetKey] ??
-                        persistedAnswer ??
-                        (nextHumanMessage ? "Answered" : undefined);
-
-                      return (
-                        <QuickAnswers
-                          answers={message.content.quickAnswers}
-                          disabled={isStreaming}
-                          selectedAnswer={selectedAnswer}
-                          onSelect={(answer) => selectQuickAnswer(widgetKey, message.content.text, answer)}
-                          onCustomAnswer={() => requestCustomAnswer(widgetKey, message.content.text)}
-                        />
-                      );
-                    })() : null}
-                    {message.role === "Assistant" ? (() => {
-                      const widget = message.content.widget;
-                      if (!widget || widget.type === "none") return null;
-
-                      const widgetKey = message.id;
-                      const nextHumanMessage = messages
-                        .slice(messageIndex + 1)
-                        .find((item) => item.role === "Human");
-                      const persistedResponse = nextHumanMessage?.content.text
-                        .match(/^Question: (.+)\nAnswer: (.+)$/s);
-                      const answered =
-                        Boolean(answeredWidgets[widgetKey]) ||
-                        persistedResponse?.[1] === message.content.text ||
-                        Boolean(nextHumanMessage);
-
-                      return (
-                        <ChatWidgetRenderer
-                          widget={widget}
-                          disabled={isStreaming}
-                          answered={answered}
-                          onSubmit={(values) =>
-                            send(values.join(", "), {
-                              key: widgetKey,
-                              question: message.content.text,
-                            })
-                          }
-                        />
-                      );
-                    })() : null}
+          <main
+            ref={chatContentRef}
+            className="flex min-h-0 min-w-0 flex-1 flex-col bg-white"
+          >
+            {empty ? (
+              <div className="flex flex-1 items-center justify-center px-4 py-10">
+                <div className="w-full max-w-2xl text-center">
+                  <div className="flex size-8 items-center justify-center rounded-lg text-white">
+                    <img src={appIcon} />
+                  </div>
+                  <h2 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">
+                    How can I help, {user?.name?.split(" ")[0] ?? "there"}?
+                  </h2>
+                  <p className="text-muted-foreground mx-auto mt-3 max-w-lg text-[15px] leading-6">
+                    Ask FitX anything about training, nutrition, or building a
+                    routine that works for you.
+                  </p>
+                  <div className="mt-8">
+                    <ChatComposer onSend={send} isPending={isStreaming} large />
+                  </div>
+                  {streamError && (
+                    <p className="text-destructive mt-3 text-sm">
+                      {streamError}
+                    </p>
+                  )}
+                  <div className="mt-4 flex flex-wrap justify-center gap-2">
+                    {[
+                      "Build me a weekly strength plan",
+                      "How should I start working out?",
+                      "What should I train today?",
+                      "Help me stay consistent",
+                    ].map((prompt) => (
+                      <button
+                        key={prompt}
+                        onClick={() => send(prompt)}
+                        className="text-muted-foreground hover:border-primary/50 hover:bg-primary-soft/40 hover:text-primary rounded-full border px-4 py-2 text-xs transition"
+                      >
+                        {prompt}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              ))}
-              {streamError && <p className="text-center text-sm text-destructive">{streamError}</p>}
-              <div ref={bottomRef} />
-            </div>
-            </div>
-          </div>
-          <div className="sticky bottom-0 border-t bg-white/95 p-4 backdrop-blur">
-            <div className="mx-auto max-w-3xl">
-              <ChatComposer
-                onSend={send}
-                isPending={isStreaming}
-                focusSignal={composerFocusSignal}
-                highlighted={Boolean(customQuestion)}
-                placeholder={customQuestion ? "Type your answer..." : "Message FitX"}
-              />
-              <p className="mt-2 text-center text-[10px] text-muted-foreground">FitX can make mistakes. Use your judgment for health and training decisions.</p>
-            </div>
-          </div>
-        </>
-      )}
-        </main>
+              </div>
+            ) : (
+              <>
+                <div className="min-h-0 flex-1 overflow-y-auto px-4 py-8 sm:px-6">
+                  <div className="mx-auto w-full max-w-2xl">
+                    <div className="space-y-7">
+                      {messages.map((message, messageIndex) => (
+                        <div
+                          key={message.id}
+                          className={cn(
+                            "flex gap-3",
+                            message.role === "Human" && "justify-end",
+                          )}
+                        >
+                          {message.role === "Assistant" && !isCompactChat && (
+                            <span className="bg-primary flex size-8 shrink-0 items-center justify-center rounded-lg text-white">
+                              <Sparkles className="size-4" />
+                            </span>
+                          )}
+                          <div
+                            className={cn(
+                              "rounded-2xl py-3 text-sm leading-7",
+                              isCompactChat
+                                ? "max-w-full px-1"
+                                : "max-w-[88%] px-4",
+                              message.role === "Human"
+                                ? "bg-primary rounded-tr-md px-4 text-white"
+                                : "bg-transparent",
+                              message.id === "pending-assistant" &&
+                                "text-muted-foreground",
+                            )}
+                          >
+                            {message.id === "pending-assistant" && status && (
+                              <div className="mb-2">
+                                <ChatStatusIndicator
+                                  status={status.type}
+                                  label={status.label}
+                                />
+                              </div>
+                            )}
+                            {message.role === "Assistant" ? (
+                              <MarkdownMessage>
+                                {message.content.text}
+                              </MarkdownMessage>
+                            ) : (
+                              formatHumanMessage(message.content.text)
+                            )}
+                            {message.role === "Assistant" &&
+                            message.content.quickAnswers?.length
+                              ? (() => {
+                                  const widgetKey = message.id;
+                                  const nextHumanMessage = messages
+                                    .slice(messageIndex + 1)
+                                    .find((item) => item.role === "Human");
+                                  const persistedResponse =
+                                    nextHumanMessage?.content.text.match(
+                                      /^Question: (.+)\nAnswer: (.+)$/s,
+                                    );
+                                  const persistedAnswer =
+                                    persistedResponse?.[1] ===
+                                    message.content.text
+                                      ? persistedResponse[2]
+                                      : undefined;
+                                  const selectedAnswer =
+                                    answeredWidgets[widgetKey] ??
+                                    persistedAnswer ??
+                                    (nextHumanMessage ? "Answered" : undefined);
+
+                                  return (
+                                    <QuickAnswers
+                                      answers={message.content.quickAnswers}
+                                      disabled={isStreaming}
+                                      selectedAnswer={selectedAnswer}
+                                      onSelect={(answer) =>
+                                        selectQuickAnswer(
+                                          widgetKey,
+                                          message.content.text,
+                                          answer,
+                                        )
+                                      }
+                                      onCustomAnswer={() =>
+                                        requestCustomAnswer(
+                                          widgetKey,
+                                          message.content.text,
+                                        )
+                                      }
+                                    />
+                                  );
+                                })()
+                              : null}
+                            {message.role === "Assistant"
+                              ? (() => {
+                                  const widget = message.content.widget;
+                                  if (!widget || widget.type === "none")
+                                    return null;
+
+                                  const widgetKey = message.id;
+                                  const nextHumanMessage = messages
+                                    .slice(messageIndex + 1)
+                                    .find((item) => item.role === "Human");
+                                  const persistedResponse =
+                                    nextHumanMessage?.content.text.match(
+                                      /^Question: (.+)\nAnswer: (.+)$/s,
+                                    );
+                                  const answered =
+                                    Boolean(answeredWidgets[widgetKey]) ||
+                                    persistedResponse?.[1] ===
+                                      message.content.text ||
+                                    Boolean(nextHumanMessage);
+
+                                  return (
+                                    <ChatWidgetRenderer
+                                      widget={widget}
+                                      disabled={isStreaming}
+                                      answered={answered}
+                                      onSubmit={(values) =>
+                                        send(values.join(", "), {
+                                          key: widgetKey,
+                                          question: message.content.text,
+                                        })
+                                      }
+                                    />
+                                  );
+                                })()
+                              : null}
+                          </div>
+                        </div>
+                      ))}
+                      {streamError && (
+                        <p className="text-destructive text-center text-sm">
+                          {streamError}
+                        </p>
+                      )}
+                      <div ref={bottomRef} />
+                    </div>
+                  </div>
+                </div>
+                <div className="sticky bottom-0 border-t bg-white/95 p-4 backdrop-blur">
+                  <div className="mx-auto max-w-3xl">
+                    <ChatComposer
+                      onSend={send}
+                      isPending={isStreaming}
+                      focusSignal={composerFocusSignal}
+                      highlighted={Boolean(customQuestion)}
+                      placeholder={
+                        customQuestion ? "Type your answer..." : "Message FitX"
+                      }
+                    />
+                    <p className="text-muted-foreground mt-2 text-center text-[10px]">
+                      FitX can make mistakes. Use your judgment for health and
+                      training decisions.
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+          </main>
         </ResizablePanel>
 
         {hasPlan && isDesktop && programQuery.data && (
@@ -461,10 +658,7 @@ export function ChatPage() {
                 initial={{ opacity: 0, x: 24 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.28, ease: "easeOut" }}
-                className={cn(
-                  "h-full",
-                  plannerCollapsed && "hidden",
-                )}
+                className={cn("h-full", plannerCollapsed && "hidden")}
               >
                 <WorkoutPlannerPanel
                   plan={programQuery.data}
@@ -486,7 +680,7 @@ export function ChatPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 32 }}
             transition={{ duration: 0.24, ease: "easeOut" }}
-            className="fixed inset-x-0 bottom-0 top-14 z-30"
+            className="fixed inset-x-0 top-14 bottom-0 z-30"
           >
             <WorkoutPlannerPanel
               plan={programQuery.data}
@@ -503,9 +697,9 @@ export function ChatPage() {
             initial={{ opacity: 0, y: 16, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
-            className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-sm font-medium text-background shadow-lg sm:bottom-6 sm:left-auto sm:right-6 sm:translate-x-0"
+            className="bg-foreground text-background fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium shadow-lg sm:right-6 sm:bottom-6 sm:left-auto sm:translate-x-0"
           >
-            <CheckCircle2 className="size-4 text-success" />
+            <CheckCircle2 className="text-success size-4" />
             Plan updated
           </motion.div>
         )}
