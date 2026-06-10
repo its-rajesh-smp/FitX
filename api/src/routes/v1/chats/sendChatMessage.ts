@@ -15,7 +15,9 @@ import { db } from "../../../db";
 import { generateThreadSummary, updateUserDetails } from "../../../services/ai";
 
 const normalizeWidget = (
-  response: Awaited<ReturnType<ReturnType<typeof useLLMStreaming>["streamAIResponse"]>>,
+  response: Awaited<
+    ReturnType<ReturnType<typeof useLLMStreaming>["streamAIResponse"]>
+  >,
 ) => {
   const widgetMatchesQuestion =
     response.widget.type === "none" ||
@@ -28,7 +30,9 @@ const normalizeWidget = (
         response.text,
       ));
 
-  const widget = widgetMatchesQuestion ? response.widget : { type: "none" as const };
+  const widget = widgetMatchesQuestion
+    ? response.widget
+    : { type: "none" as const };
 
   return {
     ...response,
@@ -122,6 +126,7 @@ export const sendChatMessage = async (
       thread: persisted.thread,
       message: persisted.newLLMResponse,
     });
+
     if (didPlanMutate()) {
       emit({ type: "plan_updated" });
     }

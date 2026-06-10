@@ -29,8 +29,7 @@ const planDaysInputSchema = z
   .array(dayInputSchema)
   .length(7)
   .refine(
-    (days) =>
-      new Set(days.map(({ dayNumber }) => dayNumber)).size === 7,
+    (days) => new Set(days.map(({ dayNumber }) => dayNumber)).size === 7,
     {
       message:
         "A weekly plan must contain every dayNumber exactly once from 0 (Sunday) to 6 (Saturday).",
@@ -95,7 +94,6 @@ export const createPlanTool = tool({
               sets: exercise.sets,
               reps: exercise.reps,
               rest: exercise.rest,
-              isCompleted: false,
               order: index + 1,
             },
             trx,

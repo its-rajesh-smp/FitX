@@ -20,7 +20,7 @@ export function WorkoutDetail({
     null,
   );
   const toggleExercise = useToggleProgramExercise();
-  const completed = day.exercises.filter(
+  const completed = day.userExercises.filter(
     (exercise) => exercise.isCompleted,
   ).length;
 
@@ -33,12 +33,12 @@ export function WorkoutDetail({
         <h1 className="text-2xl font-semibold tracking-tight">{day.name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {formatWeekDay(day.dayNumber)} - {getProgramDayMuscles(day)} -{" "}
-          {completed} / {day.exercises.length} completed
+          {completed} / {day.userExercises.length} completed
         </p>
       </header>
-      {day.exercises.length ? (
+      {day.userExercises.length ? (
         <div className="mt-6 overflow-hidden rounded-2xl border bg-white shadow-card">
-          {day.exercises.map((exercise) => (
+          {day.userExercises.map((exercise) => (
             <ExerciseCard
               key={exercise.id}
               exercise={exercise}
@@ -61,4 +61,3 @@ export function WorkoutDetail({
     </div>
   );
 }
-

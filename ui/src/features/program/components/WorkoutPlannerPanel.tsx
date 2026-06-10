@@ -23,16 +23,16 @@ export function WorkoutPlannerPanel({
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const currentDayNumber = new Date().getDay();
-  const days = [...plan.days].sort(
+  const days = [...plan.planDays].sort(
     (left, right) =>
       (left.dayNumber - currentDayNumber + 7) % 7 -
       (right.dayNumber - currentDayNumber + 7) % 7,
   );
   const today = days.find((day) => day.dayNumber === currentDayNumber);
   const selectedDay = days.find((day) => day.id === selectedDayId) ?? null;
-  const totalExercises = days.reduce((total, day) => total + day.exercises.length, 0);
+  const totalExercises = days.reduce((total, day) => total + day.userExercises.length, 0);
   const completedExercises = days.reduce(
-    (total, day) => total + day.exercises.filter((exercise) => exercise.isCompleted).length,
+    (total, day) => total + day.userExercises.filter((exercise) => exercise.isCompleted).length,
     0,
   );
 
@@ -114,7 +114,7 @@ export function WorkoutPlannerPanel({
                     </div>
                     <div className="ml-auto shrink-0 text-right text-[11px] text-muted-foreground">
                       <p>{formatWeekDay(day.dayNumber)}</p>
-                      <p>{day.exercises.length ? `${day.exercises.length} exercises` : "Rest day"}</p>
+                      <p>{day.userExercises.length ? `${day.userExercises.length} exercises` : "Rest day"}</p>
                     </div>
                   </button>
                 ))}

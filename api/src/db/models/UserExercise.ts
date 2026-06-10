@@ -1,5 +1,6 @@
 import { Model, Transaction } from "objection";
 import { Exercise } from "./Exercise";
+import { UserExerciseLog } from "./UserExerciseLog";
 
 export class UserExercise extends Model {
   id!: string;
@@ -9,8 +10,10 @@ export class UserExercise extends Model {
   reps?: number | null;
   sets?: number | null;
   rest?: number | null;
-  isCompleted!: boolean;
   order!: number;
+
+  exercise?: Exercise;
+  userExerciseLogs?: UserExerciseLog[];
 
   static tableName = "user_exercises";
 
@@ -19,6 +22,15 @@ export class UserExercise extends Model {
       relation: Model.BelongsToOneRelation,
       modelClass: Exercise,
       join: { from: "user_exercises.exerciseId", to: "exercises.id" },
+    },
+
+    userExerciseLogs: {
+      relation: Model.HasManyRelation,
+      modelClass: UserExerciseLog,
+      join: {
+        from: "user_exercises.id",
+        to: "user_exercise_logs.userExerciseId",
+      },
     },
   };
 

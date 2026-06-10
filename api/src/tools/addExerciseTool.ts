@@ -48,7 +48,6 @@ export const addExerciseTool = tool({
       sets,
       reps,
       rest,
-      isCompleted: false,
       order: Number(order) + 1,
     });
 

@@ -8,10 +8,12 @@ export class PlanDay extends Model {
   name!: string;
   dayNumber!: number;
 
+  userExercises?: UserExercise[];
+
   static tableName = "plan_days";
 
   static relationMappings = {
-    exercises: {
+    userExercises: {
       relation: Model.HasManyRelation,
       modelClass: UserExercise,
       join: { from: "plan_days.id", to: "user_exercises.planDayId" },
@@ -46,7 +48,10 @@ export class PlanDay extends Model {
     return await this.query().patchAndFetchById(id, dayData);
   }
 
-  static async deleteByPlanId(planId: string, trx?: Transaction): Promise<number> {
+  static async deleteByPlanId(
+    planId: string,
+    trx?: Transaction,
+  ): Promise<number> {
     return await this.query(trx).delete().where("userPlanId", planId);
   }
 }
