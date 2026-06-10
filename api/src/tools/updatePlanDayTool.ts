@@ -6,7 +6,7 @@ import { z } from "zod";
 export const updatePlanDayTool = tool({
   name: "updatePlanDay",
   description:
-    "Update an existing workout day's meaningful name or scheduled date. Call getPlan first to get a valid planDayId.",
+    "Update an existing plan day's meaningful name. The dayNumber cannot change because every plan always contains all seven weekdays. Call getPlan first to get a valid planDayId.",
   parameters: z.object({
     planDayId: z.string(),
     name: z
@@ -17,10 +17,9 @@ export const updatePlanDayTool = tool({
         message: "Use a meaningful workout name, not a generic day label.",
       })
       .optional(),
-    scheduledAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   }),
   execute: async (
-    { planDayId, name, scheduledAt },
+    { planDayId, name },
     runContext?: RunContext<FitXAgentContext>,
   ) => {
     if (!runContext) throw new Error("FITX_AGENT_CONTEXT_REQUIRED");
@@ -32,18 +31,17 @@ export const updatePlanDayTool = tool({
       label: "Updating your workout plan",
     });
 
-    const day = await PlanDay.findById(planDayId);
-    if (!day || day.userId !== userId) {
+    const planDay = await PlanDay.findById(planDayId);
+    if (!planDay || planDay.userId !== userId) {
       return { error: "Plan day not found or does not belong to user." };
     }
 
-    if (name === undefined && scheduledAt === undefined) {
+    if (name === undefined) {
       return { error: "No workout day changes were provided." };
     }
 
     const updated = await PlanDay.update(planDayId, {
-      ...(name !== undefined && { name }),
-      ...(scheduledAt !== undefined && { scheduledAt: new Date(scheduledAt) }),
+      name,
     });
 
     return { success: true, updated };

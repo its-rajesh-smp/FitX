@@ -1,22 +1,34 @@
 import type { FitXAgentContext } from "../helpers/chat";
+import {
+  EXERCISE_EQUIPMENT,
+  EXERCISE_LEVELS,
+  EXERCISE_MUSCLES,
+} from "../constants/exerciseFilters";
 import { Exercise } from "../db/models/Exercise";
 import { RunContext, tool } from "@openai/agents";
 import { z } from "zod";
 
 const exerciseFiltersSchema = z.object({
-  level: z.enum(["beginner", "intermediate", "expert"]).nullable(),
-  equipments: z.array(z.string()).max(5),
-  muscles: z.array(z.string()).max(8),
+  levels: z
+    .array(z.enum(EXERCISE_LEVELS))
+    .max(EXERCISE_LEVELS.length)
+    .refine((levels) => new Set(levels).size === levels.length, {
+      message: "Exercise levels must be unique.",
+    }),
+  equipments: z
+    .array(z.enum(EXERCISE_EQUIPMENT))
+    .max(EXERCISE_EQUIPMENT.length),
+  muscles: z.array(z.enum(EXERCISE_MUSCLES)).max(EXERCISE_MUSCLES.length),
   limit: z.number().int().min(1).max(30),
 });
 
 export const getExercisesTool = tool({
   name: "getExercises",
   description:
-    "Get exercises from the FitX catalog using valid filters and optional user-provided name search terms.",
+    "Get exercises from the FitX catalog. Use levels=[beginner] for beginner users, levels=[beginner, intermediate] for intermediate users, and levels=[beginner, intermediate, expert] for expert users. An empty levels array disables level filtering. The parameter enums contain every valid level, equipment, and muscle filter; muscles match both primary and secondary muscles.",
   parameters: exerciseFiltersSchema,
   execute: async (
-    { level, equipments, muscles, limit },
+    { levels, equipments, muscles, limit },
     runContext?: RunContext<FitXAgentContext>,
   ) => {
     if (!runContext) throw new Error("FITX_AGENT_CONTEXT_REQUIRED");
@@ -24,19 +36,21 @@ export const getExercisesTool = tool({
     runContext.context.emit({
       type: "status",
       status: "getting_exercises",
-      label: "Finding exercises for you...",
+      label: "Finding exercises for you",
     });
 
-    console.log("Filters:", { level, equipments, muscles, limit });
-
     const exercises = await Exercise.findByFilters({
-      ...(level && { level }),
+      levels,
       equipments,
       muscles,
       limit,
     });
 
-    console.log("Exercises:", exercises.length);
+    runContext.context.emit({
+      type: "status",
+      status: "getting_exercises",
+      label: `Found ${exercises.length} exercises`,
+    });
 
     return {
       count: exercises.length,

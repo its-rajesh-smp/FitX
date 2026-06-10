@@ -19,8 +19,15 @@ export async function up(knex: Knex): Promise<void> {
       .onDelete("CASCADE");
 
     table.string("name").notNullable();
-
-    table.date("scheduled_at").notNullable();
+    table.integer("day_number").notNullable();
+    table.unique(["user_plan_id", "day_number"], {
+      indexName: "plan_days_user_plan_id_day_number_unique",
+    });
+    table.check(
+      "day_number between 0 and 6",
+      [],
+      "plan_days_day_number_check",
+    );
 
     table.timestamps(true, true);
   });

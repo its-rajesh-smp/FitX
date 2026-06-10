@@ -1,5 +1,6 @@
 import {
   generatePrompt,
+  getLocalDateContext,
   handleChatErrors,
   useLLMStreaming,
 } from "../../../helpers/chat";
@@ -13,11 +14,34 @@ import { fitXChatAgent } from "../../../agents";
 import { db } from "../../../db";
 import { generateThreadSummary, updateUserDetails } from "../../../services/ai";
 
+const normalizeWidget = (
+  response: Awaited<ReturnType<ReturnType<typeof useLLMStreaming>["streamAIResponse"]>>,
+) => {
+  const widgetMatchesQuestion =
+    response.widget.type === "none" ||
+    (response.widget.type === "muscle_multi_select" &&
+      /\b(muscle|muscles|body part|body parts|target area|target areas|want to train|want to target|focus on)\b/i.test(
+        response.text,
+      )) ||
+    (response.widget.type === "equipment_multi_select" &&
+      /\b(equipment|body only|dumbbell|barbell|machine|bands|have available|access to)\b/i.test(
+        response.text,
+      ));
+
+  const widget = widgetMatchesQuestion ? response.widget : { type: "none" as const };
+
+  return {
+    ...response,
+    widget,
+    quickAnswers: widget.type === "none" ? response.quickAnswers : [],
+  };
+};
+
 export const sendChatMessage = async (
   req: Request<object, object, SendChatMessageInput>,
   res: Response,
 ) => {
-  const { threadId, message } = req.body;
+  const { threadId, message, timeZone } = req.body;
   const userId = req.user?.id!;
 
   const { emit, streamAIResponse, didPlanMutate } = useLLMStreaming(res);
@@ -39,22 +63,23 @@ export const sendChatMessage = async (
       message,
     });
 
+    const localDate = getLocalDateContext(timeZone);
     const prompt = generatePrompt(
       history,
       message,
       userWithUpdatedDetails,
+      localDate,
       existingChatThread ?? undefined,
     );
     emit({ type: "status", status: "thinking", label: "Thinking" });
 
     const result = await run(fitXChatAgent, prompt, {
-      context: { userId, emit },
+      context: { userId, currentDayNumber: localDate.dayNumber, emit },
       maxTurns: 20,
       stream: true,
     });
 
-    const llmResponse = await streamAIResponse(result);
-    const exercises = llmResponse.exercises ?? [];
+    const llmResponse = normalizeWidget(await streamAIResponse(result));
 
     const persisted = await db.transaction(async (trx) => {
       const thread =
@@ -81,12 +106,7 @@ export const sendChatMessage = async (
             ...(llmResponse.quickAnswers.length && {
               quickAnswers: llmResponse.quickAnswers,
             }),
-            ...(llmResponse.widget === "heightWeight" && {
-              widget: llmResponse.widget,
-            }),
-            ...(exercises.length && {
-              exercises,
-            }),
+            widget: llmResponse.widget,
           },
         },
         trx,

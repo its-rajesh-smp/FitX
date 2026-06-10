@@ -1,4 +1,9 @@
 import { memoryLlmModel } from "../../config/llm";
+import {
+  EXERCISE_EQUIPMENT,
+  EXERCISE_LEVELS,
+  EXERCISE_MUSCLES,
+} from "../../constants/exerciseFilters";
 import { User } from "../../db/models/User";
 import { Agent, run } from "@openai/agents";
 import { z } from "zod";
@@ -19,18 +24,18 @@ const userDetailsAgent = new Agent({
   outputType: userDetailsUpdateSchema,
   instructions: `Maintain the user's long-term details for a personal fitness assistant.
 
-Store only information that is very important for future conversations:
-- Exercise and health-relevant facts such as goals, experience, injuries, limitations, equipment, schedule, preferences, measurements, and habits.
-- Important facts about the user, their personality, or themselves when the user explicitly states them.
+Store only the three exercise setup filters: experience level, target muscles, and available equipment.
 
 Rules:
 - Extract only from the latest user message. Never infer facts or store assistant suggestions.
-- Do not store greetings, temporary moods, one-off questions, notes, guides or unimportant conversation.
+- Do not store any other facts.
 - Use stable camelCase keys and concise factual string values.
-- For onboarding facts, always use these canonical keys: height, weight, gender, experienceLevel, workoutLocation.
-- Store units with height and weight when the user provides them.
-- Map beginner/new/no experience to experienceLevel="Beginner", and experienced/intermediate/advanced to experienceLevel="Experienced".
-- Map gym access to workoutLocation="Gym access" and home/bodyweight/no gym to workoutLocation="Home workouts".
+- For exercise setup, always use these canonical keys: experienceLevel, targetMuscles, availableEquipment.
+- Map just starting exercise to experienceLevel="beginner", less than 6 months to experienceLevel="intermediate", and more than 6 months to experienceLevel="expert".
+- Valid experience levels: ${EXERCISE_LEVELS.join(", ")}.
+- Valid target muscles: ${EXERCISE_MUSCLES.join(", ")}.
+- Valid equipment: ${EXERCISE_EQUIPMENT.join(", ")}.
+- Store targetMuscles and availableEquipment as concise comma-separated valid catalog values.
 - Upsert corrected facts using the same key.
 - Remove a key only when the user explicitly says that fact no longer applies.
 - Return empty arrays when no details should change.

@@ -1,4 +1,4 @@
-import { Model } from "objection";
+import { Model, Transaction } from "objection";
 import { PlanDay } from "./PlanDay";
 
 export class UserPlan extends Model {
@@ -19,8 +19,9 @@ export class UserPlan extends Model {
 
   static async create(
     planData: Partial<Omit<UserPlan, "id">>,
+    trx?: Transaction,
   ): Promise<UserPlan> {
-    return await this.query().insert(planData);
+    return await this.query(trx).insert(planData);
   }
 
   static async findById(id: string): Promise<UserPlan | undefined> {
@@ -43,8 +44,6 @@ export class UserPlan extends Model {
   ): Promise<UserPlan | undefined> {
     return await this.query()
       .findOne({ userId })
-      .withGraphFetched(
-        "days(orderByScheduledAt).exercises(orderByOrder).exercise",
-      );
+      .withGraphFetched("days(orderByDayNumber).exercises(orderByOrder).exercise");
   }
 }

@@ -5,16 +5,10 @@ export interface ChatThread {
   updatedAt: string;
 }
 
-export interface ChatExercise {
-  id: string;
-  name: string;
-  level: string | null;
-  equipment: string | null;
-  primaryMuscles: string[];
-  secondaryMuscles: string[];
-  instructions: string[];
-  recommendation: string;
-}
+export type ChatWidget =
+  | { type: "none" }
+  | { type: "muscle_multi_select" }
+  | { type: "equipment_multi_select" };
 
 export interface ChatMessage {
   id: string;
@@ -24,8 +18,7 @@ export interface ChatMessage {
   content: {
     text: string;
     quickAnswers?: string[];
-    widget?: "heightWeight";
-    exercises?: ChatExercise[];
+    widget?: ChatWidget;
   };
   createdAt: string;
   updatedAt: string;

@@ -14,10 +14,41 @@ const formatHistory = (messages: Message[]): string => {
     .join("\n");
 };
 
+export interface LocalDateContext {
+  date: string;
+  weekday: string;
+  dayNumber: number;
+  timeZone: string;
+}
+
+export const getLocalDateContext = (timeZone: string): LocalDateContext => {
+  const now = new Date();
+  const dateParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    dateParts.find((item) => item.type === type)?.value ?? "";
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    weekday: "long",
+  }).format(now);
+
+  return {
+    date: `${part("year")}-${part("month")}-${part("day")}`,
+    weekday,
+    dayNumber: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(weekday),
+    timeZone,
+  };
+};
+
 export const generatePrompt = (
   history: Message[],
   newMessage: string,
   user: User,
+  localDate: LocalDateContext,
   thread?: ChatThread,
 ): string => {
   const historyText = formatHistory(history);
@@ -25,10 +56,14 @@ export const generatePrompt = (
   const threadSummary =
     (thread && ChatThread.getSummary(thread)) ??
     "No short-term thread summary yet.";
-  const currentDate = new Date().toISOString().slice(0, 10);
-
-  return `Current date:
-${currentDate}
+  return `Current local date:
+${localDate.date}
+Current local weekday:
+${localDate.weekday}
+Current dayNumber:
+${localDate.dayNumber} (0 is Sunday, 6 is Saturday)
+User time zone:
+${localDate.timeZone}
 
 Important user details:
 ${userDetails}
@@ -45,7 +80,6 @@ User: ${newMessage}`;
 export type ChatStreamStatus =
   | "thinking"
   | "responding"
-  | "getting_options"
   | "getting_exercises"
   | "getting_plan"
   | "generating_plan"
@@ -54,6 +88,7 @@ export type ChatStreamStatus =
 export type ChatStreamEvent =
   | { type: "status"; status: ChatStreamStatus; label: string }
   | { type: "delta"; text: string }
+  | { type: "text_snapshot"; text: string }
   | { type: "plan_updated" }
   | { type: "completed"; thread: ChatThread; message: Message };
 
@@ -63,12 +98,40 @@ export type ChatEventEmitter = (
 
 export interface FitXAgentContext {
   userId: string;
+  currentDayNumber: number;
   emit: ChatEventEmitter;
 }
 
 type FitXStreamedRunResult = Awaited<
   ReturnType<typeof run<typeof fitXChatAgent, FitXAgentContext>>
 >;
+
+const extractPartialJsonText = (json: string): string => {
+  const textKey = json.match(/"text"\s*:\s*"/);
+  if (!textKey?.index && textKey?.index !== 0) return "";
+
+  const start = textKey.index + textKey[0].length;
+  let escaped = false;
+  let encoded = "";
+
+  for (let index = start; index < json.length; index += 1) {
+    const character = json[index];
+
+    if (!escaped && character === '"') break;
+    encoded += character;
+
+    if (escaped) escaped = false;
+    else if (character === "\\") escaped = true;
+  }
+
+  if (escaped) return "";
+
+  try {
+    return JSON.parse(`"${encoded}"`);
+  } catch {
+    return "";
+  }
+};
 
 export const useLLMStreaming = (res: Response) => {
   let planMutated = false;
@@ -89,8 +152,29 @@ export const useLLMStreaming = (res: Response) => {
   };
 
   const streamAIResponse = async (result: FitXStreamedRunResult) => {
-    for await (const _event of result) {
-      // Consume the stream while tools emit their own request-specific statuses.
+    let rawOutput = "";
+    let streamedText = "";
+
+    for await (const event of result) {
+      if (
+        event.type !== "raw_model_stream_event" ||
+        event.data.type !== "output_text_delta"
+      ) {
+        continue;
+      }
+
+      rawOutput += event.data.delta;
+      const nextText = extractPartialJsonText(rawOutput);
+      if (!nextText.startsWith(streamedText)) continue;
+
+      const delta = nextText.slice(streamedText.length);
+      if (!delta) continue;
+
+      if (!streamedText) {
+        emit({ type: "status", status: "responding", label: "Writing response" });
+      }
+      streamedText = nextText;
+      emit({ type: "delta", text: delta });
     }
 
     await result.completed;
@@ -99,8 +183,10 @@ export const useLLMStreaming = (res: Response) => {
       throw new Error("EMPTY_CHAT_RESPONSE");
     }
 
-    emit({ type: "status", status: "responding", label: "Writing response" });
-    emit({ type: "delta", text: result.finalOutput.text });
+    if (!streamedText) {
+      emit({ type: "status", status: "responding", label: "Writing response" });
+    }
+    emit({ type: "text_snapshot", text: result.finalOutput.text });
 
     return result.finalOutput;
   };

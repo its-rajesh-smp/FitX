@@ -4,7 +4,6 @@ import type { ChatMessage, ChatThread } from "@/features/chat/types/chat";
 export type ChatStatus =
   | "thinking"
   | "responding"
-  | "getting_options"
   | "getting_exercises"
   | "getting_plan"
   | "generating_plan"
@@ -13,12 +12,13 @@ export type ChatStatus =
 export type ChatStreamEvent =
   | { type: "status"; status: ChatStatus; label: string }
   | { type: "delta"; text: string }
+  | { type: "text_snapshot"; text: string }
   | { type: "plan_updated" }
   | { type: "completed"; thread: ChatThread; message: ChatMessage }
   | { type: "error"; message: string };
 
 export async function streamChatMessage(
-  payload: { message: string; threadId?: string },
+  payload: { message: string; threadId?: string; timeZone: string },
   onEvent: (event: ChatStreamEvent) => void,
 ): Promise<void> {
   const token = useAuthStore.getState().token;
