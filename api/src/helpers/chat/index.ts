@@ -45,7 +45,6 @@ User: ${newMessage}`;
 export type ChatStreamStatus =
   | "thinking"
   | "responding"
-  | "getting_options"
   | "getting_exercises"
   | "getting_plan"
   | "generating_plan"

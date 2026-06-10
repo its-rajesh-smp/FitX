@@ -19,8 +19,8 @@ export async function up(knex: Knex): Promise<void> {
       .onDelete("CASCADE");
 
     table.string("name").notNullable();
-
-    table.date("scheduled_at").notNullable();
+    table.integer("order").notNullable();
+    table.unique(["user_plan_id", "order"]);
 
     table.timestamps(true, true);
   });

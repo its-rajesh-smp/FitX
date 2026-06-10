@@ -4,7 +4,6 @@ import type { ChatMessage, ChatThread } from "@/features/chat/types/chat";
 export type ChatStatus =
   | "thinking"
   | "responding"
-  | "getting_options"
   | "getting_exercises"
   | "getting_plan"
   | "generating_plan"

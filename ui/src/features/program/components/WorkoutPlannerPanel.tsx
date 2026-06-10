@@ -1,7 +1,7 @@
 import {
   ArrowLeft,
-  CalendarDays,
   Circle,
+  Dumbbell,
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -10,15 +10,6 @@ import { Button } from "@/components/ui/button";
 import { ExerciseCard } from "@/features/program/components/ExerciseCard";
 import { useToggleProgramExercise } from "@/features/program/hooks/useToggleProgramExercise";
 import type { ProgramDay, ProgramPlan } from "@/features/program/types/program";
-
-const dateKey = (value: string) => value.slice(0, 10);
-
-const formatDate = (value: string, weekday: "long" | "short" = "short") =>
-  new Date(`${dateKey(value)}T00:00:00`).toLocaleDateString(undefined, {
-    weekday,
-    month: "short",
-    day: "numeric",
-  });
 
 const getMuscles = (day: ProgramDay) =>
   [...new Set(day.exercises.flatMap(({ exercise }) => exercise.primaryMuscles))]
@@ -36,8 +27,10 @@ export function WorkoutPlannerPanel({
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const days = plan.days;
-  const today = new Date().toISOString().slice(0, 10);
-  const nextDay = days.find((day) => dateKey(day.scheduledAt) >= today) ?? days[0];
+  const nextDay =
+    days.find((day) =>
+      day.exercises.some((exercise) => !exercise.isCompleted),
+    ) ?? days[0];
   const selectedDay = days.find((day) => day.id === selectedDayId) ?? null;
   const totalExercises = days.reduce((total, day) => total + day.exercises.length, 0);
   const completedExercises = days.reduce(
@@ -54,7 +47,7 @@ export function WorkoutPlannerPanel({
       <header className="flex h-14 shrink-0 items-center justify-between border-b bg-white px-4">
         <div>
           <h2 className="text-sm font-bold">Workout Planner</h2>
-          <p className="text-[11px] text-muted-foreground">Your live schedule</p>
+          <p className="text-[11px] text-muted-foreground">Your workout plan</p>
         </div>
         {showCloseButton && (
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close workout planner">
@@ -68,7 +61,7 @@ export function WorkoutPlannerPanel({
           <div className="flex h-full items-center justify-center">
             <div className="max-w-sm rounded-2xl border bg-white p-8 text-center shadow-card">
               <span className="mx-auto flex size-11 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                <CalendarDays className="size-5" />
+                <Dumbbell className="size-5" />
               </span>
               <h3 className="mt-4 text-lg font-bold">No workout plan yet</h3>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -110,7 +103,7 @@ export function WorkoutPlannerPanel({
                       <p className="truncate text-xs text-muted-foreground">{getMuscles(day)}</p>
                     </div>
                     <div className="ml-auto shrink-0 text-right text-[11px] text-muted-foreground">
-                      <p>{formatDate(day.scheduledAt)}</p>
+                      <p>Workout {day.order}</p>
                       <p>{day.exercises.length ? `${day.exercises.length} exercises` : "Rest day"}</p>
                     </div>
                   </button>
@@ -137,7 +130,7 @@ function WorkoutDetail({ day, onBack }: { day: ProgramDay; onBack: () => void })
       <header className="mt-5">
         <h1 className="text-2xl font-semibold tracking-tight">{day.name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {formatDate(day.scheduledAt, "long")} - {getMuscles(day)} - {completed} / {day.exercises.length} completed
+          Workout {day.order} - {getMuscles(day)} - {completed} / {day.exercises.length} completed
         </p>
       </header>
       {day.exercises.length ? (

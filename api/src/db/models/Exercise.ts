@@ -1,17 +1,16 @@
 import { Model } from "objection";
+import type {
+  ExerciseEquipment,
+  ExerciseLevel,
+  ExerciseMuscle,
+} from "../../constants/exerciseFilters";
 
 export interface ExerciseFilters {
-  level?: "beginner" | "intermediate" | "expert";
-  equipments?: string[];
-  muscles?: string[];
+  level?: ExerciseLevel;
+  equipments?: ExerciseEquipment[];
+  muscles?: ExerciseMuscle[];
   searchTerms?: string[];
   limit?: number;
-}
-
-export interface ExerciseFilterOptions {
-  levels: string[];
-  equipments: string[];
-  muscles: string[];
 }
 
 export class Exercise extends Model {
@@ -47,30 +46,6 @@ export class Exercise extends Model {
     exerciseData: Partial<Omit<Exercise, "id">>,
   ): Promise<Exercise | undefined> {
     return await this.query().patchAndFetchById(id, exerciseData);
-  }
-
-  static async getFilterOptions(): Promise<ExerciseFilterOptions> {
-    const [levels, equipments, muscles] = await Promise.all([
-      this.query().distinct("level").whereNotNull("level").orderBy("level"),
-      this.query()
-        .distinct("equipment")
-        .whereNotNull("equipment")
-        .orderBy("equipment"),
-      this.knex().raw<{ rows: Array<{ muscle: string }> }>(`
-        select distinct muscle
-        from exercises,
-        lateral jsonb_array_elements_text(primary_muscles || secondary_muscles) muscle
-        order by muscle
-      `),
-    ]);
-
-    return {
-      levels: levels.map(({ level }) => level).filter(Boolean) as string[],
-      equipments: equipments
-        .map(({ equipment }) => equipment)
-        .filter(Boolean) as string[],
-      muscles: muscles.rows.map(({ muscle }) => muscle),
-    };
   }
 
   static async findByFilters({

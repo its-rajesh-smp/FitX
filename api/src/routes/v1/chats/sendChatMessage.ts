@@ -54,7 +54,6 @@ export const sendChatMessage = async (
     });
 
     const llmResponse = await streamAIResponse(result);
-    const exercises = llmResponse.exercises ?? [];
 
     const persisted = await db.transaction(async (trx) => {
       const thread =
@@ -80,12 +79,6 @@ export const sendChatMessage = async (
             text: llmResponse.text,
             ...(llmResponse.quickAnswers.length && {
               quickAnswers: llmResponse.quickAnswers,
-            }),
-            ...(llmResponse.widget === "heightWeight" && {
-              widget: llmResponse.widget,
-            }),
-            ...(exercises.length && {
-              exercises,
             }),
           },
         },

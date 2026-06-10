@@ -17,10 +17,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { ChatComposer } from "@/features/chat/components/ChatComposer";
-import { ChatExerciseCards } from "@/features/chat/components/ChatExerciseCards";
 import { ChatLayoutSkeleton } from "@/features/chat/components/ChatLayoutSkeleton";
 import { ChatStatusIndicator } from "@/features/chat/components/ChatStatusIndicator";
-import { HeightWeightWidget } from "@/features/chat/components/HeightWeightWidget";
 import { MarkdownMessage } from "@/features/chat/components/MarkdownMessage";
 import { QuickAnswers } from "@/features/chat/components/QuickAnswers";
 import { getChats } from "@/features/chat/services/getChats";
@@ -319,32 +317,6 @@ export function ChatPage() {
                   <div className={cn("rounded-2xl py-3 text-sm leading-7", isCompactChat ? "max-w-full px-1" : "max-w-[88%] px-4", message.role === "Human" ? "rounded-tr-md bg-primary px-4 text-white" : "bg-transparent", message.id === "pending-assistant" && "text-muted-foreground")}>
                     {message.id === "pending-assistant" && status && <div className="mb-2"><ChatStatusIndicator status={status.type} label={status.label} /></div>}
                     {message.role === "Assistant" ? <MarkdownMessage>{message.content.text}</MarkdownMessage> : formatHumanMessage(message.content.text)}
-                    {message.role === "Assistant" && message.content.exercises?.length ? (
-                      <ChatExerciseCards exercises={message.content.exercises} />
-                    ) : null}
-                    {message.role === "Assistant" && message.content.widget === "heightWeight" ? (() => {
-                      const widgetKey = message.id;
-                      const nextHumanMessage = messages
-                        .slice(messageIndex + 1)
-                        .find((item) => item.role === "Human");
-                      const persistedResponse = nextHumanMessage?.content.text
-                        .match(/^Question: (.+)\nAnswer: (.+)$/s);
-                      const persistedAnswer = persistedResponse?.[1] === message.content.text
-                        ? persistedResponse[2]
-                        : undefined;
-                      const selectedAnswer =
-                        answeredWidgets[widgetKey] ??
-                        persistedAnswer ??
-                        (nextHumanMessage ? "Answered" : undefined);
-
-                      return (
-                        <HeightWeightWidget
-                          disabled={isStreaming}
-                          selectedAnswer={selectedAnswer}
-                          onSubmit={(answer) => selectQuickAnswer(widgetKey, message.content.text, answer)}
-                        />
-                      );
-                    })() : null}
                     {message.role === "Assistant" && message.content.quickAnswers?.length ? (() => {
                       const widgetKey = message.id;
                       const nextHumanMessage = messages
