@@ -22,7 +22,7 @@ const dayInputSchema = z.object({
     .refine((name) => !/^day\s*\d+(?:\s*-\s*day\s*\d+)?$/i.test(name.trim()), {
       message: "Use a meaningful workout name, not a generic day label.",
     }),
-  exercises: z.array(exerciseInputSchema).max(8),
+  exercises: z.array(exerciseInputSchema).max(12),
 });
 
 const planDaysInputSchema = z
@@ -45,9 +45,11 @@ export const createPlanTool = tool({
   }),
   execute: async ({ days }, runContext?: RunContext<FitXAgentContext>) => {
     if (!runContext) throw new Error("FITX_AGENT_CONTEXT_REQUIRED");
+
     const { userId, currentDayNumber, emit } = runContext.context;
 
     const today = days.find((day) => day.dayNumber === currentDayNumber);
+
     if (!today?.exercises.length) {
       return {
         error:
