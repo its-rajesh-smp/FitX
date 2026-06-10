@@ -22,7 +22,7 @@ export interface ProgramExercise {
 export interface ProgramDay {
   id: string;
   name: string;
-  order: number;
+  dayNumber: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   exercises: ProgramExercise[];
 }
 

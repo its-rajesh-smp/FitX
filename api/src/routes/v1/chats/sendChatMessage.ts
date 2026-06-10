@@ -1,5 +1,6 @@
 import {
   generatePrompt,
+  getLocalDateContext,
   handleChatErrors,
   useLLMStreaming,
 } from "../../../helpers/chat";
@@ -17,7 +18,7 @@ export const sendChatMessage = async (
   req: Request<object, object, SendChatMessageInput>,
   res: Response,
 ) => {
-  const { threadId, message } = req.body;
+  const { threadId, message, timeZone } = req.body;
   const userId = req.user?.id!;
 
   const { emit, streamAIResponse, didPlanMutate } = useLLMStreaming(res);
@@ -39,16 +40,18 @@ export const sendChatMessage = async (
       message,
     });
 
+    const localDate = getLocalDateContext(timeZone);
     const prompt = generatePrompt(
       history,
       message,
       userWithUpdatedDetails,
+      localDate,
       existingChatThread ?? undefined,
     );
     emit({ type: "status", status: "thinking", label: "Thinking" });
 
     const result = await run(fitXChatAgent, prompt, {
-      context: { userId, emit },
+      context: { userId, currentDayNumber: localDate.dayNumber, emit },
       maxTurns: 20,
       stream: true,
     });
@@ -79,6 +82,9 @@ export const sendChatMessage = async (
             text: llmResponse.text,
             ...(llmResponse.quickAnswers.length && {
               quickAnswers: llmResponse.quickAnswers,
+            }),
+            ...(llmResponse.widget && {
+              widget: llmResponse.widget,
             }),
           },
         },

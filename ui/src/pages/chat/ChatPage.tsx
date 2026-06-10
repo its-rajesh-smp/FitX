@@ -19,6 +19,7 @@ import {
 import { ChatComposer } from "@/features/chat/components/ChatComposer";
 import { ChatLayoutSkeleton } from "@/features/chat/components/ChatLayoutSkeleton";
 import { ChatStatusIndicator } from "@/features/chat/components/ChatStatusIndicator";
+import { ChatWidgetRenderer } from "@/features/chat/components/widgets/ChatWidgetRenderer";
 import { MarkdownMessage } from "@/features/chat/components/MarkdownMessage";
 import { QuickAnswers } from "@/features/chat/components/QuickAnswers";
 import { getChats } from "@/features/chat/services/getChats";
@@ -64,9 +65,11 @@ export function ChatPage() {
   const programQuery = useProgram();
   const chat = chatOverride ?? chatsQuery.data ?? { thread: null, messages: [] };
   const { thread, messages } = chat;
+  const planDays = programQuery.data?.days ?? [];
   const hasPlan = Boolean(
-    programQuery.data?.days.length &&
-    programQuery.data.days.some((day) => day.exercises.length > 0),
+    planDays.length === 7 &&
+    new Set(planDays.map((day) => day.dayNumber)).size === 7 &&
+    planDays.some((day) => day.exercises.length > 0),
   );
   const isInitialLayoutLoading =
     (!chatOverride && chatsQuery.isPending) || programQuery.isPending;
@@ -159,7 +162,11 @@ export function ChatPage() {
 
     try {
       await streamChatMessage(
-        { message: messageText, ...(thread?.id && { threadId: thread.id }) },
+        {
+          message: messageText,
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          ...(thread?.id && { threadId: thread.id }),
+        },
         (event) => {
           if (event.type === "status") {
             setStatus({ type: event.status, label: event.label });
@@ -339,6 +346,32 @@ export function ChatPage() {
                           selectedAnswer={selectedAnswer}
                           onSelect={(answer) => selectQuickAnswer(widgetKey, message.content.text, answer)}
                           onCustomAnswer={() => requestCustomAnswer(widgetKey, message.content.text)}
+                        />
+                      );
+                    })() : null}
+                    {message.role === "Assistant" && message.content.widget ? (() => {
+                      const widgetKey = message.id;
+                      const nextHumanMessage = messages
+                        .slice(messageIndex + 1)
+                        .find((item) => item.role === "Human");
+                      const persistedResponse = nextHumanMessage?.content.text
+                        .match(/^Question: (.+)\nAnswer: (.+)$/s);
+                      const answered =
+                        Boolean(answeredWidgets[widgetKey]) ||
+                        persistedResponse?.[1] === message.content.text ||
+                        Boolean(nextHumanMessage);
+
+                      return (
+                        <ChatWidgetRenderer
+                          widget={message.content.widget}
+                          disabled={isStreaming}
+                          answered={answered}
+                          onSubmit={(values) =>
+                            send(values.join(", "), {
+                              key: widgetKey,
+                              question: message.content.text,
+                            })
+                          }
                         />
                       );
                     })() : null}

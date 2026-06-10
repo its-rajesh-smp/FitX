@@ -5,6 +5,10 @@ export interface ChatThread {
   updatedAt: string;
 }
 
+export type ChatWidget =
+  | { type: "muscle_multi_select" }
+  | { type: "equipment_multi_select" };
+
 export interface ChatMessage {
   id: string;
   userId: string;
@@ -13,6 +17,7 @@ export interface ChatMessage {
   content: {
     text: string;
     quickAnswers?: string[];
+    widget?: ChatWidget;
   };
   createdAt: string;
   updatedAt: string;

@@ -1,4 +1,4 @@
-import { Model } from "objection";
+import { Model, Transaction } from "objection";
 import { Exercise } from "./Exercise";
 
 export class UserExercise extends Model {
@@ -30,8 +30,9 @@ export class UserExercise extends Model {
 
   static async create(
     exerciseData: Partial<Omit<UserExercise, "id">>,
+    trx?: Transaction,
   ): Promise<UserExercise> {
-    return await this.query().insert(exerciseData);
+    return await this.query(trx).insert(exerciseData);
   }
 
   static async findById(id: string): Promise<UserExercise | undefined> {

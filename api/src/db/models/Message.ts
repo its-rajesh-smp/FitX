@@ -8,6 +8,9 @@ export enum MessageRole {
 export interface MessageContent {
   text: string;
   quickAnswers?: string[];
+  widget?: {
+    type: "muscle_multi_select" | "equipment_multi_select";
+  };
 }
 
 export class Message extends Model {

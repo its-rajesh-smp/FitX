@@ -17,7 +17,7 @@ export type ChatStreamEvent =
   | { type: "error"; message: string };
 
 export async function streamChatMessage(
-  payload: { message: string; threadId?: string },
+  payload: { message: string; threadId?: string; timeZone: string },
   onEvent: (event: ChatStreamEvent) => void,
 ): Promise<void> {
   const token = useAuthStore.getState().token;

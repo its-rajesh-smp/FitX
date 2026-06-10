@@ -14,10 +14,41 @@ const formatHistory = (messages: Message[]): string => {
     .join("\n");
 };
 
+export interface LocalDateContext {
+  date: string;
+  weekday: string;
+  dayNumber: number;
+  timeZone: string;
+}
+
+export const getLocalDateContext = (timeZone: string): LocalDateContext => {
+  const now = new Date();
+  const dateParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    dateParts.find((item) => item.type === type)?.value ?? "";
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    weekday: "long",
+  }).format(now);
+
+  return {
+    date: `${part("year")}-${part("month")}-${part("day")}`,
+    weekday,
+    dayNumber: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(weekday),
+    timeZone,
+  };
+};
+
 export const generatePrompt = (
   history: Message[],
   newMessage: string,
   user: User,
+  localDate: LocalDateContext,
   thread?: ChatThread,
 ): string => {
   const historyText = formatHistory(history);
@@ -25,10 +56,14 @@ export const generatePrompt = (
   const threadSummary =
     (thread && ChatThread.getSummary(thread)) ??
     "No short-term thread summary yet.";
-  const currentDate = new Date().toISOString().slice(0, 10);
-
-  return `Current date:
-${currentDate}
+  return `Current local date:
+${localDate.date}
+Current local weekday:
+${localDate.weekday}
+Current dayNumber:
+${localDate.dayNumber} (0 is Sunday, 6 is Saturday)
+User time zone:
+${localDate.timeZone}
 
 Important user details:
 ${userDetails}
@@ -62,6 +97,7 @@ export type ChatEventEmitter = (
 
 export interface FitXAgentContext {
   userId: string;
+  currentDayNumber: number;
   emit: ChatEventEmitter;
 }
 

@@ -13,7 +13,7 @@ export async function up(knex: Knex): Promise<void> {
 
     table.boolean("is_completed").notNullable().defaultTo(false);
 
-    table.index("user_id");
+    table.unique("user_id");
 
     table.timestamps(true, true);
   });

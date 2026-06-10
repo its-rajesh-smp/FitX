@@ -15,6 +15,19 @@ const getMuscles = (day: ProgramDay) =>
   [...new Set(day.exercises.flatMap(({ exercise }) => exercise.primaryMuscles))]
     .join(", ") || "Rest and recovery";
 
+const WEEK_DAYS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+] as const;
+
+const formatWeekDay = (dayNumber: ProgramDay["dayNumber"]) =>
+  WEEK_DAYS[dayNumber] ?? "Unknown day";
+
 export function WorkoutPlannerPanel({
   plan,
   onClose,
@@ -26,11 +39,13 @@ export function WorkoutPlannerPanel({
 }) {
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const days = plan.days;
-  const nextDay =
-    days.find((day) =>
-      day.exercises.some((exercise) => !exercise.isCompleted),
-    ) ?? days[0];
+  const currentDayNumber = new Date().getDay();
+  const days = [...plan.days].sort(
+    (left, right) =>
+      (left.dayNumber - currentDayNumber + 7) % 7 -
+      (right.dayNumber - currentDayNumber + 7) % 7,
+  );
+  const today = days.find((day) => day.dayNumber === currentDayNumber);
   const selectedDay = days.find((day) => day.id === selectedDayId) ?? null;
   const totalExercises = days.reduce((total, day) => total + day.exercises.length, 0);
   const completedExercises = days.reduce(
@@ -57,7 +72,7 @@ export function WorkoutPlannerPanel({
       </header>
 
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
-        {!nextDay ? (
+        {!today ? (
           <div className="flex h-full items-center justify-center">
             <div className="max-w-sm rounded-2xl border bg-white p-8 text-center shadow-card">
               <span className="mx-auto flex size-11 items-center justify-center rounded-xl bg-primary-soft text-primary">
@@ -87,10 +102,10 @@ export function WorkoutPlannerPanel({
                     key={day.id}
                     onClick={() => setSelectedDayId(day.id)}
                     className={`flex w-full items-center gap-3 border-b px-4 py-4 text-left transition last:border-0 hover:bg-primary-soft/40 ${
-                      day.id === nextDay.id ? "bg-primary-soft/40" : ""
+                      day.id === today.id ? "bg-primary-soft/40" : ""
                     }`}
                   >
-                    {day.id === nextDay.id ? (
+                    {day.id === today.id ? (
                       <span className="size-2.5 rounded-full bg-primary" />
                     ) : (
                       <Circle className="size-3.5 text-muted-foreground/50" />
@@ -98,12 +113,12 @@ export function WorkoutPlannerPanel({
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="truncate text-sm font-semibold">{day.name}</p>
-                        {day.id === nextDay.id && <Badge className="px-2 py-0.5 text-[9px]">NEXT</Badge>}
+                        {day.id === today.id && <Badge className="px-2 py-0.5 text-[9px]">TODAY</Badge>}
                       </div>
                       <p className="truncate text-xs text-muted-foreground">{getMuscles(day)}</p>
                     </div>
                     <div className="ml-auto shrink-0 text-right text-[11px] text-muted-foreground">
-                      <p>Workout {day.order}</p>
+                      <p>{formatWeekDay(day.dayNumber)}</p>
                       <p>{day.exercises.length ? `${day.exercises.length} exercises` : "Rest day"}</p>
                     </div>
                   </button>
@@ -130,7 +145,7 @@ function WorkoutDetail({ day, onBack }: { day: ProgramDay; onBack: () => void })
       <header className="mt-5">
         <h1 className="text-2xl font-semibold tracking-tight">{day.name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Workout {day.order} - {getMuscles(day)} - {completed} / {day.exercises.length} completed
+          {formatWeekDay(day.dayNumber)} - {getMuscles(day)} - {completed} / {day.exercises.length} completed
         </p>
       </header>
       {day.exercises.length ? (

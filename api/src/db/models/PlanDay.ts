@@ -1,4 +1,4 @@
-import { Model } from "objection";
+import { Model, Transaction } from "objection";
 import { UserExercise } from "./UserExercise";
 
 export class PlanDay extends Model {
@@ -6,7 +6,7 @@ export class PlanDay extends Model {
   userId!: string;
   userPlanId!: string;
   name!: string;
-  order!: number;
+  dayNumber!: number;
 
   static tableName = "plan_days";
 
@@ -19,13 +19,16 @@ export class PlanDay extends Model {
   };
 
   static modifiers = {
-    orderByOrder(builder: any) {
-      builder.orderBy("order");
+    orderByDayNumber(builder: any) {
+      builder.orderBy("dayNumber");
     },
   };
 
-  static async create(dayData: Partial<Omit<PlanDay, "id">>): Promise<PlanDay> {
-    return await this.query().insert(dayData);
+  static async create(
+    dayData: Partial<Omit<PlanDay, "id">>,
+    trx?: Transaction,
+  ): Promise<PlanDay> {
+    return await this.query(trx).insert(dayData);
   }
 
   static async findById(id: string): Promise<PlanDay | undefined> {
@@ -43,7 +46,7 @@ export class PlanDay extends Model {
     return await this.query().patchAndFetchById(id, dayData);
   }
 
-  static async deleteByPlanId(planId: string): Promise<number> {
-    return await this.query().delete().where("userPlanId", planId);
+  static async deleteByPlanId(planId: string, trx?: Transaction): Promise<number> {
+    return await this.query(trx).delete().where("userPlanId", planId);
   }
 }

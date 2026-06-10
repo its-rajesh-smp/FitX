@@ -6,7 +6,7 @@ import { z } from "zod";
 export const updatePlanDayTool = tool({
   name: "updatePlanDay",
   description:
-    "Update an existing workout day's meaningful name. Call getPlan first to get a valid planDayId.",
+    "Update an existing plan day's meaningful name. The dayNumber cannot change because every plan always contains all seven weekdays. Call getPlan first to get a valid planDayId.",
   parameters: z.object({
     planDayId: z.string(),
     name: z
@@ -31,8 +31,8 @@ export const updatePlanDayTool = tool({
       label: "Updating your workout plan",
     });
 
-    const day = await PlanDay.findById(planDayId);
-    if (!day || day.userId !== userId) {
+    const planDay = await PlanDay.findById(planDayId);
+    if (!planDay || planDay.userId !== userId) {
       return { error: "Plan day not found or does not belong to user." };
     }
 

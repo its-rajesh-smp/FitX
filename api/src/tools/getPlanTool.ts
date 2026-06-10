@@ -6,7 +6,7 @@ import { z } from "zod";
 export const getPlanTool = tool({
   name: "getPlan",
   description:
-    "Get the user's current workout plan with workout days and exercises sorted by order. Always call this before any plan modification.",
+    "Get the user's complete weekly workout plan sorted by dayNumber from Sunday (0) through Saturday (6). Exercises within each day are sorted by order. Always call this before any plan modification.",
   parameters: z.object({}),
   execute: async (_, runContext?: RunContext<FitXAgentContext>) => {
     if (!runContext) throw new Error("FITX_AGENT_CONTEXT_REQUIRED");
@@ -19,6 +19,7 @@ export const getPlanTool = tool({
     });
 
     const plan = await UserPlan.findByUserIdWithDetails(userId);
+    console.log(plan);
     if (!plan) return { exists: false };
 
     return { exists: true, plan };

@@ -7,13 +7,17 @@ import { addExerciseTool } from "../../tools/addExerciseTool";
 import { createPlanTool } from "../../tools/createPlanTool";
 import { getPlanTool } from "../../tools/getPlanTool";
 import { removeExerciseTool } from "../../tools/removeExerciseTool";
-import { removePlanDayTool } from "../../tools/removePlanDayTool";
 import { updateExerciseTool } from "../../tools/updateExerciseTool";
 import { updatePlanDayTool } from "../../tools/updatePlanDayTool";
+
+const chatWidgetSchema = z.object({
+  type: z.enum(["muscle_multi_select", "equipment_multi_select"]),
+});
 
 export const chatAgentResponseSchema = z.object({
   text: z.string().min(1).max(3000),
   quickAnswers: z.array(z.string().min(1).max(100)).max(4),
+  widget: chatWidgetSchema.nullable(),
 });
 
 export const fitXChatAgent = new Agent<
@@ -29,7 +33,6 @@ export const fitXChatAgent = new Agent<
   tools: [
     getExercisesTool,
     createPlanTool,
-    removePlanDayTool,
     removeExerciseTool,
     updateExerciseTool,
     updatePlanDayTool,
@@ -55,12 +58,21 @@ Once the three filters are known, choose the exercises, workout days, sets, reps
 - Use getExercises internally to select matching exercises for plan creation and maintenance.
 - Never return standalone exercise recommendations or exercise lists in chat. Create or update the saved plan instead.
 - Treat selected filters and voluntarily shared safety constraints as mandatory.
-- Create plans with at most 7 workout days.
+- Create complete weekly plans with exactly 7 plan days. Use empty exercise arrays for rest days.
+- Start newly created plans with a workout on the current local dayNumber.
 - Call getPlan before modifications and after any create or modification.
 - Apply clear plan changes directly without asking for confirmation.
 - Keep workout-day names aligned with their exercise focus.
 - Use targeted plan tools for targeted changes.
 - Never invent or reveal IDs.
+
+## Workout rules
+- For beginner experience, avoid complex movements and machines. Keep it simple with bodyweight and basic free weight exercises. Keep rest days between workout days.
+- For intermediate, include some machines and compound movements. Keep less rest between workout days.
+- For expert, include a variety of equipment and advanced exercises. Allow consecutive workout days if it fits the plan logic. Keep 6-7 exercises per workout day. Keep very less rest between workout days.
+- For body-only equipment, only include exercises that don't require equipment.
+- For muscle targets, prioritize exercises that target those muscles as primary, but include some secondary targets if needed for plan balance.
+- For all plans, ensure a balanced distribution of exercises across the week and muscle groups. Avoid overloading any single day or muscle group.
 
 ## Safety
 - For sharp pain, swelling, chest pain, fainting, or worsening symptoms, tell the user to stop and seek professional guidance.
@@ -69,5 +81,21 @@ Once the three filters are known, choose the exercises, workout days, sets, reps
 
 ## Quick answers
 - Don't provide quick answers that aren't relevant to the user's current situation or needs.
+- Once plan is created/updated, do not provide quick answer or ask questions.
+
+## Widgets
+- When asking for target muscles, return the muscle_multi_select widget.
+- When asking for available equipment, return the equipment_multi_select widget.
+- Return no quick answers when returning a widget.
+- Return a null widget when no widget is needed.
+
+Capabilities:
+- Check progress - By calling getPlan, you can check the user's existing plan details including exercises those are completed.
+- Reminder - Cannot reminder as of now.
+
+IMPORTANT:
+1. Know your limitations by checking your available tools and capabilities.
+2. NEVER provide quick answers, if you are returning a widget.
+3. Never give a lot of rest days in any plan. Unless you have a specific reason, keep the rest days to 1 or 2.
 `,
 });
