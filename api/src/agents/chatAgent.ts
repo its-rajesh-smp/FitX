@@ -1,14 +1,16 @@
-import { llmModel } from "../../config/llm";
-import type { FitXAgentContext } from "../../helpers/chat";
 import { Agent } from "@openai/agents";
 import { z } from "zod";
-import { getExercisesTool } from "../../tools";
-import { addExerciseTool } from "../../tools/addExerciseTool";
-import { createPlanTool } from "../../tools/createPlanTool";
-import { getPlanTool } from "../../tools/getPlanTool";
-import { removeExerciseTool } from "../../tools/removeExerciseTool";
-import { updateExerciseTool } from "../../tools/updateExerciseTool";
-import { updatePlanDayTool } from "../../tools/updatePlanDayTool";
+import { llmModel } from "../config/llm";
+import { FitXAgentContext } from "../helpers/chat";
+import {
+  addExerciseTool,
+  createPlanTool,
+  getExercisesTool,
+  getPlanTool,
+  removeExerciseTool,
+  updateExerciseTool,
+  updatePlanDayTool,
+} from "../tools";
 
 const chatWidgetSchema = z.object({
   type: z.enum([
@@ -16,7 +18,9 @@ const chatWidgetSchema = z.object({
     "experience_level",
     "muscle_multi_select",
     "equipment_multi_select",
+    "user_plan",
   ]),
+  label: z.string().min(1).max(50),
 });
 
 export const chatAgentResponseSchema = z.object({
@@ -96,8 +100,10 @@ Once the three filters are known, choose the exercises, workout days, sets, reps
 - When asking for experience level, return the experience_level widget.
 - When asking for target muscles, return the muscle_multi_select widget.
 - When asking for available equipment, return the equipment_multi_select widget.
+- When successfully create or update the plan, return the user_plan widget.
 - Return no quick answers with selection widgets.
 - The none widget may include relevant quick answers.
+- Each widget must have a label.
 
 Capabilities:
 - Check progress - By calling getPlan, you can check the user's existing plan details including exercises those are completed.

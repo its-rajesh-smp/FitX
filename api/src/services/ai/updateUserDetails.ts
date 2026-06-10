@@ -1,7 +1,6 @@
 import { run } from "@openai/agents";
 import { userLongTermMemoryAgent } from "../../agents";
 import { User } from "../../db/models/User";
-
 export const updateUserDetails = async ({
   user,
   message,
@@ -19,23 +18,16 @@ ${message}`,
     { maxTurns: 1 },
   );
 
-  if (!result.finalOutput) {
-    throw new Error("USER_DETAILS_EXTRACTION_EMPTY");
+  const patch = result.finalOutput;
+
+  if (!patch || Object.keys(patch).length === 0) {
+    return user;
   }
 
-  const { upserts, removals } = result.finalOutput;
-
-  if (upserts.length === 0 && removals.length === 0) return user;
-
-  const details = { ...(user.details ?? {}) };
-
-  for (const key of removals) delete details[key];
-
-  for (const update of upserts) {
-    Object.assign(details, {
-      [update.key]: update.value,
-    });
-  }
+  const details = {
+    ...(user.details ?? {}),
+    ...patch,
+  };
 
   return (await User.update(user.id, { details })) ?? user;
 };

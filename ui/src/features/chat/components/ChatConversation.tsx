@@ -13,7 +13,6 @@ interface ChatConversationProps {
   status: ActiveChatStatus | null;
   streamError: string | null;
   answeredWidgets: Record<string, string>;
-  hasPlan: boolean;
   onOpenPlan: () => void;
   onSend: SendChatMessage;
   onSelectQuickAnswer: (
@@ -31,7 +30,6 @@ export function ChatConversation({
   status,
   streamError,
   answeredWidgets,
-  hasPlan,
   onOpenPlan,
   onSend,
   onSelectQuickAnswer,
@@ -39,11 +37,6 @@ export function ChatConversation({
 }: ChatConversationProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const hasPositionedInitialMessages = useRef(false);
-  const latestAssistantIndex = messages.findLastIndex(
-    (message) =>
-      message.role === "Assistant" &&
-      !message.id.startsWith("pending-assistant-"),
-  );
 
   useLayoutEffect(() => {
     bottomRef.current?.scrollIntoView({
@@ -66,7 +59,6 @@ export function ChatConversation({
               isStreaming={isStreaming}
               status={status}
               answeredWidgets={answeredWidgets}
-              showPlanShortcut={hasPlan && index === latestAssistantIndex}
               onOpenPlan={onOpenPlan}
               onSend={onSend}
               onSelectQuickAnswer={onSelectQuickAnswer}
@@ -74,7 +66,9 @@ export function ChatConversation({
             />
           ))}
           {streamError && (
-            <p className="text-center text-sm text-destructive">{streamError}</p>
+            <p className="text-destructive text-center text-sm">
+              {streamError}
+            </p>
           )}
           <div ref={bottomRef} />
         </div>

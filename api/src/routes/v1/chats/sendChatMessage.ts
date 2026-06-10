@@ -1,19 +1,24 @@
+import { run } from "@openai/agents";
+import { Request, Response } from "express";
+import { fitXChatAgent } from "../../../agents";
+import { db } from "../../../db";
+import { ChatThread } from "../../../db/models/ChatThread";
+import { Message, MessageRole } from "../../../db/models/Message";
+import { User } from "../../../db/models/User";
 import {
   generatePrompt,
   getLocalDateContext,
   handleChatErrors,
   useLLMStreaming,
 } from "../../../helpers/chat";
-import { ChatThread } from "../../../db/models/ChatThread";
-import { Message, MessageRole } from "../../../db/models/Message";
-import { User } from "../../../db/models/User";
-import { run } from "@openai/agents";
-import { SendChatMessageInput } from "../../../validators/chat/sendChatMessage";
-import { Request, Response } from "express";
-import { fitXChatAgent } from "../../../agents";
-import { db } from "../../../db";
 import { generateThreadSummary, updateUserDetails } from "../../../services/ai";
+import { SendChatMessageInput } from "../../../validators/chat/sendChatMessage";
 
+/**
+ * Normalize the widget based on the response text
+ * Sometime AI can return a widget that doesn't match the question. So in that case we need to normalize the widget
+ * This is just to safeguard the ui from showing a widget that doesn't match the question
+ */
 const normalizeWidget = (
   response: Awaited<
     ReturnType<ReturnType<typeof useLLMStreaming>["streamAIResponse"]>
@@ -32,11 +37,15 @@ const normalizeWidget = (
     (response.widget.type === "equipment_multi_select" &&
       /\b(equipment|body only|dumbbell|barbell|machine|bands|gym|home|have available|access to)\b/i.test(
         response.text,
+      )) ||
+    (response.widget.type === "user_plan" &&
+      /\b(plan|workout|schedule|created|updated|ready|exercises)\b/i.test(
+        response.text,
       ));
 
   const widget = widgetMatchesQuestion
     ? response.widget
-    : { type: "none" as const };
+    : { type: "none" as const, label: "" };
 
   return {
     ...response,
@@ -114,7 +123,10 @@ export const sendChatMessage = async (
             ...(llmResponse.quickAnswers.length && {
               quickAnswers: llmResponse.quickAnswers,
             }),
-            widget: llmResponse.widget,
+            widget:
+              llmResponse.widget.type === "none" && didPlanMutate()
+                ? { type: "user_plan", label: "Your workout plan is ready" }
+                : llmResponse.widget,
           },
         },
         trx,

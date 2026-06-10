@@ -13,7 +13,9 @@ export interface MessageContent {
       | "none"
       | "experience_level"
       | "muscle_multi_select"
-      | "equipment_multi_select";
+      | "equipment_multi_select"
+      | "user_plan";
+    label: string;
   };
 }
 

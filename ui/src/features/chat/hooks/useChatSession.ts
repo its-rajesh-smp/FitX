@@ -82,6 +82,16 @@ export function useChatSession() {
           setStatus({ type: event.status, label: event.label });
           if (["generating_plan", "updating_plan"].includes(event.status)) {
             setIsPlannerUpdating(true);
+            updatePendingAssistant(pendingAssistantId, (message) => ({
+              ...message,
+              content: {
+                ...message.content,
+                widget: {
+                  type: "user_plan",
+                  label: event.label,
+                },
+              },
+            }));
           }
           break;
         case "delta":

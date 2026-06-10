@@ -1,7 +1,6 @@
 import { Sparkles } from "lucide-react";
 import { ChatStatusIndicator } from "@/features/chat/components/ChatStatusIndicator";
 import { MarkdownMessage } from "@/features/chat/components/MarkdownMessage";
-import { PlanShortcut } from "@/features/chat/components/PlanShortcut";
 import { QuickAnswers } from "@/features/chat/components/QuickAnswers";
 import { ChatWidgetRenderer } from "@/features/chat/components/widgets/ChatWidgetRenderer";
 import {
@@ -23,7 +22,6 @@ interface ChatMessageItemProps {
   isStreaming: boolean;
   status: ActiveChatStatus | null;
   answeredWidgets: Record<string, string>;
-  showPlanShortcut: boolean;
   onOpenPlan: () => void;
   onSend: SendChatMessage;
   onSelectQuickAnswer: (
@@ -42,7 +40,6 @@ export function ChatMessageItem({
   isStreaming,
   status,
   answeredWidgets,
-  showPlanShortcut,
   onOpenPlan,
   onSend,
   onSelectQuickAnswer,
@@ -104,6 +101,7 @@ export function ChatMessageItem({
             widget={widget}
             disabled={isStreaming}
             answered={widgetAnswered}
+            onOpenPlan={onOpenPlan}
             onSubmit={(values) =>
               void onSend(values.join(", "), {
                 key: message.id,
@@ -111,9 +109,6 @@ export function ChatMessageItem({
               })
             }
           />
-        )}
-        {isAssistant && showPlanShortcut && (
-          <PlanShortcut onOpen={onOpenPlan} />
         )}
       </div>
     </div>

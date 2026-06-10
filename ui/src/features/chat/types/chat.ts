@@ -6,10 +6,11 @@ export interface ChatThread {
 }
 
 export type ChatWidget =
-  | { type: "none" }
-  | { type: "experience_level" }
-  | { type: "muscle_multi_select" }
-  | { type: "equipment_multi_select" };
+  | { type: "none"; label?: string }
+  | { type: "experience_level"; label?: string }
+  | { type: "muscle_multi_select"; label?: string }
+  | { type: "equipment_multi_select"; label?: string }
+  | { type: "user_plan"; label?: string };
 
 export interface ChatMessage {
   id: string;

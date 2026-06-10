@@ -1,7 +1,13 @@
 import { CalendarDays, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function PlanShortcut({ onOpen }: { onOpen: () => void }) {
+export function PlanShortcut({
+  label,
+  onOpen,
+}: {
+  label?: string;
+  onOpen: () => void;
+}) {
   return (
     <div className="mt-4 rounded-2xl border border-primary/25 bg-primary-soft/30 p-3 shadow-card">
       <div className="flex items-center gap-3">
@@ -9,7 +15,9 @@ export function PlanShortcut({ onOpen }: { onOpen: () => void }) {
           <CalendarDays className="size-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold">Your workout plan is ready</p>
+          <p className="text-sm font-semibold">
+            {label || "Your workout plan is ready"}
+          </p>
           <p className="text-xs text-muted-foreground">
             View your schedule and exercises.
           </p>
