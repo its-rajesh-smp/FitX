@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   Circle,
   Dumbbell,
+  LoaderCircle,
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -31,10 +32,12 @@ const formatWeekDay = (dayNumber: ProgramDay["dayNumber"]) =>
 export function WorkoutPlannerPanel({
   plan,
   onClose,
+  isUpdating = false,
   showCloseButton = true,
 }: {
   plan: ProgramPlan;
   onClose: () => void;
+  isUpdating?: boolean;
   showCloseButton?: boolean;
 }) {
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
@@ -58,7 +61,15 @@ export function WorkoutPlannerPanel({
   }, [selectedDayId]);
 
   return (
-    <aside className="flex h-full min-h-0 flex-col bg-canvas">
+    <aside className="relative flex h-full min-h-0 flex-col bg-canvas">
+      {isUpdating && (
+        <div className="absolute inset-x-0 bottom-0 top-14 z-20 flex items-center justify-center bg-white/70 backdrop-blur-sm">
+          <div className="flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-medium shadow-card">
+            <LoaderCircle className="size-4 animate-spin text-primary" />
+            Updating workout plan...
+          </div>
+        </div>
+      )}
       <header className="flex h-14 shrink-0 items-center justify-between border-b bg-white px-4">
         <div>
           <h2 className="text-sm font-bold">Workout Planner</h2>

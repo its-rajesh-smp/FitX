@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  CheckCircle2,
   Dumbbell,
   LogOut,
   PanelLeftClose,
@@ -7,6 +8,7 @@ import {
   PanelRightOpen,
   Sparkles,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import type { Layout, PanelImperativeHandle, PanelSize } from "react-resizable-panels";
 import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -56,6 +58,9 @@ export function ChatPage() {
   const [isCompactChat, setIsCompactChat] = useState(() => window.innerWidth < 640);
   const [chatCollapsed, setChatCollapsed] = useState(false);
   const [plannerCollapsed, setPlannerCollapsed] = useState(false);
+  const [isPlannerUpdating, setIsPlannerUpdating] = useState(false);
+  const [plannerRefreshSignal, setPlannerRefreshSignal] = useState(0);
+  const [showPlanUpdatedToast, setShowPlanUpdatedToast] = useState(false);
   const chatPanelRef = useRef<PanelImperativeHandle>(null);
   const plannerPanelRef = useRef<PanelImperativeHandle>(null);
   const chatContentRef = useRef<HTMLElement>(null);
@@ -119,6 +124,13 @@ export function ChatPage() {
     if (!hasPlan) chatPanelRef.current?.resize("100%");
   }, [hasPlan, isDesktop]);
 
+  useEffect(() => {
+    if (!showPlanUpdatedToast) return;
+
+    const timeout = window.setTimeout(() => setShowPlanUpdatedToast(false), 3000);
+    return () => window.clearTimeout(timeout);
+  }, [showPlanUpdatedToast]);
+
   const handleChatResize = useCallback((size: PanelSize) => {
     setChatCollapsed(size.inPixels < 1);
   }, []);
@@ -138,6 +150,16 @@ export function ChatPage() {
       },
     });
   }, [hasPlan, isDesktop, updateUserLayout, userId]);
+
+  const handlePlanUpdated = useCallback(async () => {
+    try {
+      await queryClient.invalidateQueries({ queryKey: ["program"] });
+      setPlannerRefreshSignal((current) => current + 1);
+      setShowPlanUpdatedToast(true);
+    } finally {
+      setIsPlannerUpdating(false);
+    }
+  }, [queryClient]);
 
   const send = async (
     text: string,
@@ -170,6 +192,12 @@ export function ChatPage() {
         (event) => {
           if (event.type === "status") {
             setStatus({ type: event.status, label: event.label });
+            if (
+              event.status === "generating_plan" ||
+              event.status === "updating_plan"
+            ) {
+              setIsPlannerUpdating(true);
+            }
           }
 
           if (event.type === "delta") {
@@ -195,7 +223,7 @@ export function ChatPage() {
           }
 
           if (event.type === "plan_updated") {
-            void queryClient.invalidateQueries({ queryKey: ["program"] });
+            void handlePlanUpdated();
           }
 
           if (event.type === "error") throw new Error(event.message);
@@ -203,6 +231,7 @@ export function ChatPage() {
       );
     } catch (error) {
       setStreamError(error instanceof Error ? error.message : "FitX could not respond. Please try again.");
+      setIsPlannerUpdating(false);
       setChatOverride((current) => ({ thread: current?.thread ?? thread, messages: (current?.messages ?? []).filter((item) => item.id !== "pending-assistant") }));
     } finally {
       setIsStreaming(false);
@@ -427,7 +456,11 @@ export function ChatPage() {
               onResize={handlePlannerResize}
               className="overflow-hidden"
             >
-              <div
+              <motion.div
+                key={`${programQuery.data.id}-${plannerRefreshSignal}`}
+                initial={{ opacity: 0, x: 24 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.28, ease: "easeOut" }}
                 className={cn(
                   "h-full",
                   plannerCollapsed && "hidden",
@@ -436,22 +469,47 @@ export function ChatPage() {
                 <WorkoutPlannerPanel
                   plan={programQuery.data}
                   onClose={toggleMobilePlanner}
+                  isUpdating={isPlannerUpdating}
                   showCloseButton={false}
                 />
-              </div>
+              </motion.div>
             </ResizablePanel>
           </>
         )}
       </ResizablePanelGroup>
 
-      {hasPlan && !isDesktop && mobilePlannerOpen && programQuery.data && (
-        <div className="fixed inset-x-0 bottom-0 top-14 z-30">
-          <WorkoutPlannerPanel
-            plan={programQuery.data}
-            onClose={toggleMobilePlanner}
-          />
-        </div>
-      )}
+      <AnimatePresence>
+        {hasPlan && !isDesktop && mobilePlannerOpen && programQuery.data && (
+          <motion.div
+            key={`mobile-planner-${plannerRefreshSignal}`}
+            initial={{ opacity: 0, y: 32 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 32 }}
+            transition={{ duration: 0.24, ease: "easeOut" }}
+            className="fixed inset-x-0 bottom-0 top-14 z-30"
+          >
+            <WorkoutPlannerPanel
+              plan={programQuery.data}
+              onClose={toggleMobilePlanner}
+              isUpdating={isPlannerUpdating}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showPlanUpdatedToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.98 }}
+            className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-sm font-medium text-background shadow-lg sm:bottom-6 sm:left-auto sm:right-6 sm:translate-x-0"
+          >
+            <CheckCircle2 className="size-4 text-success" />
+            Plan updated
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
