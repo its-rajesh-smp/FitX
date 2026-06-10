@@ -1,33 +1,13 @@
-import {
-  ArrowLeft,
-  Circle,
-  Dumbbell,
-  LoaderCircle,
-  X,
-} from "lucide-react";
+import { Circle, Dumbbell, LoaderCircle, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExerciseCard } from "@/features/program/components/ExerciseCard";
-import { useToggleProgramExercise } from "@/features/program/hooks/useToggleProgramExercise";
-import type { ProgramDay, ProgramPlan } from "@/features/program/types/program";
-
-const getMuscles = (day: ProgramDay) =>
-  [...new Set(day.exercises.flatMap(({ exercise }) => exercise.primaryMuscles))]
-    .join(", ") || "Rest and recovery";
-
-const WEEK_DAYS = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-] as const;
-
-const formatWeekDay = (dayNumber: ProgramDay["dayNumber"]) =>
-  WEEK_DAYS[dayNumber] ?? "Unknown day";
+import { WorkoutDetail } from "@/features/program/components/WorkoutDetail";
+import {
+  formatWeekDay,
+  getProgramDayMuscles,
+} from "@/features/program/helpers/program";
+import type { ProgramPlan } from "@/features/program/types/program";
 
 export function WorkoutPlannerPanel({
   plan,
@@ -126,7 +106,7 @@ export function WorkoutPlannerPanel({
                         <p className="truncate text-sm font-semibold">{day.name}</p>
                         {day.id === today.id && <Badge className="px-2 py-0.5 text-[9px]">TODAY</Badge>}
                       </div>
-                      <p className="truncate text-xs text-muted-foreground">{getMuscles(day)}</p>
+                      <p className="truncate text-xs text-muted-foreground">{getProgramDayMuscles(day)}</p>
                     </div>
                     <div className="ml-auto shrink-0 text-right text-[11px] text-muted-foreground">
                       <p>{formatWeekDay(day.dayNumber)}</p>
@@ -140,47 +120,5 @@ export function WorkoutPlannerPanel({
         )}
       </div>
     </aside>
-  );
-}
-
-function WorkoutDetail({ day, onBack }: { day: ProgramDay; onBack: () => void }) {
-  const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null);
-  const toggleExercise = useToggleProgramExercise();
-  const completed = day.exercises.filter((exercise) => exercise.isCompleted).length;
-
-  return (
-    <div className="mx-auto max-w-3xl">
-      <Button variant="ghost" onClick={onBack}>
-        <ArrowLeft />Back to plan
-      </Button>
-      <header className="mt-5">
-        <h1 className="text-2xl font-semibold tracking-tight">{day.name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {formatWeekDay(day.dayNumber)} - {getMuscles(day)} - {completed} / {day.exercises.length} completed
-        </p>
-      </header>
-      {day.exercises.length ? (
-        <div className="mt-6 overflow-hidden rounded-2xl border bg-white shadow-card">
-          {day.exercises.map((exercise) => (
-            <ExerciseCard
-              key={exercise.id}
-              exercise={exercise}
-              expanded={expandedExerciseId === exercise.id}
-              isPending={toggleExercise.isPending}
-              onToggleExpanded={() =>
-                setExpandedExerciseId((current) =>
-                  current === exercise.id ? null : exercise.id,
-                )
-              }
-              onToggleCompleted={() => toggleExercise.mutate(exercise.id)}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="mt-6 rounded-2xl border bg-white p-8 text-center text-sm text-muted-foreground">
-          This is a rest and recovery day.
-        </div>
-      )}
-    </div>
   );
 }
