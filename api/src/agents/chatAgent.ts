@@ -10,7 +10,7 @@ import {
   removeExerciseTool,
   updateExerciseTool,
 } from "../tools";
-import { loadInstruction } from "../utils/instruction";
+import { chatAgentPrompt } from "./prompts/chatAgentPrompt";
 
 const chatWidgetSchema = z.object({
   type: z.enum([
@@ -49,5 +49,5 @@ export const fitXChatAgent = new Agent<
     getPlanTool,
     getExerciseDetailTool,
   ],
-  instructions: loadInstruction("chat-agent-instruction.md"),
+  instructions: chatAgentPrompt,
 });
