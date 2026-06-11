@@ -19,8 +19,11 @@ export async function up(knex: Knex): Promise<void> {
 
     table.timestamps(true, true);
   });
+
+  await knex.raw(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
 }
 
 export async function down(knex: Knex): Promise<void> {
   await knex.schema.dropTableIfExists("exercises");
+  await knex.raw(`DROP EXTENSION IF EXISTS pg_trgm`);
 }
