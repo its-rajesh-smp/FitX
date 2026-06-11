@@ -7,7 +7,11 @@ import { z } from "zod";
 import { db } from "../db";
 
 const exerciseInputSchema = z.object({
-  exerciseId: z.string(),
+  exerciseId: z
+    .string()
+    .describe(
+      "The exact exercise id. Get this from the getExercises tool. DO not create by your own.",
+    ),
   sets: z.number().int().positive().nullable(),
   reps: z.number().int().positive().nullable(),
   rest: z.number().int().positive().nullable(), // seconds
@@ -22,15 +26,14 @@ const dayInputSchema = z.object({
     .refine((name) => !/^day\s*\d+(?:\s*-\s*day\s*\d+)?$/i.test(name.trim()), {
       message: "Use a meaningful workout name, not a generic day label.",
     }),
-  exercises: z.array(exerciseInputSchema).max(8),
+  exercises: z.array(exerciseInputSchema).max(12),
 });
 
 const planDaysInputSchema = z
   .array(dayInputSchema)
   .length(7)
   .refine(
-    (days) =>
-      new Set(days.map(({ dayNumber }) => dayNumber)).size === 7,
+    (days) => new Set(days.map(({ dayNumber }) => dayNumber)).size === 7,
     {
       message:
         "A weekly plan must contain every dayNumber exactly once from 0 (Sunday) to 6 (Saturday).",
@@ -39,16 +42,24 @@ const planDaysInputSchema = z
 
 export const createPlanTool = tool({
   name: "createPlan",
-  description:
-    "Create a complete seven-day weekly workout plan. Provide every dayNumber exactly once: 0 is Sunday through 6 is Saturday. The current dayNumber provided in the prompt must contain exercises so the plan starts today. Other rest days must have an empty exercises array.",
+  description: `Create a complete seven-day weekly workout plan.
+
+BEFORE CALLING THIS TOOL:
+- Always call getExercises first to get valid exercise IDs.
+- Never use all exercises returned. Pick only what fits 
+  the user's level and weekly structure.
+- Never invent or reuse exercise IDs from memory.
+  `,
   parameters: z.object({
     days: planDaysInputSchema,
   }),
   execute: async ({ days }, runContext?: RunContext<FitXAgentContext>) => {
     if (!runContext) throw new Error("FITX_AGENT_CONTEXT_REQUIRED");
+
     const { userId, currentDayNumber, emit } = runContext.context;
 
     const today = days.find((day) => day.dayNumber === currentDayNumber);
+
     if (!today?.exercises.length) {
       return {
         error:
@@ -95,7 +106,6 @@ export const createPlanTool = tool({
               sets: exercise.sets,
               reps: exercise.reps,
               rest: exercise.rest,
-              isCompleted: false,
               order: index + 1,
             },
             trx,

@@ -19,13 +19,36 @@ const exerciseFiltersSchema = z.object({
     .array(z.enum(EXERCISE_EQUIPMENT))
     .max(EXERCISE_EQUIPMENT.length),
   muscles: z.array(z.enum(EXERCISE_MUSCLES)).max(EXERCISE_MUSCLES.length),
-  limit: z.number().int().min(1).max(30),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(30)
+    .describe("Maximum number of exercises to return. Use for pagination."),
+  offset: z
+    .number()
+    .int()
+    .min(0)
+    .default(0)
+    .describe("Number of exercises to skip. Use for pagination."),
 });
 
 export const getExercisesTool = tool({
   name: "getExercises",
-  description:
-    "Get exercises from the FitX catalog. Use levels=[beginner] for beginner users, levels=[beginner, intermediate] for intermediate users, and levels=[beginner, intermediate, expert] for expert users. An empty levels array disables level filtering. The parameter enums contain every valid level, equipment, and muscle filter; muscles match both primary and secondary muscles.",
+  description: `Get exercises from the FitX catalog. 
+Use levels=[beginner] for beginner users, 
+levels=[beginner, intermediate] for intermediate users, 
+and levels=[beginner, intermediate, expert] for expert users.
+
+Request limit based on user level:
+- Beginner: limit=15
+- Intermediate: limit=20  
+- Expert: limit=30
+
+IMPORTANT
+- Never use all returned exercises. 
+- Select only the most appropriate ones for the user and discard the rest.
+  `,
   parameters: exerciseFiltersSchema,
   execute: async (
     { levels, equipments, muscles, limit },
@@ -39,12 +62,19 @@ export const getExercisesTool = tool({
       label: "Finding exercises for you",
     });
 
+    // console.log(
+    //   `Getting exercises for levels: ${levels}, equipments: ${equipments}, muscles: ${muscles}, limit: ${limit}`,
+    // );
+
     const exercises = await Exercise.findByFilters({
       levels,
       equipments,
       muscles,
       limit,
     });
+
+    // console.log("Exercises found:");
+    // console.log(exercises);
 
     runContext.context.emit({
       type: "status",
@@ -61,7 +91,7 @@ export const getExercisesTool = tool({
         equipment: exercise.equipment,
         primaryMuscles: exercise.primaryMuscles,
         secondaryMuscles: exercise.secondaryMuscles,
-        instructions: exercise.instructions,
+        // instructions: exercise.instructions,
       })),
     };
   },

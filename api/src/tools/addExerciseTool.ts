@@ -29,6 +29,7 @@ export const addExerciseTool = tool({
     });
 
     const day = await PlanDay.findById(planDayId);
+
     if (!day || day.userId !== userId) {
       return { error: "Plan day not found or does not belong to user." };
     }
@@ -48,7 +49,6 @@ export const addExerciseTool = tool({
       sets,
       reps,
       rest,
-      isCompleted: false,
       order: Number(order) + 1,
     });
 

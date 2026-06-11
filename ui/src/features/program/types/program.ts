@@ -23,11 +23,11 @@ export interface ProgramDay {
   id: string;
   name: string;
   dayNumber: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-  exercises: ProgramExercise[];
+  userExercises: ProgramExercise[];
 }
 
 export interface ProgramPlan {
   id: string;
   isCompleted: boolean;
-  days: ProgramDay[];
+  planDays: ProgramDay[];
 }

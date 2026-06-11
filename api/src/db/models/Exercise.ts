@@ -9,7 +9,6 @@ export interface ExerciseFilters {
   levels?: ExerciseLevel[];
   equipments?: ExerciseEquipment[];
   muscles?: ExerciseMuscle[];
-  searchTerms?: string[];
   limit?: number;
 }
 
@@ -24,6 +23,7 @@ export class Exercise extends Model {
   secondaryMuscles!: string[];
   instructions!: string[];
   category?: string | null;
+  images?: string[];
 
   static tableName = "exercises";
 
@@ -77,6 +77,35 @@ export class Exercise extends Model {
       })
 
       .orderByRaw("random()")
-      .limit(Math.min(Math.max(limit, 1), 8));
+      .limit(limit);
+  }
+
+  static async search(filter: Partial<Exercise>): Promise<Exercise[]> {
+    const { name, id } = filter;
+
+    let query = name?.trim() || id?.trim();
+
+    if (!query) {
+      return [];
+    }
+
+    // If name is there then perform fuzzy search with name else use id as query and perform exact fuzzy search over id
+    // This is just to find similar exercises
+    let queryKey = name ? "name" : "id";
+
+    return await this.query()
+      .select(
+        "id",
+        "name",
+        "level",
+        "equipment",
+        "primaryMuscles",
+        "secondaryMuscles",
+        "instructions",
+        "category",
+        Exercise.raw(`similarity(${queryKey}, ?) as score`, [query]),
+      )
+      .whereRaw(`similarity(${queryKey}, ?) > ?`, [query, 0.3])
+      .orderBy("score", "desc");
   }
 }

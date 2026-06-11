@@ -1,34 +1,51 @@
+import { run } from "@openai/agents";
+import { Request, Response } from "express";
+import { fitXChatAgent } from "../../../agents";
+import { db } from "../../../db";
+import { ChatThread } from "../../../db/models/ChatThread";
+import { Message, MessageRole } from "../../../db/models/Message";
+import { User } from "../../../db/models/User";
 import {
   generatePrompt,
   getLocalDateContext,
   handleChatErrors,
   useLLMStreaming,
 } from "../../../helpers/chat";
-import { ChatThread } from "../../../db/models/ChatThread";
-import { Message, MessageRole } from "../../../db/models/Message";
-import { User } from "../../../db/models/User";
-import { run } from "@openai/agents";
-import { SendChatMessageInput } from "../../../validators/chat/sendChatMessage";
-import { Request, Response } from "express";
-import { fitXChatAgent } from "../../../agents";
-import { db } from "../../../db";
 import { generateThreadSummary, updateUserDetails } from "../../../services/ai";
+import { SendChatMessageInput } from "../../../validators/chat/sendChatMessage";
 
+/**
+ * Normalize the widget based on the response text
+ * Sometime AI can return a widget that doesn't match the question. So in that case we need to normalize the widget
+ * This is just to safeguard the ui from showing a widget that doesn't match the question
+ */
 const normalizeWidget = (
-  response: Awaited<ReturnType<ReturnType<typeof useLLMStreaming>["streamAIResponse"]>>,
+  response: Awaited<
+    ReturnType<ReturnType<typeof useLLMStreaming>["streamAIResponse"]>
+  >,
 ) => {
   const widgetMatchesQuestion =
     response.widget.type === "none" ||
+    (response.widget.type === "experience_level" &&
+      /\b(experience|worked out|work out|workout|training|exercise regularly|fitness level)\b/i.test(
+        response.text,
+      )) ||
     (response.widget.type === "muscle_multi_select" &&
       /\b(muscle|muscles|body part|body parts|target area|target areas|want to train|want to target|focus on)\b/i.test(
         response.text,
       )) ||
     (response.widget.type === "equipment_multi_select" &&
-      /\b(equipment|body only|dumbbell|barbell|machine|bands|have available|access to)\b/i.test(
+      /\b(equipment|body only|dumbbell|barbell|machine|bands|gym|home|have available|access to)\b/i.test(
+        response.text,
+      )) ||
+    (response.widget.type === "user_plan" &&
+      /\b(plan|workout|schedule|created|updated|ready|exercises)\b/i.test(
         response.text,
       ));
 
-  const widget = widgetMatchesQuestion ? response.widget : { type: "none" as const };
+  const widget = widgetMatchesQuestion
+    ? response.widget
+    : { type: "none" as const, label: "" };
 
   return {
     ...response,
@@ -47,6 +64,8 @@ export const sendChatMessage = async (
   const { emit, streamAIResponse, didPlanMutate } = useLLMStreaming(res);
 
   try {
+    emit({ type: "status", status: "thinking", label: "Thinking" });
+
     const existingChatThread = threadId
       ? await ChatThread.findByIdAndUserId(threadId, userId)
       : null;
@@ -71,6 +90,7 @@ export const sendChatMessage = async (
       localDate,
       existingChatThread ?? undefined,
     );
+
     emit({ type: "status", status: "thinking", label: "Thinking" });
 
     const result = await run(fitXChatAgent, prompt, {
@@ -106,7 +126,10 @@ export const sendChatMessage = async (
             ...(llmResponse.quickAnswers.length && {
               quickAnswers: llmResponse.quickAnswers,
             }),
-            widget: llmResponse.widget,
+            widget:
+              llmResponse.widget.type === "none" && didPlanMutate()
+                ? { type: "user_plan", label: "Your workout plan is ready" }
+                : llmResponse.widget,
           },
         },
         trx,
@@ -122,6 +145,7 @@ export const sendChatMessage = async (
       thread: persisted.thread,
       message: persisted.newLLMResponse,
     });
+
     if (didPlanMutate()) {
       emit({ type: "plan_updated" });
     }

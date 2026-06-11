@@ -1,46 +1,34 @@
-import { memoryLlmModel } from "../../config/llm";
-import {
-  EXERCISE_EQUIPMENT,
-  EXERCISE_LEVELS,
-  EXERCISE_MUSCLES,
-} from "../../constants/exerciseFilters";
-import { User } from "../../db/models/User";
-import { Agent, run } from "@openai/agents";
-import { z } from "zod";
+import { run } from "@openai/agents";
+import { userLongTermMemoryAgent } from "../../agents";
+import { User, UserDetails } from "../../db/models/User";
 
-const userDetailsUpdateSchema = z.object({
-  upserts: z.array(
-    z.object({
-      key: z.string().min(1).max(60),
-      value: z.string().min(1).max(500),
-    }),
-  ),
-  removals: z.array(z.string().min(1).max(60)),
-});
+const normalizedUserDetails = (details: any) => {
+  const normalizedDetails: UserDetails = {};
 
-const userDetailsAgent = new Agent({
-  name: "FitX User Details",
-  model: memoryLlmModel,
-  outputType: userDetailsUpdateSchema,
-  instructions: `Maintain the user's long-term details for a personal fitness assistant.
+  if (details.experienceLevel) {
+    normalizedDetails.experienceLevel = details.experienceLevel;
+  }
 
-Store only the three exercise setup filters: experience level, target muscles, and available equipment.
+  if (details.targetMuscles) {
+    normalizedDetails.targetMuscles = details.targetMuscles;
+  }
 
-Rules:
-- Extract only from the latest user message. Never infer facts or store assistant suggestions.
-- Do not store any other facts.
-- Use stable camelCase keys and concise factual string values.
-- For exercise setup, always use these canonical keys: experienceLevel, targetMuscles, availableEquipment.
-- Map just starting exercise to experienceLevel="beginner", less than 6 months to experienceLevel="intermediate", and more than 6 months to experienceLevel="expert".
-- Valid experience levels: ${EXERCISE_LEVELS.join(", ")}.
-- Valid target muscles: ${EXERCISE_MUSCLES.join(", ")}.
-- Valid equipment: ${EXERCISE_EQUIPMENT.join(", ")}.
-- Store targetMuscles and availableEquipment as concise comma-separated valid catalog values.
-- Upsert corrected facts using the same key.
-- Remove a key only when the user explicitly says that fact no longer applies.
-- Return empty arrays when no details should change.
-`,
-});
+  if (details.availableEquipment) {
+    normalizedDetails.availableEquipment = details.availableEquipment;
+  }
+
+  return normalizedDetails;
+};
+
+const getPrompt = (details: UserDetails, message: string) => {
+  return `
+Here is the current user's details stored as memory:
+${JSON.stringify(details)}
+
+Here is the latest user's message:
+${message}
+`;
+};
 
 export const updateUserDetails = async ({
   user,
@@ -49,27 +37,22 @@ export const updateUserDetails = async ({
   user: User;
   message: string;
 }): Promise<User> => {
-  const result = await run(
-    userDetailsAgent,
-    `Existing user details:
-${JSON.stringify(user.details ?? {})}
+  const prompt = getPrompt(user.details ?? {}, message);
 
-Latest user message:
-${message}`,
-    { maxTurns: 1 },
-  );
+  const result = await run(userLongTermMemoryAgent, prompt, { maxTurns: 1 });
 
-  if (!result.finalOutput) {
-    throw new Error("USER_DETAILS_EXTRACTION_EMPTY");
+  const patch = result.finalOutput;
+
+  if (!patch || Object.keys(patch).length === 0) {
+    return user;
   }
 
-  const { upserts, removals } = result.finalOutput;
-  if (upserts.length === 0 && removals.length === 0) return user;
+  const details = {
+    ...(user.details ?? {}),
+    ...patch,
+  };
 
-  const details = { ...(user.details ?? {}) };
+  const normalizedDetails = normalizedUserDetails(details);
 
-  for (const key of removals) delete details[key];
-  for (const update of upserts) details[update.key] = update.value;
-
-  return (await User.update(user.id, { details })) ?? user;
+  return (await User.update(user.id, { details: normalizedDetails })) ?? user;
 };

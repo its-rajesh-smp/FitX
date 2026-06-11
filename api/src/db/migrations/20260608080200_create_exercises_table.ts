@@ -2,7 +2,7 @@ import type { Knex } from "knex";
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable("exercises", (table) => {
-    table.uuid("id").primary().defaultTo(knex.fn.uuid());
+    table.string("id").primary().defaultTo(knex.fn.uuid());
 
     table.string("name");
     table.string("force");
@@ -12,6 +12,7 @@ export async function up(knex: Knex): Promise<void> {
 
     table.jsonb("primary_muscles");
     table.jsonb("secondary_muscles");
+    table.jsonb("images");
 
     table.jsonb("instructions");
     table.string("category");
