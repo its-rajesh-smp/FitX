@@ -41,6 +41,13 @@ export class UserPlan extends Model {
     return await this.query().patchAndFetchById(id, planData);
   }
 
+  static async deleteByUserId(
+    userId: string,
+    trx?: Transaction,
+  ): Promise<number> {
+    return await this.query(trx).delete().where({ userId });
+  }
+
   static async findByUserIdWithDetails(
     userId: string,
   ): Promise<UserPlan | undefined> {

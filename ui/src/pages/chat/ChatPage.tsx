@@ -137,7 +137,7 @@ export function ChatPage() {
                 refreshSignal={chat.plannerRefreshSignal}
                 collapsed={panels.plannerCollapsed}
                 isUpdating={chat.isPlannerUpdating}
-                onClose={panels.toggleMobilePlanner}
+                onClose={panels.closePlanner}
               />
             </ResizablePanel>
           </>

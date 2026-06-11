@@ -1,4 +1,4 @@
-import { Model, Pojo } from "objection";
+import { Model, Pojo, Transaction } from "objection";
 
 import {
   EXERCISE_EQUIPMENT,
@@ -47,7 +47,8 @@ export class User extends Model {
   static async update(
     id: string,
     userData: Partial<Omit<User, "id">>,
+    trx?: Transaction,
   ): Promise<User | undefined> {
-    return await this.query().patchAndFetchById(id, userData);
+    return await this.query(trx).patchAndFetchById(id, userData);
   }
 }

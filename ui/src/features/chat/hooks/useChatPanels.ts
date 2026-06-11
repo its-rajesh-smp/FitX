@@ -55,6 +55,24 @@ export function useChatPanels(userId: string | undefined, hasPlan: boolean) {
     if (isDesktop) plannerPanelRef.current?.expand();
     else setMobilePlannerOpen(true);
   }, [isDesktop]);
+  const closePlanner = useCallback(() => {
+    if (!isDesktop) {
+      setMobilePlannerOpen(false);
+      return;
+    }
+
+    const chatPanel = chatPanelRef.current;
+    const plannerPanel = plannerPanelRef.current;
+    if (!plannerPanel) return;
+
+    if (chatPanel?.isCollapsed()) {
+      chatPanel.expand();
+      window.requestAnimationFrame(() => plannerPanel.collapse());
+      return;
+    }
+
+    plannerPanel.collapse();
+  }, [isDesktop]);
   const toggleMobilePlanner = () =>
     setMobilePlannerOpen((current) => !current);
 
@@ -78,6 +96,7 @@ export function useChatPanels(userId: string | undefined, hasPlan: boolean) {
     ),
     toggleChat,
     openPlanner,
+    closePlanner,
     openMobilePlanner,
     toggleMobilePlanner,
   };

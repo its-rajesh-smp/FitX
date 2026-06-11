@@ -30,7 +30,6 @@ export function DesktopPlanner({
         plan={plan}
         onClose={onClose}
         isUpdating={isUpdating}
-        showCloseButton={false}
       />
     </motion.div>
   );

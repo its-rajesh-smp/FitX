@@ -33,6 +33,12 @@ export function ChatWidgetRenderer({
         <EquipmentMultiSelectWidget disabled={disabled} onSubmit={onSubmit} />
       );
     case "user_plan":
-      return <PlanShortcut label={widget.label} onOpen={onOpenPlan} />;
+      return (
+        <PlanShortcut
+          label={widget.label}
+          disabled={disabled}
+          onOpen={onOpenPlan}
+        />
+      );
   }
 }
