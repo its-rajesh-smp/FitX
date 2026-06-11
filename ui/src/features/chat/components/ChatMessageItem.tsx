@@ -57,11 +57,12 @@ export function ChatMessageItem({
     Boolean(answeredWidgets[message.id]) ||
     Boolean(persisted.answer) ||
     persisted.hasFollowingAnswer;
+  const hasPlanWidget = isAssistant && widget?.type === "user_plan";
 
   return (
     <div className={cn("flex gap-3", !isAssistant && "justify-end")}>
       {isAssistant && !isCompact && (
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
+        <span className="bg-primary flex size-8 shrink-0 items-center justify-center rounded-lg text-white">
           <Sparkles className="size-4" />
         </span>
       )}
@@ -69,8 +70,10 @@ export function ChatMessageItem({
         className={cn(
           "rounded-2xl py-3 text-sm leading-7",
           isCompact ? "max-w-full px-1" : "max-w-[88%] px-4",
-          !isAssistant && "rounded-tr-md bg-primary px-4 text-white",
+          !isAssistant && "bg-primary rounded-tr-md px-4 text-white",
           isPendingAssistant && "text-muted-foreground",
+          hasPlanWidget &&
+            (isCompact ? "w-full max-w-full" : "w-full max-w-xl"),
         )}
       >
         {isPendingAssistant && status && (

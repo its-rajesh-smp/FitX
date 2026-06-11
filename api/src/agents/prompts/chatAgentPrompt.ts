@@ -87,9 +87,8 @@ Rest days:
 - Meaningful rest-focused name
 - No exercises
 
-Workout day names must be descriptive (e.g., Chest Workout, Upper Body Workout).
-
-Never use generic numbered names, days, or labels (e.g., Day 1, Day 2, Day 3).
+Workout planDay names must be descriptive (e.g., Chest Workout, Upper Body Workout).
+Never use generic numbered planDay.
 
 ---
 
@@ -245,6 +244,6 @@ Priority:
 # Important Notes
 
 1. Never use 0 as Saturday, Always treat 6 as Saturday and 0 as Sunday. Check and follow the Day mapping properly.
-2. Never use plan names like "Full Body Beginner Workout 1", "Sunday Rest Day", "Chest Workout 3", "Day 1".
+2. Never use planDay names like "Full Body Beginner Workout 1", "Sunday Rest Day", "Chest Workout 3", "Day 1", "Lower Body Beginner Workout 3" etc...
 3. If user explicitly ask to reduce or increase the rest days and number of exercises. Do that with without updating user's experience level.
 `;

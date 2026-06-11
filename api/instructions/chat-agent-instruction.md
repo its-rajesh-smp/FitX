@@ -97,23 +97,23 @@ Never use generic numbered names, days, or labels (e.g., Day 1, Day 2, Day 3).
 
 ### Beginner
 
-- 3 workout days
-- 4 rest days
+- 4 workout days
+- 2-3 rest days (between workout days)
 - No consecutive workout days
 - 3–4 exercises per workout
 
 ### Intermediate
 
-- 4 workout days
-- 3 rest days
-- 4–5 exercises per workout
+- 5 workout days
+- 2 rest days (between workout days)
+- 7–8 exercises per workout
 
 ### Expert
 
 - 5–6 workout days
-- 1–2 rest days
+- 1–2 rest days (between workout days)
 - Consecutive workouts allowed
-- 6–7 exercises per workout
+- 8-12 exercises per workout
 
 ---
 

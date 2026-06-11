@@ -8,6 +8,14 @@ const STARTER_PROMPTS = [
   "What should I workout today?",
 ];
 
+const COMPOSER_PLACEHOLDERS = [
+  "Message FitX",
+  "Create a workout plan for my goals",
+  "What should I train today?",
+  "Help me improve my nutrition",
+  "Adjust my workout schedule",
+];
+
 interface EmptyChatStateProps {
   firstName?: string;
   isStreaming: boolean;
@@ -33,7 +41,12 @@ export function EmptyChatState({
           that works for you.
         </p>
         <div className="mt-8">
-          <ChatComposer onSend={onSend} isPending={isStreaming} large />
+          <ChatComposer
+            onSend={onSend}
+            isPending={isStreaming}
+            placeholderOptions={COMPOSER_PLACEHOLDERS}
+            large
+          />
         </div>
         {streamError && (
           <p className="text-destructive mt-3 text-sm">{streamError}</p>
@@ -43,7 +56,7 @@ export function EmptyChatState({
             <button
               key={prompt}
               onClick={() => void onSend(prompt)}
-              className="text-muted-foreground hover:border-primary/50 hover:bg-primary-soft/40 hover:text-primary rounded-full border px-4 py-2 text-xs transition"
+              className="text-muted-foreground hover:border-primary/50 hover:bg-primary-soft/40 hover:text-primary cursor-pointer rounded-full border px-4 py-2 text-xs transition"
             >
               {prompt}
             </button>
