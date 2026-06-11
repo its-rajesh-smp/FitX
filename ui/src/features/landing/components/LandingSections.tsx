@@ -1,8 +1,10 @@
-import { ArrowRight, CheckCircle2, Flame, Sparkles } from "lucide-react";
-import { motion } from "motion/react";
-import { Link } from "react-router-dom";
+import calenderIcon3d from "@/assets/3dicons-calender-dynamic-color.png";
+import dumbbellIcon3d from "@/assets/3dicons-gym-dynamic-color.png";
 import { Button } from "@/components/ui/button";
 import { benefits, highlights, steps } from "@/features/landing/data/landing";
+import { ArrowRight, Flame, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
+import { Link } from "react-router-dom";
 import { ProductPreview } from "./ProductPreview";
 
 const heroItem = {
@@ -24,9 +26,30 @@ export function HeroSection({
   primaryHref,
 }: AuthAwareSectionProps) {
   return (
-    <section className="relative border-t">
+    <section className="relative overflow-hidden border-t">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_75%_15%,color-mix(in_oklch,var(--primary)_15%,transparent),transparent_35%),linear-gradient(to_bottom,var(--canvas),white_75%)]" />
-      <div className="mx-auto grid min-h-[calc(100svh-4rem)] max-w-7xl items-center gap-14 px-4 py-14 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:py-16 [@media(max-height:900px)]:lg:gap-10 [@media(max-height:900px)]:lg:py-8">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 hidden 2xl:block"
+      >
+        <motion.img
+          alt=""
+          className="absolute -top-20 -right-20 w-120 rotate-10 drop-shadow-2xl"
+          initial={{ opacity: 0, x: 45, y: -30, rotate: 16 }}
+          animate={{ opacity: 1, x: 0, y: 0, rotate: 10 }}
+          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+          src={dumbbellIcon3d}
+        />
+        <motion.img
+          src={calenderIcon3d}
+          alt=""
+          className="absolute -bottom-32 -left-24 w-80 rotate-10 drop-shadow-2xl"
+          initial={{ opacity: 0, x: -45, y: 30, rotate: -16 }}
+          animate={{ opacity: 1, x: 0, y: 0, rotate: -10 }}
+          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+        />
+      </div>
+      <div className="relative z-10 mx-auto grid min-h-[calc(100svh-4rem)] max-w-7xl items-center gap-14 px-4 py-14 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:py-16 [@media(max-height:900px)]:lg:gap-10 [@media(max-height:900px)]:lg:py-8">
         <motion.div
           className="relative z-10"
           initial="hidden"
@@ -38,12 +61,6 @@ export function HeroSection({
             },
           }}
         >
-          <motion.span
-            variants={heroItem}
-            className="border-primary/15 text-primary inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1.5 text-xs font-semibold shadow-sm"
-          >
-            <Sparkles className="size-3.5" /> Your personal AI fitness coach
-          </motion.span>
           <motion.h1
             variants={heroItem}
             className="mt-7 max-w-2xl text-5xl leading-[1.02] font-semibold tracking-[-0.055em] sm:text-6xl lg:text-7xl [@media(max-height:900px)]:lg:mt-5 [@media(max-height:900px)]:lg:text-6xl"
@@ -82,18 +99,10 @@ export function HeroSection({
               <a href="#how-it-works">See how it works</a>
             </Button>
           </motion.div>
-          <motion.div
-            variants={heroItem}
-            className="text-muted-foreground mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium [@media(max-height:900px)]:lg:mt-6"
-          >
-            {["No credit card", "Home or gym", "Adjust anytime"].map((item) => (
-              <span key={item} className="flex items-center gap-1.5">
-                <CheckCircle2 className="text-success size-4" /> {item}
-              </span>
-            ))}
-          </motion.div>
         </motion.div>
-        <ProductPreview />
+        <div className="relative mx-auto w-full max-w-4xl py-8 lg:py-12">
+          <ProductPreview />
+        </div>
       </div>
     </section>
   );
