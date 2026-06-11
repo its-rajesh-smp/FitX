@@ -5,8 +5,13 @@ import { z } from "zod";
 
 export const updateExerciseTool = tool({
   name: "updateExercise",
-  description:
-    "Update sets, reps, or rest of an exercise in the user's plan. Call getPlan first to get valid userExerciseId values.",
+  description: `Update sets, reps, or rest of an exercise in the user's plan. 
+  Call getPlan first to get valid userExerciseId values.
+  
+IMPORTANT:
+- Make sure to check the complete plan before updating any exercise.
+- Make sure to check is the plan name update is required or not. After updating the exercise.  
+`,
   parameters: z.object({
     userExerciseId: z.string(),
     sets: z.number().int().positive().nullable().optional(),

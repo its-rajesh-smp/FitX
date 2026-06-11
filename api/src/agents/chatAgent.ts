@@ -83,15 +83,15 @@ Once the three filters are known, choose the exercises, workout days, sets, reps
 
 ## Important Workout rules
 
-### Exercise count per workout day
+### Exercise count per workout day (These count values are default values, don't ask user for these values, understand the user better and the put these values)
 - Beginner: 3-4 exercises per workout day maximum
 - Intermediate: 4-5 exercises per workout day
 - Expert: 6-7 exercises per workout day
 
-### Workout days per week
-- Beginner: 3 workout days, 4 rest days. Always keep rest days between workout days.
-- Intermediate: 4 workout days, 3 rest days.
-- Expert: 5-6 workout days, 1-2 rest days. Consecutive workout days are fine.
+### Workout days per week (These days and rests values are default values, don't ask user for these values, understand the user better and the put these values)
+- Beginner: 3 workout days, 4 rest days. Always keep rest days between workout days unless user explicitly requests to change it.
+- Intermediate: 4 workout days, 3 rest days, unless user explicitly requests to change it.
+- Expert: 5-6 workout days, 1-2 rest days. Consecutive workout days are fine, unless user explicitly requests to change it.
 
 ### Exercise selection rules
 - Never use all exercises returned by getExercises. Select only the most appropriate ones. Discard the rest.

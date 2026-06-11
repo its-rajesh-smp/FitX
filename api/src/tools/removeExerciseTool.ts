@@ -5,8 +5,13 @@ import { z } from "zod";
 import { db } from "../db";
 export const removeExerciseTool = tool({
   name: "removeExercise",
-  description:
-    "Remove one or more exercises from the user's plan. Call getPlan first to get valid userExerciseId values.",
+  description: `Remove one or more exercises from the user's plan. 
+  Call getPlan first to get valid userExerciseId values.
+  
+IMPORTANT:
+- Make sure to check the complete plan before updating any exercise.
+- Make sure to check if the plan name update is required or not. After removing the exercise.  
+  `,
   parameters: z.object({
     userExerciseIds: z.array(z.string()).min(1),
   }),
