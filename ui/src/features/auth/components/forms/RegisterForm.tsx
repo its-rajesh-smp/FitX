@@ -9,6 +9,7 @@ import { getAuthError } from "@/features/auth/helpers/getAuthError";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { AuthField, AuthFormCard } from "./AuthFormCard";
 import { registerSchema, type RegisterValues } from "./authSchemas";
+import { PasswordInput } from "./PasswordInput";
 
 export function RegisterForm() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export function RegisterForm() {
   return (
     <AuthFormCard
       title="Start your journey"
-      description="Create your account and build your first plan."
+      description="Create your account and build your first workout plan."
       footer={
         <>
           Already have an account?{" "}
@@ -47,7 +48,11 @@ export function RegisterForm() {
           label="Full name"
           error={form.formState.errors.name?.message}
         >
-          <Input placeholder="Alex Johnson" {...form.register("name")} />
+          <Input
+            placeholder="Alex Johnson"
+            autoComplete="name"
+            {...form.register("name")}
+          />
         </AuthField>
         <AuthField
           label="Email address"
@@ -56,6 +61,7 @@ export function RegisterForm() {
           <Input
             type="email"
             placeholder="alex@example.com"
+            autoComplete="email"
             {...form.register("email")}
           />
         </AuthField>
@@ -63,9 +69,9 @@ export function RegisterForm() {
           label="Password"
           error={form.formState.errors.password?.message}
         >
-          <Input
-            type="password"
+          <PasswordInput
             placeholder="At least 8 characters"
+            autoComplete="new-password"
             {...form.register("password")}
           />
         </AuthField>
@@ -76,7 +82,7 @@ export function RegisterForm() {
         )}
         <Button
           type="submit"
-          className="mt-2 h-11 w-full rounded-lg"
+          className="shadow-primary/20 mt-3 h-12 w-full rounded-xl font-bold shadow-lg"
           disabled={mutation.isPending}
         >
           {mutation.isPending ? "Creating account..." : "Create account"}

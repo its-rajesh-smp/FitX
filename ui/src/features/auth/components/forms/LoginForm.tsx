@@ -9,6 +9,7 @@ import { getAuthError } from "@/features/auth/helpers/getAuthError";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { AuthField, AuthFormCard } from "./AuthFormCard";
 import { loginSchema, type LoginValues } from "./authSchemas";
+import { PasswordInput } from "./PasswordInput";
 
 export function LoginForm() {
   const navigate = useNavigate();
@@ -51,6 +52,7 @@ export function LoginForm() {
           <Input
             type="email"
             placeholder="alex@example.com"
+            autoComplete="email"
             {...form.register("email")}
           />
         </AuthField>
@@ -58,9 +60,9 @@ export function LoginForm() {
           label="Password"
           error={form.formState.errors.password?.message}
         >
-          <Input
-            type="password"
+          <PasswordInput
             placeholder="At least 8 characters"
+            autoComplete="current-password"
             {...form.register("password")}
           />
         </AuthField>
@@ -71,7 +73,7 @@ export function LoginForm() {
         )}
         <Button
           type="submit"
-          className="mt-2 h-11 w-full rounded-lg"
+          className="shadow-primary/20 mt-3 h-12 w-full rounded-xl font-bold shadow-lg"
           disabled={mutation.isPending}
         >
           {mutation.isPending ? "Signing in..." : "Sign in"}
