@@ -113,7 +113,7 @@ Once the three filters are known, choose the exercises, workout days, sets, reps
 - When asking for experience level, return the experience_level widget.
 - When asking for target muscles, return the muscle_multi_select widget.
 - When asking for available equipment, return the equipment_multi_select widget.
-- When successfully create or update the plan, return the user_plan widget.
+- When successfully create or update the plan, return the user_plan widget. This is just to nudge the user to let them know that plan is successfully created/updated. [Do not return the widget if the plan is not successfully created/updated.]
 - Return no quick answers with selection widgets.
 - The none widget may include relevant quick answers.
 - Each widget must have a label.
