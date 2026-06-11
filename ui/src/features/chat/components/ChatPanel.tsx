@@ -1,4 +1,3 @@
-import type { RefObject } from "react";
 import { ChatComposerDock } from "@/features/chat/components/ChatComposerDock";
 import { ChatConversation } from "@/features/chat/components/ChatConversation";
 import { EmptyChatState } from "@/features/chat/components/EmptyChatState";
@@ -8,6 +7,7 @@ import type {
   AnswerContext,
   SendChatMessage,
 } from "@/features/chat/types/chatUi";
+import type { RefObject } from "react";
 
 interface ChatPanelProps {
   contentRef: RefObject<HTMLElement | null>;
@@ -20,7 +20,6 @@ interface ChatPanelProps {
   answeredWidgets: Record<string, string>;
   customQuestion: AnswerContext | null;
   composerFocusSignal: number;
-  hasPlan: boolean;
   onOpenPlan: () => void;
   onSend: SendChatMessage;
   onSelectQuickAnswer: (
@@ -42,7 +41,6 @@ export function ChatPanel({
   answeredWidgets,
   customQuestion,
   composerFocusSignal,
-  hasPlan,
   onOpenPlan,
   onSend,
   onSelectQuickAnswer,
@@ -70,7 +68,6 @@ export function ChatPanel({
           status={status}
           streamError={streamError}
           answeredWidgets={answeredWidgets}
-          hasPlan={hasPlan}
           onOpenPlan={onOpenPlan}
           onSend={onSend}
           onSelectQuickAnswer={onSelectQuickAnswer}

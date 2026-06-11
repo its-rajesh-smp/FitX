@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -16,6 +14,8 @@ import { hasCompletePlan } from "@/features/chat/helpers/hasCompletePlan";
 import { useChatPanels } from "@/features/chat/hooks/useChatPanels";
 import { useChatSession } from "@/features/chat/hooks/useChatSession";
 import { useCompactChat } from "@/features/chat/hooks/useCompactChat";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function ChatPage() {
   const navigate = useNavigate();
@@ -51,12 +51,7 @@ export function ChatPage() {
   useEffect(() => {
     if (chat.plannerRefreshSignal > 0 && hasPlan && !isDesktop)
       openMobilePlanner();
-  }, [
-    chat.plannerRefreshSignal,
-    hasPlan,
-    isDesktop,
-    openMobilePlanner,
-  ]);
+  }, [chat.plannerRefreshSignal, hasPlan, isDesktop, openMobilePlanner]);
 
   const logout = () => {
     clearAuth();
@@ -117,7 +112,6 @@ export function ChatPage() {
             answeredWidgets={chat.answeredWidgets}
             customQuestion={chat.customQuestion}
             composerFocusSignal={chat.composerFocusSignal}
-            hasPlan={hasPlan}
             onOpenPlan={panels.openPlanner}
             onSend={chat.send}
             onSelectQuickAnswer={chat.selectQuickAnswer}
