@@ -64,6 +64,8 @@ export const sendChatMessage = async (
   const { emit, streamAIResponse, didPlanMutate } = useLLMStreaming(res);
 
   try {
+    emit({ type: "status", status: "thinking", label: "Thinking" });
+
     const existingChatThread = threadId
       ? await ChatThread.findByIdAndUserId(threadId, userId)
       : null;
@@ -88,6 +90,7 @@ export const sendChatMessage = async (
       localDate,
       existingChatThread ?? undefined,
     );
+
     emit({ type: "status", status: "thinking", label: "Thinking" });
 
     const result = await run(fitXChatAgent, prompt, {

@@ -62,9 +62,9 @@ IMPORTANT
       label: "Finding exercises for you",
     });
 
-    console.log(
-      `Getting exercises for levels: ${levels}, equipments: ${equipments}, muscles: ${muscles}, limit: ${limit}`,
-    );
+    // console.log(
+    //   `Getting exercises for levels: ${levels}, equipments: ${equipments}, muscles: ${muscles}, limit: ${limit}`,
+    // );
 
     const exercises = await Exercise.findByFilters({
       levels,
@@ -73,8 +73,8 @@ IMPORTANT
       limit,
     });
 
-    console.log("Exercises found:");
-    console.log(exercises);
+    // console.log("Exercises found:");
+    // console.log(exercises);
 
     runContext.context.emit({
       type: "status",

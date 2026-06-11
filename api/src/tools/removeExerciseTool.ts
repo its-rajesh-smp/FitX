@@ -3,19 +3,19 @@ import { UserExercise } from "../db/models/UserExercise";
 import { RunContext, tool } from "@openai/agents";
 import { z } from "zod";
 import { db } from "../db";
-
 export const removeExerciseTool = tool({
   name: "removeExercise",
   description:
-    "Remove an exercise from the user's plan. Call getPlan first to get valid userExerciseId values.",
+    "Remove one or more exercises from the user's plan. Call getPlan first to get valid userExerciseId values.",
   parameters: z.object({
-    userExerciseId: z.string(),
+    userExerciseIds: z.array(z.string()).min(1),
   }),
   execute: async (
-    { userExerciseId },
+    { userExerciseIds },
     runContext?: RunContext<FitXAgentContext>,
   ) => {
     if (!runContext) throw new Error("FITX_AGENT_CONTEXT_REQUIRED");
+
     const { userId, emit } = runContext.context;
 
     emit({
@@ -24,24 +24,37 @@ export const removeExerciseTool = tool({
       label: "Updating your workout plan",
     });
 
-    const exercise = await UserExercise.findById(userExerciseId);
-    if (!exercise || exercise.userId !== userId) {
-      return { error: "Exercise not found or does not belong to user." };
-    }
-
     await db.transaction(async (trx) => {
-      await UserExercise.query(trx).deleteById(userExerciseId);
+      const exercisesToRemove = await UserExercise.query(trx)
+        .whereIn("id", userExerciseIds)
+        .where({ userId });
 
-      const remainingExercises = await UserExercise.query(trx)
-        .where({ planDayId: exercise.planDayId })
-        .orderBy("order");
+      if (exercisesToRemove.length !== userExerciseIds.length) {
+        throw new Error("INVALID_USER_EXERCISE_ID");
+      }
 
-      for (const [index, remainingExercise] of remainingExercises.entries()) {
-        const order = index + 1;
-        if (remainingExercise.order !== order) {
-          await UserExercise.query(trx)
-            .patch({ order })
-            .where({ id: remainingExercise.id });
+      const affectedPlanDayIds = [
+        ...new Set(exercisesToRemove.map((exercise) => exercise.planDayId)),
+      ];
+
+      await UserExercise.query(trx)
+        .delete()
+        .whereIn("id", userExerciseIds)
+        .where({ userId });
+
+      for (const planDayId of affectedPlanDayIds) {
+        const remainingExercises = await UserExercise.query(trx)
+          .where({ userId, planDayId })
+          .orderBy("order");
+
+        for (const [index, remainingExercise] of remainingExercises.entries()) {
+          const order = index + 1;
+
+          if (remainingExercise.order !== order) {
+            await UserExercise.query(trx)
+              .patch({ order })
+              .where({ id: remainingExercise.id, userId });
+          }
         }
       }
     });

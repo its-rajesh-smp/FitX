@@ -57,6 +57,10 @@ export class UserPlan extends Model {
       day.userExercises?.forEach((exercise) => {
         (exercise as any).isCompleted = exercise.userExerciseLogs!.length > 0;
         delete (exercise as any).userExerciseLogs;
+        delete (exercise as any).instructions;
+        delete (exercise as any).images;
+        delete (exercise as any).createdAt;
+        delete (exercise as any).updatedAt;
       });
     });
 
