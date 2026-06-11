@@ -91,8 +91,6 @@ export const sendChatMessage = async (
       existingChatThread ?? undefined,
     );
 
-    console.log(prompt);
-
     emit({ type: "status", status: "thinking", label: "Thinking" });
 
     const result = await run(fitXChatAgent, prompt, {

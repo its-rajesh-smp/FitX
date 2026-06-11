@@ -71,21 +71,22 @@ export const generatePrompt = (
     "No short-term thread summary yet.";
 
   return `
----  
 Current local date: ${localDate.date}
 Current local weekday: ${localDate.weekday}
-Current dayNumber: ${localDate.dayNumber} (0 is Sunday, 6 is Saturday)
-User time zone: ${localDate.timeZone}
----
+Current dayNumber: ${localDate.dayNumber}
+
+
 Important user details:
 ${userDetails}
----
+
+
 Short-term chat thread summary:
 ${threadSummary}
----
+
 Previous conversations:
 ${historyText || "No recent messages."}
----
+
+
 New User's Message: ${newMessage}`;
 };
 

@@ -3,14 +3,12 @@ import { z } from "zod";
 import { llmModel } from "../config/llm";
 import { FitXAgentContext } from "../helpers/chat";
 import {
-  addExerciseTool,
   createPlanTool,
   getExerciseDetailTool,
   getExercisesTool,
   getPlanTool,
   removeExerciseTool,
   updateExerciseTool,
-  updatePlanDayTool,
 } from "../tools";
 import { loadInstruction } from "../utils/instruction";
 
@@ -47,7 +45,7 @@ export const fitXChatAgent = new Agent<
     removeExerciseTool,
     updateExerciseTool,
     // updatePlanDayTool,
-    addExerciseTool,
+    // addExerciseTool,
     getPlanTool,
     getExerciseDetailTool,
   ],
