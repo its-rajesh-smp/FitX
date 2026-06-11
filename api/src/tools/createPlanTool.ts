@@ -45,7 +45,9 @@ export const createPlanTool = tool({
   description: `Create a complete seven-day weekly workout plan.
 
 BEFORE CALLING THIS TOOL:
-- Always call getExercises first with limit=20 to get valid exercise IDs.
+- Always call getExercises first to get valid exercise IDs.
+- Never use all exercises returned. Pick only what fits 
+  the user's level and weekly structure.
 - Never invent or reuse exercise IDs from memory.
   `,
   parameters: z.object({

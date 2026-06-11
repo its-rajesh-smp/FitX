@@ -6,3 +6,4 @@ export * from "./getPlanTool";
 export * from "./removeExerciseTool";
 export * from "./updateExerciseTool";
 export * from "./updatePlanDayTool";
+export * from "./getExerciseDetailTool";

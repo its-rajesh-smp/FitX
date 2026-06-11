@@ -78,6 +78,6 @@ export class Exercise extends Model {
       })
 
       .orderByRaw("random()")
-      .limit(Math.min(Math.max(limit, 1), 8));
+      .limit(limit);
   }
 }

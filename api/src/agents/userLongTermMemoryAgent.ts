@@ -1,6 +1,6 @@
 import { Agent } from "@openai/agents";
 import { z } from "zod";
-import { memoryLlmModel } from "../config/llm";
+import { llmModel } from "../config/llm";
 import {
   EXERCISE_EQUIPMENT,
   EXERCISE_LEVELS,
@@ -11,38 +11,48 @@ const userDetailsUpdateSchema = z.object({
   experienceLevel: z
     .enum(EXERCISE_LEVELS)
     .optional()
-    .describe("User's fitness experience level."),
+    .describe(
+      "Only set if the user explicitly states their own fitness experience level.",
+    ),
+
   targetMuscles: z
     .array(z.enum(EXERCISE_MUSCLES))
     .optional()
-    .describe("Muscles the user wants to target and exercise."),
+    .describe(
+      "Only set if the user explicitly states muscles they want to target.",
+    ),
+
   availableEquipment: z
     .array(z.enum(EXERCISE_EQUIPMENT))
     .optional()
-    .describe("Equipment the user has access to."),
+    .describe(
+      "Only set if the user explicitly states equipment they have access to.",
+    ),
 });
 
 export const userLongTermMemoryAgent = new Agent({
   name: "User Memory Agent",
-  model: memoryLlmModel,
+  model: llmModel,
   outputType: userDetailsUpdateSchema,
   modelSettings: {
-    temperature: 0.5,
+    temperature: 0.1,
   },
-  instructions: `Extract long-term exercise setup preferences from the latest user message only.
+  instructions: `You extract ONLY facts explicitly stated by the user about themselves.
 
-Return only fields that are explicitly mentioned in the latest user message.
+Do NOT extract values from:
+- questions
+- assistant messages
+- suggestions
+- examples
+- options presented to the user
+- negated statements
 
-Extract:
-- experienceLevel
-- targetMuscles
-- availableEquipment
+Examples:
+"Are you beginner?" => {}
+"Are you a beginner or intermediate?" => {}
+"I am a beginner" => {"experienceLevel":"beginner"}
+"I'm not a beginner" => {}
+"I have dumbbells" => {"availableEquipment":["dumbbells"]}
 
-Rules:
-- Do not infer.
-- Do not use assistant suggestions.
-- Existing details are only context.
-- If nothing should change, return {}.
-- If the user updates a field, return the complete new value for that field.
-`,
+Only output fields when the latest user message is an affirmative self-disclosure.`,
 });
