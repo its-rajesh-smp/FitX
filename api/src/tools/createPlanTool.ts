@@ -18,7 +18,14 @@ const exerciseInputSchema = z.object({
 });
 
 const dayInputSchema = z.object({
-  dayNumber: z.number().int().min(0).max(6),
+  dayNumber: z
+    .number()
+    .int()
+    .min(0)
+    .max(6)
+    .describe(
+      "Day number from 0 to 6. Where 0 is Sunday, 1 is Monday, 2 is Tuesday, 3 is Wednesday, 4 is Thursday, 5 is Friday, 6 is Saturday.",
+    ),
   name: z
     .string()
     .min(1)
@@ -29,16 +36,7 @@ const dayInputSchema = z.object({
   exercises: z.array(exerciseInputSchema).max(12),
 });
 
-const planDaysInputSchema = z
-  .array(dayInputSchema)
-  .length(7)
-  .refine(
-    (days) => new Set(days.map(({ dayNumber }) => dayNumber)).size === 7,
-    {
-      message:
-        "A weekly plan must contain every dayNumber exactly once from 0 (Sunday) to 6 (Saturday).",
-    },
-  );
+const planDaysInputSchema = z.array(dayInputSchema).length(7);
 
 export const createPlanTool = tool({
   name: "createPlan",
@@ -46,9 +44,19 @@ export const createPlanTool = tool({
 
 BEFORE CALLING THIS TOOL:
 - Always call getExercises first to get valid exercise IDs.
-- Never use all exercises returned. Pick only what fits 
-  the user's level and weekly structure.
+- Never use all exercises returned. Pick only what fits the user's level and weekly structure.
 - Never invent or reuse exercise IDs from memory.
+
+IMPORTANT:
+dayNumber have to be always between 0, 1, 2, 3, 4, 5, 6
+Where
+0 = Sunday
+1 = Monday
+2 = Tuesday
+3 = Wednesday
+4 = Thursday
+5 = Friday
+6 = Saturday
   `,
   parameters: z.object({
     days: planDaysInputSchema,
@@ -56,16 +64,7 @@ BEFORE CALLING THIS TOOL:
   execute: async ({ days }, runContext?: RunContext<FitXAgentContext>) => {
     if (!runContext) throw new Error("FITX_AGENT_CONTEXT_REQUIRED");
 
-    const { userId, currentDayNumber, emit } = runContext.context;
-
-    const today = days.find((day) => day.dayNumber === currentDayNumber);
-
-    if (!today?.exercises.length) {
-      return {
-        error:
-          "A newly created weekly plan must start with a workout today. Add exercises to the current dayNumber from the prompt.",
-      };
-    }
+    const { userId, emit } = runContext.context;
 
     emit({
       type: "status",

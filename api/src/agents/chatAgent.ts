@@ -46,7 +46,7 @@ export const fitXChatAgent = new Agent<
     createPlanTool,
     removeExerciseTool,
     updateExerciseTool,
-    updatePlanDayTool,
+    // updatePlanDayTool,
     addExerciseTool,
     getPlanTool,
     getExerciseDetailTool,

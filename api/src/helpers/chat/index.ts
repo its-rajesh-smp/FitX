@@ -1,8 +1,8 @@
-import { ChatThread } from "../../db/models/ChatThread";
-import { Message } from "../../db/models/Message";
 import { run } from "@openai/agents";
 import { Response } from "express";
 import { fitXChatAgent } from "../../agents";
+import { ChatThread } from "../../db/models/ChatThread";
+import { Message } from "../../db/models/Message";
 import { User } from "../../db/models/User";
 
 const formatHistory = (messages: Message[]): string => {
@@ -110,7 +110,6 @@ export type ChatEventEmitter = (
 
 export interface FitXAgentContext {
   userId: string;
-  currentDayNumber: number;
   emit: ChatEventEmitter;
 }
 
