@@ -132,6 +132,27 @@ Example:
 - Recovery Day
 - Active Recovery
 
+Never create/update a plan day without a meaningful plan day name. Never put counters in the plan day name.:
+Example:
+Full Body Workout 2
+Upper Body Workout 2
+Workout 1
+Chest Workout 1
+Lower Body Workout 1 - Glutes & Hamstrings
+
+Some meaningful plan day names are:
+
+- Upper Body Workout
+- Lower Body Workout
+- Full Body Workout
+- Chest Workout
+- Back Workout
+- Legs Workout
+- Chest, Back, Legs Workout
+- Chest focused workout
+- Chest focused
+  etc...
+
 ---
 
 # WEEKLY STRUCTURE
