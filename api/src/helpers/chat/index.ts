@@ -7,10 +7,15 @@ import { User } from "../../db/models/User";
 
 const formatHistory = (messages: Message[]): string => {
   return messages
-    .map(
-      (message) =>
-        `${message.role === "Human" ? "User" : "FitX"}: ${message.content.text}`,
-    )
+    .map((message) => {
+      let text = `${message.role === "Human" ? "User" : "Assistant"}: ${message.content.text}`;
+
+      if (message.content?.widget) {
+        text += ` widget_shown: ${message.content.widget.type}`;
+      }
+
+      return text;
+    })
     .join("\n");
 };
 
@@ -39,7 +44,15 @@ export const getLocalDateContext = (timeZone: string): LocalDateContext => {
   return {
     date: `${part("year")}-${part("month")}-${part("day")}`,
     weekday,
-    dayNumber: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(weekday),
+    dayNumber: [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ].indexOf(weekday),
     timeZone,
   };
 };
@@ -56,25 +69,24 @@ export const generatePrompt = (
   const threadSummary =
     (thread && ChatThread.getSummary(thread)) ??
     "No short-term thread summary yet.";
-  return `Current local date:
-${localDate.date}
-Current local weekday:
-${localDate.weekday}
-Current dayNumber:
-${localDate.dayNumber} (0 is Sunday, 6 is Saturday)
-User time zone:
-${localDate.timeZone}
 
+  return `
+---  
+Current local date: ${localDate.date}
+Current local weekday: ${localDate.weekday}
+Current dayNumber: ${localDate.dayNumber} (0 is Sunday, 6 is Saturday)
+User time zone: ${localDate.timeZone}
+---
 Important user details:
 ${userDetails}
-
-Short-term thread summary:
+---
+Short-term chat thread summary:
 ${threadSummary}
-
-Latest conversation history:
+---
+Previous conversations:
 ${historyText || "No recent messages."}
-
-User: ${newMessage}`;
+---
+New User's Message: ${newMessage}`;
 };
 
 export type ChatStreamStatus =
@@ -171,7 +183,11 @@ export const useLLMStreaming = (res: Response) => {
       if (!delta) continue;
 
       if (!streamedText) {
-        emit({ type: "status", status: "responding", label: "Writing response" });
+        emit({
+          type: "status",
+          status: "responding",
+          label: "Writing response",
+        });
       }
       streamedText = nextText;
       emit({ type: "delta", text: delta });

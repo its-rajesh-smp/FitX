@@ -1,6 +1,6 @@
 import { Agent } from "@openai/agents";
 import { z } from "zod";
-import { llmModel } from "../config/llm";
+import { memoryLlmModel } from "../config/llm";
 import {
   EXERCISE_EQUIPMENT,
   EXERCISE_LEVELS,
@@ -32,7 +32,7 @@ const userDetailsUpdateSchema = z.object({
 
 export const userLongTermMemoryAgent = new Agent({
   name: "User Memory Agent",
-  model: llmModel,
+  model: memoryLlmModel,
   outputType: userDetailsUpdateSchema,
   modelSettings: {
     temperature: 0.5,

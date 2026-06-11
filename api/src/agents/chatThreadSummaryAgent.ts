@@ -1,6 +1,6 @@
 import { Agent } from "@openai/agents";
 import { z } from "zod";
-import { llmModel } from "../config/llm";
+import { memoryLlmModel } from "../config/llm";
 
 const threadSummarySchema = z.object({
   summary: z.string().min(1).max(4000),
@@ -8,7 +8,7 @@ const threadSummarySchema = z.object({
 
 export const chatThreadSummaryAgent = new Agent({
   name: "FitX Thread Summarizer",
-  model: llmModel,
+  model: memoryLlmModel,
   outputType: threadSummarySchema,
   instructions: `Maintain a compact short-term summary of a FitX chat thread.
 

@@ -1,6 +1,6 @@
 {
-  "watch": ["src"],
-  "ext": "ts,json",
+  "watch": ["src", "instructions"],
+  "ext": "ts,json,md",
   "legacyWatch": true,
   "exec": "pnpm run start"
 }

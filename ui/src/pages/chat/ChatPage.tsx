@@ -23,7 +23,7 @@ export function ChatPage() {
   const chat = useChatSession();
   const hasPlan = hasCompletePlan(chat.programQuery.data);
   const panels = useChatPanels(chat.user?.id, hasPlan);
-  const { isDesktop, openMobilePlanner, updateUserLayout } = panels;
+  const { isDesktop, openPlanner, updateUserLayout } = panels;
   const isInitialLoading =
     chat.chatsQuery.isPending || chat.programQuery.isPending;
   const { contentRef, isCompact } = useCompactChat(isInitialLoading);
@@ -49,9 +49,16 @@ export function ChatPage() {
   ]);
 
   useEffect(() => {
-    if (chat.plannerRefreshSignal > 0 && hasPlan && !isDesktop)
-      openMobilePlanner();
-  }, [chat.plannerRefreshSignal, hasPlan, isDesktop, openMobilePlanner]);
+    if (chat.plannerRefreshSignal <= 0 || !hasPlan) return;
+
+    if (!isDesktop) {
+      openPlanner();
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(openPlanner);
+    return () => window.cancelAnimationFrame(frame);
+  }, [chat.plannerRefreshSignal, hasPlan, isDesktop, openPlanner]);
 
   const logout = () => {
     clearAuth();

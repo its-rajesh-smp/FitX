@@ -59,10 +59,10 @@ export class Message extends Model {
   static async getRecent(threadId: string, limit = 12): Promise<Message[]> {
     const messages = await this.query()
       .where({ threadId })
-      .orderBy("createdAt", "desc")
+      .orderBy("createdAt", "asc")
       .limit(limit);
 
-    return messages.reverse();
+    return messages;
   }
 
   static async countByThreadId(threadId: string): Promise<number> {
