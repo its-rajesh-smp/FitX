@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { getCurrentUser } from "@/features/auth/services/getCurrentUser";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 
+/** Fetches the authenticated user and keeps the auth store synchronized. */
 export function useCurrentUser() {
   const token = useAuthStore((state) => state.token);
   const updateUser = useAuthStore((state) => state.updateUser);

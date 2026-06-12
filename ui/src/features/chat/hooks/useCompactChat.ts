@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
+/** Tracks whether the chat content container requires its compact layout. */
 export function useCompactChat(isLoading: boolean) {
   const contentRef = useRef<HTMLElement>(null);
   const [isCompact, setIsCompact] = useState(() => window.innerWidth < 640);

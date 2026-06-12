@@ -6,6 +6,7 @@ import type {
 } from "react-resizable-panels";
 import { useChatLayoutStore } from "@/features/chat/stores/useChatLayoutStore";
 
+/** Manages responsive chat and planner panels, including per-user layouts. */
 export function useChatPanels(userId: string | undefined, hasPlan: boolean) {
   const cachedLayout = useChatLayoutStore((state) =>
     userId ? state.users[userId] : undefined,
