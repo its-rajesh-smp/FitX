@@ -62,6 +62,7 @@ export const generatePrompt = (
   newMessage: string,
   user: User,
   localDate: LocalDateContext,
+  userName: string,
   thread?: ChatThread,
 ): string => {
   const historyText = formatHistory(history);
@@ -74,6 +75,7 @@ export const generatePrompt = (
 Current local date: ${localDate.date}
 Current local weekday: ${localDate.weekday}
 Current dayNumber: ${localDate.dayNumber}
+Current user's name: ${userName}
 
 
 Important user details:
