@@ -88,6 +88,7 @@ export const sendChatMessage = async (
       message,
       userWithUpdatedDetails,
       localDate,
+      user.name,
       existingChatThread ?? undefined,
     );
 

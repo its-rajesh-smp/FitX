@@ -1,7 +1,10 @@
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ExerciseCard } from "@/features/program/components/ExerciseCard";
+import {
+  ExerciseCard,
+  ExerciseDetail,
+} from "@/features/program/components/ExerciseCard";
 import {
   formatWeekDay,
   getProgramDayMuscles,
@@ -16,16 +19,37 @@ export function WorkoutDetail({
   day: ProgramDay;
   onBack: () => void;
 }) {
-  const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(
     null,
   );
+  const topRef = useRef<HTMLDivElement>(null);
   const toggleExercise = useToggleProgramExercise();
+  const selectedExercise =
+    day.userExercises.find((exercise) => exercise.id === selectedExerciseId) ??
+    null;
   const completed = day.userExercises.filter(
     (exercise) => exercise.isCompleted,
   ).length;
 
+  useEffect(() => {
+    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [selectedExerciseId]);
+
+  if (selectedExercise) {
+    return (
+      <div ref={topRef} className="mx-auto max-w-3xl">
+        <ExerciseDetail
+          exercise={selectedExercise}
+          isPending={toggleExercise.isPending}
+          onBack={() => setSelectedExerciseId(null)}
+          onToggleCompleted={() => toggleExercise.mutate(selectedExercise.id)}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-3xl">
+    <div ref={topRef} className="mx-auto max-w-3xl">
       <Button variant="ghost" onClick={onBack}>
         <ArrowLeft /> Back to plan
       </Button>
@@ -42,14 +66,7 @@ export function WorkoutDetail({
             <ExerciseCard
               key={exercise.id}
               exercise={exercise}
-              expanded={expandedExerciseId === exercise.id}
-              isPending={toggleExercise.isPending}
-              onToggleExpanded={() =>
-                setExpandedExerciseId((current) =>
-                  current === exercise.id ? null : exercise.id,
-                )
-              }
-              onToggleCompleted={() => toggleExercise.mutate(exercise.id)}
+              onSelect={() => setSelectedExerciseId(exercise.id)}
             />
           ))}
         </div>

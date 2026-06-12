@@ -19,4 +19,6 @@ export const env = {
   OPENAI_MEMORY_MODEL: process.env.OPENAI_MEMORY_MODEL || "gpt-4.1-mini",
   OPENAI_AGENTS_TRACING_ENABLED:
     process.env.OPENAI_AGENTS_TRACING_ENABLED === "true",
+
+  YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY || "",
 };
