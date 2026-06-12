@@ -22,7 +22,7 @@ export function WorkoutPlannerPanel({
 }) {
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const currentDayNumber = new Date().getDay();
+  const currentDayNumber = (new Date().getDay() || 7) as ProgramPlan["planDays"][number]["dayNumber"];
   const days = [...plan.planDays].sort(
     (left, right) =>
       (left.dayNumber - currentDayNumber + 7) % 7 -
@@ -144,7 +144,7 @@ export function WorkoutPlannerPanel({
                           )}
                         </span>
                         <span className="mt-2 block truncate text-[11px] font-medium">
-                          {day.name}
+                          {day.label}
                         </span>
                         <span className="mt-0.5 block text-[10px] text-muted-foreground">
                           {day.userExercises.length
@@ -200,7 +200,7 @@ export function WorkoutPlannerPanel({
                           )}
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <p className="truncate text-sm font-semibold">{day.name}</p>
+                              <p className="truncate text-sm font-semibold">{day.label}</p>
                               {day.id === today.id && <Badge className="px-2 py-0.5 text-[9px]">TODAY</Badge>}
                             </div>
                             <p className="truncate text-xs text-muted-foreground">{getProgramDayMuscles(day)}</p>

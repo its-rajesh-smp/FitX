@@ -21,8 +21,8 @@ export interface ProgramExercise {
 
 export interface ProgramDay {
   id: string;
-  name: string;
-  dayNumber: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  label: string;
+  dayNumber: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   userExercises: ProgramExercise[];
 }
 

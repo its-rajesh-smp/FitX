@@ -45,14 +45,14 @@ export const getLocalDateContext = (timeZone: string): LocalDateContext => {
     date: `${part("year")}-${part("month")}-${part("day")}`,
     weekday,
     dayNumber: [
-      "Sunday",
       "Monday",
       "Tuesday",
       "Wednesday",
       "Thursday",
       "Friday",
       "Saturday",
-    ].indexOf(weekday),
+      "Sunday",
+    ].indexOf(weekday) + 1,
     timeZone,
   };
 };
@@ -67,14 +67,14 @@ export const generatePrompt = (
 ): string => {
   const historyText = formatHistory(history);
   const userDetails = JSON.stringify(user.details ?? {});
+  // Current local date: ${localDate.date}
+  // Current local weekday: ${localDate.weekday}
+  // Current dayNumber: ${localDate.dayNumber}
   const threadSummary =
     (thread && ChatThread.getSummary(thread)) ??
     "No short-term thread summary yet.";
 
   return `
-Current local date: ${localDate.date}
-Current local weekday: ${localDate.weekday}
-Current dayNumber: ${localDate.dayNumber}
 Current user's name: ${userName}
 
 

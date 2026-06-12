@@ -5,7 +5,7 @@ export class PlanDay extends Model {
   id!: string;
   userId!: string;
   userPlanId!: string;
-  name!: string;
+  label!: string;
   dayNumber!: number;
 
   userExercises?: UserExercise[];

@@ -1,13 +1,14 @@
 import type { ProgramDay } from "@/features/program/types/program";
 
 const WEEK_DAYS = [
-  "Sunday",
+  "Unknown day",
   "Monday",
   "Tuesday",
   "Wednesday",
   "Thursday",
   "Friday",
   "Saturday",
+  "Sunday",
 ] as const;
 
 export const formatWeekDay = (dayNumber: ProgramDay["dayNumber"]) =>

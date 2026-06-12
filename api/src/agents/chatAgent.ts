@@ -8,6 +8,7 @@ import {
   getExercisesTool,
   getPlanTool,
 } from "../tools";
+import { updatePlanTool } from "../tools/updatePlan";
 import { chatAgentPrompt } from "./prompts/chatAgentPrompt";
 
 const chatWidgetSchema = z.object({
@@ -54,9 +55,9 @@ export const fitXChatAgent = new Agent<
     createPlanTool,
     getPlanTool,
     getExerciseDetailTool,
+    updatePlanTool,
     // removeExerciseTool,
     // updateExerciseTool,
-    // updatePlanDayTool,
     // addExerciseTool,
   ],
   instructions: chatAgentPrompt,

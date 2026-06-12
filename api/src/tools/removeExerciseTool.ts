@@ -10,7 +10,7 @@ export const removeExerciseTool = tool({
   
 IMPORTANT:
 - Make sure to check the complete plan before updating any exercise.
-- Make sure to check if the plan name update is required or not. After removing the exercise.  
+- Make sure to check if the plan day label update is required after removing the exercise.
   `,
   parameters: z.object({
     userExerciseIds: z.array(z.string()).min(1),

@@ -54,7 +54,7 @@ export function WorkoutDetail({
         <ArrowLeft /> Back to plan
       </Button>
       <header className="mt-5">
-        <h1 className="text-2xl font-semibold tracking-tight">{day.name}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{day.label}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {formatWeekDay(day.dayNumber)} - {getProgramDayMuscles(day)} -{" "}
           {completed} / {day.userExercises.length} completed

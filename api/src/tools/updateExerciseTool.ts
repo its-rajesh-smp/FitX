@@ -10,7 +10,7 @@ export const updateExerciseTool = tool({
   
 IMPORTANT:
 - Make sure to check the complete plan before updating any exercise.
-- Make sure to check is the plan name update is required or not. After updating the exercise.  
+- Make sure to check if the plan day label update is required after updating the exercise.
 `,
   parameters: z.object({
     userExerciseId: z.string(),

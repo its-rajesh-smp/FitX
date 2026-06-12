@@ -21,17 +21,17 @@ const dayInputSchema = z.object({
   dayNumber: z
     .number()
     .int()
-    .min(0)
-    .max(6)
+    .min(1)
+    .max(7)
     .describe(
-      "Day number from 0 to 6. Where 0 is Sunday, 1 is Monday, 2 is Tuesday, 3 is Wednesday, 4 is Thursday, 5 is Friday, 6 is Saturday.",
+      "ISO 8601 day number from 1 to 7. Where 1 is Monday, 2 is Tuesday, 3 is Wednesday, 4 is Thursday, 5 is Friday, 6 is Saturday, 7 is Sunday.",
     ),
-  name: z
+  label: z
     .string()
     .min(1)
     .max(100)
-    .refine((name) => !/^day\s*\d+(?:\s*-\s*day\s*\d+)?$/i.test(name.trim()), {
-      message: "Use a meaningful workout name, not a generic day label.",
+    .refine((label) => !/^day\s*\d+(?:\s*-\s*day\s*\d+)?$/i.test(label.trim()), {
+      message: "Use a meaningful workout label, not a generic day label.",
     }),
   exercises: z.array(exerciseInputSchema).max(12),
 });
@@ -40,23 +40,23 @@ const planDaysInputSchema = z.array(dayInputSchema).length(7);
 
 export const createPlanTool = tool({
   name: "createPlan",
-  description: `Create a complete seven-day weekly workout plan.
+  description: `Create a new seven-day weekly workout plan.
 
 BEFORE CALLING THIS TOOL:
-- Always call getExercises first to get valid exercise IDs.
+- Always call getExercises() first to get valid exercise IDs.
 - Never use all exercises returned. Pick only what fits the user's level and weekly structure.
 - Never invent or reuse exercise IDs from memory.
 
 IMPORTANT:
-dayNumber have to be always between 0, 1, 2, 3, 4, 5, 6
+dayNumber must use ISO 8601 weekday numbering from 1 through 7.
 Where
-0 = Sunday
 1 = Monday
 2 = Tuesday
 3 = Wednesday
 4 = Thursday
 5 = Friday
 6 = Saturday
+7 = Sunday
   `,
   parameters: z.object({
     days: planDaysInputSchema,
@@ -91,7 +91,7 @@ Where
             userId,
             userPlanId: createdPlan.id,
             dayNumber: day.dayNumber,
-            name: day.name,
+            label: day.label,
           },
           trx,
         );
