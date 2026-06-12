@@ -13,7 +13,7 @@ const TARGET_DETAILS = {
     description: "Use the full range of gym equipment and machines.",
     Icon: Building2,
   },
-  "Workout On Home": {
+  "Workout At Home": {
     description: "Start with workouts that need no equipment.",
     Icon: House,
   },

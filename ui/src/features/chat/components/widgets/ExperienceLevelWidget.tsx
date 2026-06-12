@@ -1,21 +1,25 @@
 import { ArrowRight, Dumbbell, Flame, Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const EXPERIENCE_OPTIONS = [
   {
     label: "Never really worked out before",
     description: "We will keep your first plan simple and approachable.",
     Icon: Sprout,
+    iconClassName: "bg-emerald-500/10 text-emerald-600",
   },
   {
     label: "Worked out before, but not consistently (less than 6 months)",
     description: "We will help you build a steady routine.",
     Icon: Dumbbell,
+    iconClassName: "bg-amber-500/10 text-amber-600",
   },
   {
     label: "I work out regularly (6+ months)",
     description: "We can use more variety and challenging movements.",
     Icon: Flame,
+    iconClassName: "bg-red-500/10 text-red-600",
   },
 ] as const;
 
@@ -28,7 +32,8 @@ export function ExperienceLevelWidget({
 }) {
   return (
     <div className="bg-card shadow-card mt-3 grid gap-2 rounded-2xl border p-2.5 sm:p-3">
-      {EXPERIENCE_OPTIONS.map(({ label, description, Icon }) => (
+      {EXPERIENCE_OPTIONS.map(
+        ({ label, description, Icon, iconClassName }) => (
         <Button
           key={label}
           type="button"
@@ -37,8 +42,13 @@ export function ExperienceLevelWidget({
           className="group hover:border-primary/40 hover:bg-primary-soft h-auto min-h-16 justify-start gap-3 rounded-xl px-3 py-3 text-left whitespace-normal"
           onClick={() => onSubmit([label])}
         >
-          <span className="bg-primary-soft text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
-            <Icon className="size-4.5" />
+          <span
+            className={cn(
+              "flex size-9 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:scale-110 group-hover:shadow-md",
+              iconClassName,
+            )}
+          >
+            <Icon className="size-4.5 transition-transform duration-300 ease-out group-hover:-rotate-12 group-hover:scale-110" />
           </span>
           <span className="min-w-0 flex-1">
             <span className="block text-sm leading-5 font-semibold">
@@ -50,7 +60,8 @@ export function ExperienceLevelWidget({
           </span>
           <ArrowRight className="text-muted-foreground group-hover:text-primary size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
         </Button>
-      ))}
+        ),
+      )}
     </div>
   );
 }
