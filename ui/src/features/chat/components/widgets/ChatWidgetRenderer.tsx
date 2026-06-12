@@ -2,6 +2,7 @@ import { PlanShortcut } from "@/features/chat/components/PlanShortcut";
 import { EquipmentMultiSelectWidget } from "@/features/chat/components/widgets/EquipmentMultiSelectWidget";
 import { ExperienceLevelWidget } from "@/features/chat/components/widgets/ExperienceLevelWidget";
 import { MuscleMultiSelectWidget } from "@/features/chat/components/widgets/MuscleMultiSelectWidget";
+import { DailyWorkoutDurationWidget } from "@/features/chat/components/widgets/DailyWorkoutDurationWidget";
 import type { ChatWidget } from "@/features/chat/types/chat";
 
 export function ChatWidgetRenderer({
@@ -31,6 +32,10 @@ export function ChatWidgetRenderer({
     case "equipment_multi_select":
       return (
         <EquipmentMultiSelectWidget disabled={disabled} onSubmit={onSubmit} />
+      );
+    case "daily_workout_duration":
+      return (
+        <DailyWorkoutDurationWidget disabled={disabled} onSubmit={onSubmit} />
       );
     case "user_plan":
       return (
