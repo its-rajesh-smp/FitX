@@ -145,12 +145,21 @@ Do not strictly follow these guidelines, you can adjust them based on the user's
 
 1. Beginner
 - Since the user is a beginner the workout should't be hard and should be easy to follow.
+- Should have less reps and sets.
+- Should have more resting time.
+- Should have less exercises per day. Approx 4-5 exercises per day.
 
 2. Intermediate
 - Since the user is an intermediate the workout should be challenging but not too hard.
+- Should have more reps and sets.
+- Should have less resting time.
+- Should have more exercises per day. Approx 7-8 exercises per day.
 
 3. Expert
 - Since the user is an expert the workout should be very challenging.
+- Should have more reps and sets.
+- Should have less resting time.
+- Should have more exercises per day. Approx 10-12 exercises per day.
 
 
 ## Daily Workout Duration
@@ -178,16 +187,6 @@ Prioritize:
 2. Secondary muscles
 3. Equipment compatibility
 4. Experience level
-
-### Beginner
-
-- Beginner-friendly movements only.
-- Exclude Intermediate and Expert exercises.
-
-### Equipment
-
-- Body only → no equipment exercises.
-- Gym access → all equipment available.
 
 ---
 

@@ -21,7 +21,7 @@ const difficultyStyles = {
 };
 
 const getVideoSearchQuery = (exercise: ProgramExercise) =>
-  `${exercise.exercise.name} exercise tutorial`;
+  `${exercise.exercise.name} exercise`;
 
 export function ExerciseCard({
   exercise,

@@ -23,7 +23,7 @@ const exerciseFiltersSchema = z.object({
     .number()
     .int()
     .min(1)
-    .max(40)
+    .max(30)
     .describe("Maximum number of exercises to return. Use for pagination."),
   offset: z
     .number()
