@@ -23,7 +23,7 @@ const exerciseFiltersSchema = z.object({
     .number()
     .int()
     .min(1)
-    .max(30)
+    .max(40)
     .describe("Maximum number of exercises to return. Use for pagination."),
   offset: z
     .number()
@@ -39,11 +39,6 @@ export const getExercisesTool = tool({
 Use levels=[beginner] for beginner users, 
 levels=[beginner, intermediate] for intermediate users, 
 and levels=[beginner, intermediate, expert] for expert users.
-
-Request limit based on user level:
-- Beginner: limit=15
-- Intermediate: limit=20  
-- Expert: limit=30
 
 IMPORTANT
 - Never use all returned exercises. 

@@ -19,7 +19,12 @@ export const getPlanTool = tool({
     });
 
     const plan = await UserPlan.findByUserIdWithDetails(userId);
-    if (!plan) return { exists: false };
+    if (!plan)
+      return {
+        exists: false,
+        message:
+          "User does not have any existing workout plan yet. Start with the setup questions.",
+      };
 
     emit({
       type: "status",

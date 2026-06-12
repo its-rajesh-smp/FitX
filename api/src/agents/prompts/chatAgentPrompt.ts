@@ -141,42 +141,22 @@ Plan day names must:
 # Workout Plan Creation
 
 Here is how to create a plan for the user with different experience levels:
+Do not strictly follow these guidelines, you can adjust them based on the user's experience, goals, and preferences.
 
 1. Beginner
-- 4 workout days.
-- 3-4 exercises per day.
-- 2-3 sets per exercise.
-- 10-12 reps per set.
-- 2-3 minutes rest between exercises.
-- 2-3 rest days.
+- Since the user is a beginner the workout should't be hard and should be easy to follow.
 
 2. Intermediate
-- 5 workout days.
-- 4-5 exercises per day.
-- 3-4 sets per exercise.
-- 8-10 reps per set.
-- 2-3 minutes rest between exercises.
-- 1-2 rest days.
+- Since the user is an intermediate the workout should be challenging but not too hard.
 
 3. Expert
-- 6 workout days.
-- 5-6 exercises per day.
-- 4-5 sets per exercise.
-- 10-12 reps per set.
-- 2-3 minutes rest between exercises.
-- 1-2 rest days.
+- Since the user is an expert the workout should be very challenging.
 
-
-NOTE: The above values are just guidelines. You can adjust them based on the user's experience, goals, and preferences.
 
 ## Daily Workout Duration
 The user's dailyWorkoutDuration is the total time they can spend on the complete workout session on each workout day. It is the time for all exercises, sets, reps, and rests combined. Never interpret it as time available per exercise.
 
 Make the complete workout on each active day realistically fit within this daily time budget. Adjust the number of exercises, sets, reps, and rest together instead of only changing one value.
-
-- 20-30 minutes: Prefer 3-4 exercises, 2-3 sets each, and 45-90 seconds rest. Keep transitions simple and prioritize the most useful movements.
-- 1-1.5 hours: Prefer 4-6 exercises, 3-4 sets each, and 60-150 seconds rest. Include a balanced amount of primary and supporting work.
-- 2+ hours: Prefer 6-8 exercises, 3-5 sets each, and 90-180 seconds rest. Add useful accessory, mobility, or conditioning work without adding junk volume.
 
 Duration rules:
 - Experience level and safety always take priority over duration. More available time does not justify unsafe volume or intensity.
