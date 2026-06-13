@@ -37,9 +37,9 @@ cp ui/.env.example ui/.env
 At minimum, update `api/.env` with:
 
 - `JWT_SECRET` - a long random secret
-- `GEMINI_API_KEY` when using the default `AI_PROVIDER=gemini`
-- `OPENAI_API_KEY` when using `AI_PROVIDER=openai`
-- `YOUTUBE_API_KEY` to enable exercise video guides
+- `OPENAI_API_KEY`- a openai api (reasoning models should be unlocked)
+- `AI_PROVIDER - "openai"`
+- `YOUTUBE_API_KEY`- to enable exercise video guides
 
 The example database values work with the local Docker PostgreSQL service.
 Docker automatically overrides `POSTGRES_HOST` to `db` for the API container,
