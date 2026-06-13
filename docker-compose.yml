@@ -1,31 +1,44 @@
 services:
   api-service:
-    container_name: template_api
+    container_name: fitx-api
     build:
       context: ./api
       dockerfile: Dockerfile.dev
     command: ["pnpm", "run", "dev"]
     env_file:
       - ./api/.env
+    environment:
+      POSTGRES_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
     volumes:
       - ./api:/app
       - /app/node_modules
     ports:
       - "8080:8080" # HOST_PORT : CONTAINER_PORT
     networks:
-      - template_network
+      - fitx-network
   db:
-    container_name: template-postgres
+    container_name: fitx-postgres
     image: postgres:16.6
     env_file:
       - ./api/.env
+    environment:
+      POSTGRES_HOST: db
     ports:
       - 5432:5432
     volumes:
       - ./postgresql/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-fitx}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
-      - template_network
+      - fitx-network
 
 networks:
-  template_network:
+  fitx-network:
+    name: fitx-network
     driver: bridge
