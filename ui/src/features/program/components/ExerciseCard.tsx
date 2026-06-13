@@ -90,6 +90,7 @@ export function ExerciseDetail({
     videoSearchQuery,
   )}`;
   const videos = useExerciseVideos(videoSearchQuery);
+  const instructions = exercise.exercise.instructions ?? [];
 
   return (
     <div>
@@ -143,9 +144,9 @@ export function ExerciseDetail({
             Video guide
           </a>
         </div>
-        {exercise.exercise.instructions.length ? (
+        {instructions.length ? (
           <ol className="text-muted-foreground mt-5 space-y-4 text-sm leading-6">
-            {exercise.exercise.instructions.map((instruction, index) => (
+            {instructions.map((instruction, index) => (
               <li key={`${exercise.id}-${index}`} className="flex gap-3">
                 <span className="bg-primary-soft text-primary flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
                   {index + 1}

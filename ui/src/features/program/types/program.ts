@@ -5,7 +5,7 @@ export interface CatalogExercise {
   equipment: string | null;
   primaryMuscles: string[];
   secondaryMuscles: string[];
-  instructions: string[];
+  instructions?: string[];
 }
 
 export interface ProgramExercise {
