@@ -1,5 +1,3 @@
-import { Check, Circle, Dumbbell, LoaderCircle, Moon, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { WorkoutDetail } from "@/features/program/components/WorkoutDetail";
@@ -8,6 +6,8 @@ import {
   getProgramDayMuscles,
 } from "@/features/program/helpers/program";
 import type { ProgramPlan } from "@/features/program/types/program";
+import { Check, Circle, Dumbbell, LoaderCircle, Moon, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export function WorkoutPlannerPanel({
   plan,
@@ -22,25 +22,34 @@ export function WorkoutPlannerPanel({
 }) {
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const currentDayNumber = new Date().getDay();
+  const currentDayNumber = (new Date().getDay() ||
+    7) as ProgramPlan["planDays"][number]["dayNumber"];
   const days = [...plan.planDays].sort(
     (left, right) =>
-      (left.dayNumber - currentDayNumber + 7) % 7 -
-      (right.dayNumber - currentDayNumber + 7) % 7,
+      ((left.dayNumber - currentDayNumber + 7) % 7) -
+      ((right.dayNumber - currentDayNumber + 7) % 7),
   );
   const today = days.find((day) => day.dayNumber === currentDayNumber);
   const selectedDay = days.find((day) => day.id === selectedDayId) ?? null;
-  const totalExercises = days.reduce((total, day) => total + day.userExercises.length, 0);
+  const totalExercises = days.reduce(
+    (total, day) => total + day.userExercises.length,
+    0,
+  );
   const completedExercises = days.reduce(
-    (total, day) => total + day.userExercises.filter((exercise) => exercise.isCompleted).length,
+    (total, day) =>
+      total +
+      day.userExercises.filter((exercise) => exercise.isCompleted).length,
     0,
   );
   const getDayProgress = (day: (typeof days)[number]) => {
-    const completed = day.userExercises.filter((exercise) => exercise.isCompleted).length;
+    const completed = day.userExercises.filter(
+      (exercise) => exercise.isCompleted,
+    ).length;
 
     return {
       completed,
-      isComplete: day.userExercises.length > 0 && completed === day.userExercises.length,
+      isComplete:
+        day.userExercises.length > 0 && completed === day.userExercises.length,
     };
   };
 
@@ -49,11 +58,11 @@ export function WorkoutPlannerPanel({
   }, [selectedDayId]);
 
   return (
-    <aside className="relative flex h-full min-h-0 flex-col bg-canvas">
+    <aside className="bg-canvas relative flex h-full min-h-0 flex-col">
       {isUpdating && (
-        <div className="absolute inset-x-0 bottom-0 top-14 z-20 flex items-center justify-center bg-white/70 backdrop-blur-sm">
-          <div className="flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-medium shadow-card">
-            <LoaderCircle className="size-4 animate-spin text-primary" />
+        <div className="absolute inset-x-0 top-14 bottom-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-sm">
+          <div className="shadow-card flex items-center gap-2 rounded-full border bg-white px-4 py-2 text-sm font-medium">
+            <LoaderCircle className="text-primary size-4 animate-spin" />
             Updating workout plan...
           </div>
         </div>
@@ -61,40 +70,50 @@ export function WorkoutPlannerPanel({
       <header className="flex h-14 shrink-0 items-center justify-between border-b bg-white px-4">
         <div>
           <h2 className="text-sm font-bold">Workout Planner</h2>
-          <p className="text-[11px] text-muted-foreground">Your workout plan</p>
+          <p className="text-muted-foreground text-[11px]">Your workout plan</p>
         </div>
         {showCloseButton && (
-          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close workout planner">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            aria-label="Close workout planner"
+          >
             <X />
           </Button>
         )}
       </header>
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+      <div
+        ref={scrollRef}
+        className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6"
+      >
         {!today ? (
           <div className="flex h-full items-center justify-center">
-            <div className="max-w-sm rounded-2xl border bg-white p-8 text-center shadow-card">
-              <span className="mx-auto flex size-11 items-center justify-center rounded-xl bg-primary-soft text-primary">
+            <div className="shadow-card max-w-sm rounded-2xl border bg-white p-8 text-center">
+              <span className="bg-primary-soft text-primary mx-auto flex size-11 items-center justify-center rounded-xl">
                 <Dumbbell className="size-5" />
               </span>
               <h3 className="mt-4 text-lg font-bold">No workout plan yet</h3>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Ask FitX to create a plan. It will appear here as soon as it is ready.
+              <p className="text-muted-foreground mt-2 text-sm leading-6">
+                Ask FitX to create a plan. It will appear here as soon as it is
+                ready.
               </p>
             </div>
           </div>
         ) : (
-          <div className="mx-auto min-w-0 max-w-3xl">
+          <div className="mx-auto max-w-3xl min-w-0">
             <section className="mb-6 min-w-0">
               <div className="mb-3 flex min-w-0 items-end justify-between gap-3">
                 <div className="min-w-0">
                   <h2 className="text-sm font-semibold">This week</h2>
-                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-0.5 truncate text-xs">
                     Stay consistent, one workout at a time.
                   </p>
                 </div>
-                <p className="shrink-0 text-xs font-medium text-muted-foreground">
-                  {days.filter((day) => getDayProgress(day).isComplete).length} workouts done
+                <p className="text-muted-foreground shrink-0 text-xs font-medium">
+                  {days.filter((day) => getDayProgress(day).isComplete).length}{" "}
+                  day completed
                 </p>
               </div>
               <div className="w-full min-w-0 overflow-x-auto p-1">
@@ -116,15 +135,21 @@ export function WorkoutPlannerPanel({
                             ? "border-green-200 bg-green-50 hover:bg-green-100"
                             : isToday
                               ? "border-primary/30 bg-primary-soft/60"
-                              : "bg-white hover:bg-muted/50"
-                        } ${isSelected ? "ring-2 ring-inset ring-primary/40" : ""}`}
+                              : "hover:bg-muted/50 bg-white"
+                        } ${isSelected ? "ring-primary/40 ring-2 ring-inset" : ""}`}
                       >
                         <span
-                          className={`block text-[10px] font-semibold uppercase tracking-wide ${
-                            isComplete ? "text-green-700" : isToday ? "text-primary" : "text-muted-foreground"
+                          className={`block text-[10px] font-semibold tracking-wide uppercase ${
+                            isComplete
+                              ? "text-green-700"
+                              : isToday
+                                ? "text-primary"
+                                : "text-muted-foreground"
                           }`}
                         >
-                          {isToday ? "Today" : formatWeekDay(day.dayNumber).slice(0, 3)}
+                          {isToday
+                            ? "Today"
+                            : formatWeekDay(day.dayNumber).slice(0, 3)}
                         </span>
                         <span
                           className={`mx-auto mt-2 flex size-8 items-center justify-center rounded-full text-xs font-semibold ${
@@ -144,9 +169,9 @@ export function WorkoutPlannerPanel({
                           )}
                         </span>
                         <span className="mt-2 block truncate text-[11px] font-medium">
-                          {day.name}
+                          {day.label}
                         </span>
-                        <span className="mt-0.5 block text-[10px] text-muted-foreground">
+                        <span className="text-muted-foreground mt-0.5 block text-[10px]">
                           {day.userExercises.length
                             ? `${completed}/${day.userExercises.length} done`
                             : "Rest day"}
@@ -158,21 +183,26 @@ export function WorkoutPlannerPanel({
               </div>
             </section>
             {selectedDay ? (
-              <WorkoutDetail day={selectedDay} onBack={() => setSelectedDayId(null)} />
+              <WorkoutDetail
+                day={selectedDay}
+                onBack={() => setSelectedDayId(null)}
+              />
             ) : (
               <>
                 <section className="mb-5">
-                  <h1 className="text-2xl font-semibold tracking-tight">Your {days.length} day exercise plan</h1>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <h1 className="text-2xl font-semibold tracking-tight">
+                    Your {days.length} day exercise plan
+                  </h1>
+                  <p className="text-muted-foreground mt-1 text-sm">
                     {completedExercises} / {totalExercises} exercises completed
                   </p>
-                  <p className="mt-2 max-w-xl text-xs leading-5 text-muted-foreground">
-                    Repeat this 7-day routine for 4 weeks to build consistency and
-                    track your progress.
+                  <p className="text-muted-foreground mt-2 max-w-xl text-xs leading-5">
+                    Repeat this 7-day routine for 4 weeks to build consistency
+                    and track your progress.
                   </p>
                 </section>
                 <section>
-                  <div className="overflow-hidden rounded-2xl border bg-white shadow-card">
+                  <div className="shadow-card overflow-hidden rounded-2xl border bg-white">
                     {days.map((day) => {
                       const { isComplete } = getDayProgress(day);
 
@@ -194,20 +224,32 @@ export function WorkoutPlannerPanel({
                               <Check className="size-2.5" />
                             </span>
                           ) : day.id === today.id ? (
-                            <span className="size-2.5 rounded-full bg-primary" />
+                            <span className="bg-primary size-2.5 rounded-full" />
                           ) : (
-                            <Circle className="size-3.5 text-muted-foreground/50" />
+                            <Circle className="text-muted-foreground/50 size-3.5" />
                           )}
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <p className="truncate text-sm font-semibold">{day.name}</p>
-                              {day.id === today.id && <Badge className="px-2 py-0.5 text-[9px]">TODAY</Badge>}
+                              <p className="truncate text-sm font-semibold">
+                                {day.label}
+                              </p>
+                              {day.id === today.id && (
+                                <Badge className="px-2 py-0.5 text-[9px]">
+                                  TODAY
+                                </Badge>
+                              )}
                             </div>
-                            <p className="truncate text-xs text-muted-foreground">{getProgramDayMuscles(day)}</p>
+                            <p className="text-muted-foreground truncate text-xs">
+                              {getProgramDayMuscles(day)}
+                            </p>
                           </div>
-                          <div className="ml-auto shrink-0 text-right text-[11px] text-muted-foreground">
+                          <div className="text-muted-foreground ml-auto shrink-0 text-right text-[11px]">
                             <p>{formatWeekDay(day.dayNumber)}</p>
-                            <p>{day.userExercises.length ? `${day.userExercises.length} exercises` : "Rest day"}</p>
+                            <p>
+                              {day.userExercises.length
+                                ? `${day.userExercises.length} exercises`
+                                : "Rest day"}
+                            </p>
                           </div>
                         </button>
                       );

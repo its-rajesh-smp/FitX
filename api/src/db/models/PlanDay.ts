@@ -5,7 +5,7 @@ export class PlanDay extends Model {
   id!: string;
   userId!: string;
   userPlanId!: string;
-  name!: string;
+  label!: string;
   dayNumber!: number;
 
   userExercises?: UserExercise[];
@@ -53,5 +53,21 @@ export class PlanDay extends Model {
     trx?: Transaction,
   ): Promise<number> {
     return await this.query(trx).delete().where("userPlanId", planId);
+  }
+
+  static async renameUserPlanDay(
+    userId: string,
+    input: {
+      planDayId: string;
+      label: string;
+    },
+  ): Promise<void> {
+    const { planDayId, label } = input;
+
+    const updated = await PlanDay.update(planDayId, { label });
+
+    if (!updated) {
+      throw new Error(`RENAME_FAILED: planDayId "${planDayId}" not found`);
+    }
   }
 }

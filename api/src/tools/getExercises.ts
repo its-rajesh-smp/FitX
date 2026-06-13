@@ -12,13 +12,17 @@ const exerciseFiltersSchema = z.object({
   levels: z
     .array(z.enum(EXERCISE_LEVELS))
     .max(EXERCISE_LEVELS.length)
-    .refine((levels) => new Set(levels).size === levels.length, {
-      message: "Exercise levels must be unique.",
-    }),
+    .describe("Unique List of fitness levels to filter by."),
   equipments: z
     .array(z.enum(EXERCISE_EQUIPMENT))
-    .max(EXERCISE_EQUIPMENT.length),
-  muscles: z.array(z.enum(EXERCISE_MUSCLES)).max(EXERCISE_MUSCLES.length),
+    .max(EXERCISE_EQUIPMENT.length)
+    .describe("Unique List of equipment to filter by."),
+  muscles: z
+    .array(z.enum(EXERCISE_MUSCLES))
+    .max(EXERCISE_MUSCLES.length)
+    .describe(
+      "Unique List of muscles to filter by. Combination of primary muscles and secondary muscles.",
+    ),
   limit: z
     .number()
     .int()
@@ -34,16 +38,8 @@ const exerciseFiltersSchema = z.object({
 });
 
 export const getExercisesTool = tool({
-  name: "getExercises",
-  description: `Get exercises from the FitX catalog. 
-Use levels=[beginner] for beginner users, 
-levels=[beginner, intermediate] for intermediate users, 
-and levels=[beginner, intermediate, expert] for expert users.
-
-IMPORTANT
-- Never use all returned exercises. 
-- Select only the most appropriate ones for the user and discard the rest.
-  `,
+  name: "getExercisesTool",
+  description: `This tool is used to get a list of exercises based on the provided filters.`,
   parameters: exerciseFiltersSchema,
   execute: async (
     { levels, equipments, muscles, limit },

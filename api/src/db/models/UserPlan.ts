@@ -50,6 +50,7 @@ export class UserPlan extends Model {
 
   static async findByUserIdWithDetails(
     userId: string,
+    excludeFieldsForLlm: boolean = true,
   ): Promise<UserPlan | undefined> {
     const plan = await this.query()
       .findOne({ userId })
@@ -61,14 +62,26 @@ export class UserPlan extends Model {
 
     // Derive isCompleted and clean up the response
     plan.planDays?.forEach((day) => {
-      day.userExercises?.forEach((exercise) => {
-        (exercise as any).isCompleted = exercise.userExerciseLogs!.length > 0;
-        delete (exercise as any).userExerciseLogs;
-        delete (exercise as any).instructions;
-        delete (exercise as any).images;
-        delete (exercise as any).createdAt;
-        delete (exercise as any).updatedAt;
+      day.userExercises?.forEach((userExercise) => {
+        (userExercise as any).isCompleted =
+          (userExercise as any).userExerciseLogs?.length > 0;
+
+        delete (userExercise as any).userExerciseLogs;
+
+        // LLM don't need these fields
+        if (excludeFieldsForLlm) {
+          delete (userExercise as any).exercise?.instructions;
+          delete (userExercise as any).exercise?.images;
+          delete (userExercise as any).exercise?.createdAt;
+          delete (userExercise as any).exercise?.updatedAt;
+        }
       });
+
+      // LLM don't need these fields
+      if (excludeFieldsForLlm) {
+        delete (day as any).createdAt;
+        delete (day as any).updatedAt;
+      }
     });
 
     return plan;

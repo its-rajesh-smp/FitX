@@ -100,7 +100,7 @@ export const sendChatMessage = async (
 
     const result = await run(fitXChatAgent, prompt, {
       context: { userId, emit },
-      maxTurns: 20,
+      maxTurns: 35,
       stream: true,
     });
 

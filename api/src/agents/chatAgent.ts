@@ -7,6 +7,7 @@ import {
   getExerciseDetailTool,
   getExercisesTool,
   getPlanTool,
+  updatePlanTool,
 } from "../tools";
 import { chatAgentPrompt } from "./prompts/chatAgentPrompt";
 
@@ -48,16 +49,20 @@ export const fitXChatAgent = new Agent<
   model: llmModel,
   outputType: chatAgentResponseSchema,
   modelSettings: {
-    temperature: 0.5,
+    // temperature: 0.5,
+    reasoning: {
+      effort: "medium",
+      summary: "concise",
+    },
   },
   tools: [
     getExercisesTool,
     createPlanTool,
     getPlanTool,
     getExerciseDetailTool,
+    updatePlanTool,
     // removeExerciseTool,
     // updateExerciseTool,
-    // updatePlanDayTool,
     // addExerciseTool,
   ],
   instructions: chatAgentPrompt,
