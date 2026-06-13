@@ -42,6 +42,9 @@ Requirements:
 3. quickAnswers have to be small in size and concise.
 4. Generate Quick Answers only when the user's next likely actions can be predicted with high confidence.
 
+IMPORTANT:
+Never use numbering in the quick answers. These have to be just plan text.
+
 ---
 
 # Widgets
