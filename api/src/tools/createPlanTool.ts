@@ -1,20 +1,20 @@
-import type { FitXAgentContext } from "../helpers/chat";
-import { PlanDay } from "../db/models/PlanDay";
-import { UserExercise } from "../db/models/UserExercise";
-import { UserPlan } from "../db/models/UserPlan";
 import { RunContext, tool } from "@openai/agents";
 import { z } from "zod";
 import { db } from "../db";
+import { PlanDay } from "../db/models/PlanDay";
+import { UserExercise } from "../db/models/UserExercise";
+import { UserPlan } from "../db/models/UserPlan";
+import type { FitXAgentContext } from "../helpers/chat";
 
 const exerciseInputSchema = z.object({
   exerciseId: z
     .string()
     .describe(
-      "The exact exercise id. Get this from the getExercises tool. DO not create by your own.",
+      "The exact exercise id. Get this from the getExercisesTool(). DO not create by your own.",
     ),
   sets: z.number().int().positive().nullable(),
   reps: z.number().int().positive().nullable(),
-  rest: z.number().int().positive().nullable(), // seconds
+  rest: z.number().int().positive().nullable(),
 });
 
 const dayInputSchema = z.object({
@@ -30,34 +30,21 @@ const dayInputSchema = z.object({
     .string()
     .min(1)
     .max(100)
-    .refine((label) => !/^day\s*\d+(?:\s*-\s*day\s*\d+)?$/i.test(label.trim()), {
-      message: "Use a meaningful workout label, not a generic day label.",
-    }),
-  exercises: z.array(exerciseInputSchema).max(12),
+    .describe("A meaningful label for the plan day."),
+  exercises: z
+    .array(exerciseInputSchema)
+    .max(12)
+    .describe("List of exercises need to have in this day."),
 });
 
-const planDaysInputSchema = z.array(dayInputSchema).length(7);
+const planDaysInputSchema = z
+  .array(dayInputSchema)
+  .length(7)
+  .describe("The list of 7 plan days need to have in the workout plan");
 
 export const createPlanTool = tool({
-  name: "createPlan",
-  description: `Create a new seven-day weekly workout plan.
-
-BEFORE CALLING THIS TOOL:
-- Always call getExercises() first to get valid exercise IDs.
-- Never use all exercises returned. Pick only what fits the user's level and weekly structure.
-- Never invent or reuse exercise IDs from memory.
-
-IMPORTANT:
-dayNumber must use ISO 8601 weekday numbering from 1 through 7.
-Where
-1 = Monday
-2 = Tuesday
-3 = Wednesday
-4 = Thursday
-5 = Friday
-6 = Saturday
-7 = Sunday
-  `,
+  name: "createWorkoutPlanTool",
+  description: `This tool is use to create a new seven-day weekly workout plan for the user.`,
   parameters: z.object({
     days: planDaysInputSchema,
   }),

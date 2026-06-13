@@ -48,7 +48,11 @@ export const fitXChatAgent = new Agent<
   model: llmModel,
   outputType: chatAgentResponseSchema,
   modelSettings: {
-    temperature: 0.5,
+    // temperature: 0.5,
+    reasoning: {
+      effort: "medium",
+      summary: "concise",
+    },
   },
   tools: [
     getExercisesTool,

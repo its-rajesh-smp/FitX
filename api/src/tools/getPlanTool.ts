@@ -4,12 +4,12 @@ import { UserPlan } from "../db/models/UserPlan";
 import type { FitXAgentContext } from "../helpers/chat";
 
 export const getPlanTool = tool({
-  name: "getPlan",
-  description:
-    "Get the user's complete weekly workout plan sorted by ISO 8601 dayNumber from Monday (1) through Sunday (7). Exercises within each day are sorted by order. Always call this before any plan modification.",
+  name: "getWorkoutPlanTool",
+  description: "This tool is use to get the user's current workout plan.",
   parameters: z.object({}),
   execute: async (_, runContext?: RunContext<FitXAgentContext>) => {
     if (!runContext) throw new Error("FITX_AGENT_CONTEXT_REQUIRED");
+
     const { userId, emit } = runContext.context;
 
     emit({
@@ -19,9 +19,8 @@ export const getPlanTool = tool({
     });
 
     const plan = await UserPlan.findByUserIdWithDetails(userId);
-    if (!plan) return { exists: false };
 
-    console.log(plan);
+    if (!plan) return { exists: false };
 
     emit({
       type: "status",

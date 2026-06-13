@@ -231,33 +231,24 @@ async function renameUserPlanDay(
 // ─────────────────────────────────────────────
 
 export const updatePlanTool = tool({
-  name: "updatePlan",
-  description: `
-    Updates the user's existing workout plan.
+  name: "updateWorkoutPlanTool",
+  description: `This tool is used to update the user's existing workout plan.
 
-    BEFORE CALLING:
-    - Always call getPlan() first this turn to get current UUIDs (userExerciseId, planDayId).
-    - For swap_exercise or add_exercise, always call getExercises() first to get valid exerciseId UUIDs.
-    - Never use UUIDs from conversation history. Always re-fetch.
-
-    OPERATIONS:
+    ACTIONS:
     - swap_exercise  : Replace an existing userExercise with a different exercise. Needs userExerciseId + newExerciseId.
     - adjust_volume  : Change sets, reps, or rest on an existing userExercise. Include only fields that are changing.
     - add_exercise   : Add a new exercise to a planDay. Needs planDayId + newExerciseId. sets, reps, rest are required.
     - remove_exercise: Remove a userExercise from a planDay. Needs userExerciseId.
     - rename_day     : Rename a planDay label without touching its exercises. Needs planDayId + label.
 
-    RULES:
-    - Never call this tool twice in the same turn.
-    - After success, always return the user_plan widget.
+    IMPORTANT:
+    - Never call this tool multiple times instead use batch operations to update the user's workout plan in a single call.
   `,
   parameters: z.object({
     operations: z
       .array(operationSchema)
       .min(1)
-      .describe(
-        "List of operations to apply. Batch all changes into a single call.",
-      ),
+      .describe("List of actions to perform"),
   }),
   execute: async (
     { operations },
