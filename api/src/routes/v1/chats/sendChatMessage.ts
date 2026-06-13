@@ -104,7 +104,7 @@ export const sendChatMessage = async (
       stream: true,
     });
 
-    const llmResponse = normalizeWidget(await streamAIResponse(result));
+    const llmResponse = await streamAIResponse(result);
 
     const persisted = await db.transaction(async (trx) => {
       const thread =
