@@ -1,5 +1,5 @@
 export const APP = {
-  name: "FitX",
+  name: "OceanFitX",
   icon: "/favicon.png",
+  productName: "FitX",
 } as const;
-

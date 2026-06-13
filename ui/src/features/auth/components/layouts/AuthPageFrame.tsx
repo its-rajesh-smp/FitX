@@ -1,3 +1,4 @@
+import { APP } from "@/constants/app";
 import { Dumbbell, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AuthWorkoutIllustration } from "./AuthWorkoutIllustration";
@@ -15,7 +16,7 @@ export function AuthPageFrame({ children }: { children: React.ReactNode }) {
           <span className="flex size-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
             <Dumbbell />
           </span>
-          FitAI
+          {APP.productName}
         </Link>
         <div className="relative my-auto max-w-lg">
           <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold backdrop-blur">
@@ -48,7 +49,7 @@ export function AuthPageFrame({ children }: { children: React.ReactNode }) {
             <span className="bg-primary flex size-9 items-center justify-center rounded-lg text-white">
               <Dumbbell className="size-5" />
             </span>
-            FitAI
+            {APP.productName}
           </Link>
           {children}
         </div>
