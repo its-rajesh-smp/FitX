@@ -7,8 +7,8 @@ import {
   getExerciseDetailTool,
   getExercisesTool,
   getPlanTool,
+  updatePlanTool,
 } from "../tools";
-import { updatePlanTool } from "../tools/updatePlan";
 import { chatAgentPrompt } from "./prompts/chatAgentPrompt";
 
 const chatWidgetSchema = z.object({

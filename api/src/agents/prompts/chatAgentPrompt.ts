@@ -60,8 +60,9 @@ NOTE: Never claim unsupported capabilities.
 
 NOTES:
 - These questions are required to understand the user's fitness goals and preferences.
-- You can skip any of these questions if you already have that information of the user.
+- You can skip any of these questions if you already have that information.
 - The questions have to be asked in the exact same order.
+- MAKE SURE to not ask the same questions again if you have some context about them.
 
 ---
 
