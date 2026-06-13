@@ -3,10 +3,7 @@ import { z } from "zod";
 import { PlanDay, UserExercise } from "../db/models";
 import type { FitXAgentContext } from "../helpers/chat";
 
-// ─────────────────────────────────────────────
 // OPERATION SCHEMA (flat — no discriminatedUnion, OpenAI doesn't support oneOf)
-// ─────────────────────────────────────────────
-
 const operationSchema = z.object({
   type: z
     .enum([
@@ -85,151 +82,6 @@ const operationSchema = z.object({
   reason: z.string().describe("Why you are doing this?"),
 });
 
-// ─────────────────────────────────────────────
-// SERVICE FUNCTIONS (temporary, move to services/ later)
-// ─────────────────────────────────────────────
-
-async function swapUserExercise(
-  userId: string,
-  input: {
-    userExerciseId: string;
-    newExerciseId: string;
-    sets?: number;
-    reps?: number;
-    rest?: number;
-  },
-): Promise<void> {
-  const { userExerciseId, newExerciseId, sets, reps, rest } = input;
-
-  const updated = await UserExercise.update(userExerciseId, {
-    exerciseId: newExerciseId,
-    ...(sets !== undefined && { sets }),
-    ...(reps !== undefined && { reps }),
-    ...(rest !== undefined && { rest }),
-  });
-
-  if (!updated) {
-    throw new Error(
-      `SWAP_FAILED: userExerciseId "${userExerciseId}" not found`,
-    );
-  }
-}
-
-async function adjustUserExerciseVolume(
-  userId: string,
-  input: {
-    userExerciseId: string;
-    sets?: number;
-    reps?: number;
-    rest?: number;
-  },
-): Promise<void> {
-  const { userExerciseId, sets, reps, rest } = input;
-
-  if (sets === undefined && reps === undefined && rest === undefined) {
-    throw new Error(
-      "ADJUST_FAILED: At least one of sets, reps, or rest must be provided",
-    );
-  }
-
-  const updated = await UserExercise.update(userExerciseId, {
-    ...(sets !== undefined && { sets }),
-    ...(reps !== undefined && { reps }),
-    ...(rest !== undefined && { rest }),
-  });
-
-  if (!updated) {
-    throw new Error(
-      `ADJUST_FAILED: userExerciseId "${userExerciseId}" not found`,
-    );
-  }
-}
-
-async function addUserExercise(
-  userId: string,
-  input: {
-    planDayId: string;
-    exerciseId: string;
-    sets: number;
-    reps: number;
-    rest: number;
-  },
-): Promise<void> {
-  const { planDayId, exerciseId, sets, reps, rest } = input;
-
-  const existing = await UserExercise.query()
-    .where({ planDayId })
-    .orderBy("order");
-
-  const alreadyExists = existing.some((ex) => ex.exerciseId === exerciseId);
-  if (alreadyExists) {
-    throw new Error(
-      `ADD_FAILED: exerciseId "${exerciseId}" already exists on this day`,
-    );
-  }
-
-  const nextOrder = existing.length + 1;
-
-  await UserExercise.create({
-    userId,
-    planDayId,
-    exerciseId,
-    sets,
-    reps,
-    rest,
-    order: nextOrder,
-  });
-}
-
-async function removeUserExercise(
-  userId: string,
-  input: {
-    userExerciseId: string;
-  },
-): Promise<void> {
-  const { userExerciseId } = input;
-
-  const userExercise = await UserExercise.findById(userExerciseId);
-  if (!userExercise) {
-    throw new Error(
-      `REMOVE_FAILED: userExerciseId "${userExerciseId}" not found`,
-    );
-  }
-
-  await UserExercise.query().deleteById(userExerciseId);
-
-  // Reorder remaining to close the gap
-  const remaining = await UserExercise.query()
-    .where({ planDayId: userExercise.planDayId })
-    .orderBy("order");
-
-  await Promise.all(
-    remaining.map((ex, index) =>
-      UserExercise.update(ex.id, { order: index + 1 }),
-    ),
-  );
-}
-
-async function renameUserPlanDay(
-  userId: string,
-  input: {
-    planDayId: string;
-    label: string;
-  },
-): Promise<void> {
-  const { planDayId, label } = input;
-
-  const updated = await PlanDay.update(planDayId, { label });
-
-  if (!updated) {
-    throw new Error(`RENAME_FAILED: planDayId "${planDayId}" not found`);
-  }
-}
-
-// ─────────────────────────────────────────────
-// TOOL
-// ─────────────────────────────────────────────
-
 export const updatePlanTool = tool({
   name: "updateWorkoutPlanTool",
   description: `This tool is used to update the user's existing workout plan.
@@ -279,7 +131,7 @@ export const updatePlanTool = tool({
               status: "updating_plan",
               label: "Swapping exercise",
             });
-            await swapUserExercise(userId, {
+            await UserExercise.swapUserExercise(userId, {
               userExerciseId: operation.userExerciseId,
               newExerciseId: operation.newExerciseId,
               sets: operation.sets,
@@ -298,7 +150,7 @@ export const updatePlanTool = tool({
               status: "updating_plan",
               label: "Adjusting sets, reps and rest",
             });
-            await adjustUserExerciseVolume(userId, {
+            await UserExercise.adjustUserExerciseVolume(userId, {
               userExerciseId: operation.userExerciseId,
               sets: operation.sets,
               reps: operation.reps,
@@ -324,7 +176,7 @@ export const updatePlanTool = tool({
               status: "updating_plan",
               label: "Adding exercise to your plan",
             });
-            await addUserExercise(userId, {
+            await UserExercise.addUserExercise(userId, {
               planDayId: operation.planDayId,
               exerciseId: operation.newExerciseId,
               sets: operation.sets,
@@ -343,7 +195,7 @@ export const updatePlanTool = tool({
               status: "updating_plan",
               label: "Removing exercise from your plan",
             });
-            await removeUserExercise(userId, {
+            await UserExercise.removeUserExercise(userId, {
               userExerciseId: operation.userExerciseId,
             });
             break;
@@ -360,7 +212,7 @@ export const updatePlanTool = tool({
               status: "updating_plan",
               label: "Renaming workout day",
             });
-            await renameUserPlanDay(userId, {
+            await PlanDay.renameUserPlanDay(userId, {
               planDayId: operation.planDayId,
               label: operation.label,
             });
