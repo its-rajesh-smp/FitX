@@ -1,5 +1,8 @@
 # FitX
 
+<img width="1995" height="1042" alt="image" src="https://github.com/user-attachments/assets/3aae1ef0-c1c9-4d56-a2d8-37c047fb2382" />
+
+
 FitX is an Agent powered fitness planning application with an AI-assisted chat,
 weekly workout plans, exercise tracking, and video guides.
 
