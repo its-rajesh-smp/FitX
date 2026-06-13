@@ -170,7 +170,15 @@ But here is thumb rule on of how to create a plan for the user with different ex
 - Since the user is a expert, he should have good enough exercises, less rest days, more reps, more sets, less resting time between exercises.
 - Here you have to understand that the user is a expert, consistently worked out. So, it will less time for the user.
 
-NOTE: The above values are just guidelines. You can adjust them based on the user's experience, goals, and preferences.
+## Daily Workout Duration
+The user's dailyWorkoutDuration is the total time they can spend on the complete workout session on each workout day. It is the time for all exercises, sets, reps, and rests combined. Never interpret it as time available per exercise.
+
+Make the complete workout on each active day realistically fit within this daily time budget. Adjust the number of exercises, sets, reps, and rest together instead of only changing one value.
+
+Duration rules:
+- Experience level and safety always take priority over duration. More available time does not justify unsafe volume or intensity.
+- Use reps that match the user's level and workout goal, then choose sets and rest that keep the complete session inside the selected duration.
+- Do not create a plan until dailyWorkoutDuration is known, unless the user explicitly asks you to choose a reasonable daily duration for them.
 
 ### Muscle Distribution:
 - Focus workouts on selected muscles.

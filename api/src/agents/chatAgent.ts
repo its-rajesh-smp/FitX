@@ -18,6 +18,7 @@ const chatWidgetSchema = z.object({
       "experience_level",
       "muscle_multi_select",
       "equipment_multi_select",
+      "daily_workout_duration",
       "user_plan",
     ])
     .default("none")

@@ -27,7 +27,7 @@ export function MuscleMultiSelectWidget({
 
   const selectTarget = (target: WorkoutTarget) => {
     setSelectedTarget(target);
-    setSelectedMuscles([]);
+    setSelectedMuscles([...WORKOUT_TARGETS[target]]);
   };
 
   const toggleMuscle = (muscle: string) => {
@@ -119,8 +119,7 @@ export function MuscleMultiSelectWidget({
       {showAllMuscles && (
         <div className="mt-3 flex flex-wrap gap-2">
           {EXERCISE_MUSCLES.map((muscle) => {
-            const isSelected =
-              !selectedTarget && selectedMuscles.includes(muscle);
+            const isSelected = selectedMuscles.includes(muscle);
             return (
               <Button
                 key={muscle}

@@ -14,6 +14,7 @@ export interface MessageContent {
       | "experience_level"
       | "muscle_multi_select"
       | "equipment_multi_select"
+      | "daily_workout_duration"
       | "user_plan";
     label: string;
   };

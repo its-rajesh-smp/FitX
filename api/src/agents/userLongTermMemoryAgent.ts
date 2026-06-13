@@ -6,6 +6,7 @@ import {
   EXERCISE_LEVELS,
   EXERCISE_MUSCLES,
 } from "../constants/exerciseFilters";
+import { DAILY_WORKOUT_DURATIONS } from "../constants/workoutPreferences";
 
 const userDetailsUpdateSchema = z.object({
   experienceLevel: z
@@ -28,6 +29,13 @@ const userDetailsUpdateSchema = z.object({
     .describe(
       "Set when the user explicitly states equipment available to the workout subject.",
     ),
+
+  dailyWorkoutDuration: z
+    .enum(DAILY_WORKOUT_DURATIONS)
+    .optional()
+    .describe(
+      "Set when the user explicitly states the total time the workout subject can spend daily on their full workout session. This is the total daily time for all exercises combined, not time per exercise. Normalize to the closest available duration.",
+    ),
 });
 
 export const userLongTermMemoryAgent = new Agent({
@@ -45,6 +53,9 @@ Examples:
 "I am a beginner" => {"experienceLevel":"beginner"}
 "I'm not a beginner" => {}
 "I have dumbbells" => {"availableEquipment":["dumbbells"]}
+"I can workout for 25 minutes daily" => {"dailyWorkoutDuration":"20-30 minutes"}
+"I can spend about an hour daily on exercise" => {"dailyWorkoutDuration":"1-1.5 hours"}
+"I have more than 2 hours available daily for my workout" => {"dailyWorkoutDuration":"2+ hours"}
 "My dad has dumbbells and he is a beginner" => {"availableEquipment":["dumbbells"], "experienceLevel":"beginner"}
 "I have dumbbells and I am a beginner" => {"availableEquipment":["dumbbells"], "experienceLevel":"beginner"}
 "My dad have no experience in fitness" => {"experienceLevel":"beginner"}

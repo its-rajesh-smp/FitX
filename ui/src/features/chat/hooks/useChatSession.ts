@@ -16,11 +16,17 @@ import { useProgram } from "@/features/program/hooks/useProgram";
 
 const EMPTY_CHAT = { thread: null, messages: [] };
 
+/**
+ * Coordinates chat history, optimistic messages, streamed responses, widgets,
+ * and workout-plan refreshes for the active session.
+ */
 export function useChatSession() {
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
   const chatsQuery = useQuery({ queryKey: ["chats"], queryFn: getChats });
   const programQuery = useProgram();
+
+  // Combines optimistic and streamed messages with the saved chat state.
   const [chatOverride, setChatOverride] = useState<{
     thread: ChatThread | null;
     messages: ChatMessage[];
@@ -28,9 +34,9 @@ export function useChatSession() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [status, setStatus] = useState<ActiveChatStatus | null>(null);
   const [streamError, setStreamError] = useState<string | null>(null);
-  const [answeredWidgets, setAnsweredWidgets] = useState<Record<string, string>>(
-    {},
-  );
+  const [answeredWidgets, setAnsweredWidgets] = useState<
+    Record<string, string>
+  >({});
   const [customQuestion, setCustomQuestion] = useState<AnswerContext | null>(
     null,
   );
@@ -50,6 +56,7 @@ export function useChatSession() {
     return () => window.clearTimeout(timeout);
   }, [showPlanUpdatedToast]);
 
+  // Refreshes planner data and feedback after an agent plan mutation.
   const handlePlanUpdated = useCallback(async () => {
     try {
       await queryClient.invalidateQueries({ queryKey: ["program"] });
@@ -75,6 +82,7 @@ export function useChatSession() {
     [thread],
   );
 
+  // Processes streamed server events and updates the assistant message and UI state.
   const handleStreamEvent = useCallback(
     (event: ChatStreamEvent, pendingAssistantId: string) => {
       switch (event.type) {
@@ -129,7 +137,11 @@ export function useChatSession() {
     [handlePlanUpdated, queryClient, updatePendingAssistant],
   );
 
-  const send: SendChatMessage = async (text, answerContext = customQuestion) => {
+  // Shows optimistic messages immediately, then fills the assistant response.
+  const send: SendChatMessage = async (
+    text,
+    answerContext = customQuestion,
+  ) => {
     const messageText = answerContext
       ? `Question: ${answerContext.question}\nAnswer: ${text}`
       : text;
@@ -200,6 +212,7 @@ export function useChatSession() {
     }
   };
 
+  // Preserves widget-question context when submitting preset or custom answers.
   const selectQuickAnswer = (
     widgetKey: string,
     question: string,

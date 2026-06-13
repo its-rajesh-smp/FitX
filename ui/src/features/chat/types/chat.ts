@@ -10,6 +10,7 @@ export type ChatWidget =
   | { type: "experience_level"; label?: string }
   | { type: "muscle_multi_select"; label?: string }
   | { type: "equipment_multi_select"; label?: string }
+  | { type: "daily_workout_duration"; label?: string }
   | { type: "user_plan"; label?: string };
 
 export interface ChatMessage {

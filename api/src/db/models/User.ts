@@ -5,11 +5,13 @@ import {
   EXERCISE_LEVELS,
   EXERCISE_MUSCLES,
 } from "../../constants/exerciseFilters";
+import { DAILY_WORKOUT_DURATIONS } from "../../constants/workoutPreferences";
 
 export interface UserDetails {
   experienceLevel?: (typeof EXERCISE_LEVELS)[number];
   targetMuscles?: (typeof EXERCISE_MUSCLES)[number][];
   availableEquipment?: (typeof EXERCISE_EQUIPMENT)[number][];
+  dailyWorkoutDuration?: (typeof DAILY_WORKOUT_DURATIONS)[number];
 }
 
 export class User extends Model {

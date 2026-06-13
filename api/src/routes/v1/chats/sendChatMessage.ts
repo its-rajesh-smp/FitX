@@ -38,6 +38,10 @@ const normalizeWidget = (
       /\b(equipment|body only|dumbbell|barbell|machine|bands|gym|home|have available|access to)\b/i.test(
         response.text,
       )) ||
+    (response.widget.type === "daily_workout_duration" &&
+      /\b(how much time|how long|minutes|hours|duration|spend daily|each day|per day|daily workout|daily exercise)\b/i.test(
+        response.text,
+      )) ||
     (response.widget.type === "user_plan" &&
       /\b(plan|workout|schedule|created|updated|ready|exercises)\b/i.test(
         response.text,

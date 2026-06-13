@@ -48,7 +48,9 @@ export async function streamChatMessage(
     const lines = buffer.split("\n");
     buffer = lines.pop() ?? "";
 
-    lines.filter(Boolean).forEach((line) => onEvent(JSON.parse(line) as ChatStreamEvent));
+    lines
+      .filter(Boolean)
+      .forEach((line) => onEvent(JSON.parse(line) as ChatStreamEvent));
     if (done) break;
   }
 

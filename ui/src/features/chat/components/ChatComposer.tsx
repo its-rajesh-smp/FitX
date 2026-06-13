@@ -66,7 +66,8 @@ export function ChatComposer({
     <form
       className={cn(
         "shadow-card flex items-end gap-2 rounded-3xl border bg-white p-2 transition-[border-color,box-shadow]",
-        large && "min-h-28",
+        large &&
+          "border-primary/15 min-h-28 bg-white/95 p-3 shadow-[0_18px_55px_rgb(30_20_70/0.10)] focus-within:border-primary/40 focus-within:shadow-[0_22px_65px_rgb(30_20_70/0.14)]",
         highlighted && "border-primary ring-primary/15 ring-3",
       )}
       onSubmit={(event) => {
@@ -87,14 +88,17 @@ export function ChatComposer({
         rows={1}
         className={cn(
           "min-h-10 flex-1 resize-none overflow-y-auto bg-transparent px-3 py-2.5 text-sm leading-6 outline-none",
-          large && "min-h-20",
+          large && "min-h-20 px-4 py-3 text-[15px]",
         )}
         placeholder={activePlaceholder}
       />
       <Button
         type="submit"
         size="icon"
-        className="mb-0.5 rounded-full"
+        className={cn(
+          "mb-0.5 rounded-full",
+          large && "size-10 shadow-sm transition-transform hover:-translate-y-0.5",
+        )}
         disabled={isPending || !value.trim()}
         aria-label="Send message"
       >

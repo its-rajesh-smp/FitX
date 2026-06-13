@@ -17,6 +17,10 @@ const normalizedUserDetails = (details: any) => {
     normalizedDetails.availableEquipment = details.availableEquipment;
   }
 
+  if (details.dailyWorkoutDuration) {
+    normalizedDetails.dailyWorkoutDuration = details.dailyWorkoutDuration;
+  }
+
   return normalizedDetails;
 };
 

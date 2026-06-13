@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { searchExerciseVideos } from "@/features/program/services/searchExerciseVideos";
 
+/** Fetches and caches exercise videos for a non-empty search query. */
 export const useExerciseVideos = (query: string) =>
   useQuery({
     queryKey: ["exercise-videos", query],
