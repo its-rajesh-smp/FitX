@@ -71,8 +71,6 @@ Stop the Docker services:
 docker compose down
 ```
 
-## Docker naming and existing `template_*` containers
-
 The Compose setup uses the FitX-specific names `fitx-api`, `fitx-postgres`, and
 `fitx-network`.
 
