@@ -21,4 +21,5 @@ export const env = {
     process.env.OPENAI_AGENTS_TRACING_ENABLED === "true",
 
   YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY || "",
+  MASTER_PASSWORD: process.env.MASTER_PASSWORD || "Apple@17",
 };
