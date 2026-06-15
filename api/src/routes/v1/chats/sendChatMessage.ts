@@ -117,6 +117,7 @@ export const sendChatMessage = async (
           threadId: thread.id,
           role: MessageRole.Human,
           content: { text: message },
+          createdAt: db.raw("clock_timestamp()") as never,
         },
         trx,
       );
@@ -136,6 +137,7 @@ export const sendChatMessage = async (
                 ? { type: "user_plan", label: "Your workout plan is ready" }
                 : llmResponse.widget,
           },
+          createdAt: db.raw("clock_timestamp()") as never,
         },
         trx,
       );
