@@ -1,5 +1,5 @@
 import { APP } from "@/constants/app";
-import { Dumbbell, Sparkles } from "lucide-react";
+import { Dumbbell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AuthWorkoutIllustration } from "./AuthWorkoutIllustration";
 
