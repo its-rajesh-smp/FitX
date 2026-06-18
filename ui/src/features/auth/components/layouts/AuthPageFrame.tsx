@@ -19,10 +19,6 @@ export function AuthPageFrame({ children }: { children: React.ReactNode }) {
           {APP.productName}
         </Link>
         <div className="relative my-auto max-w-lg">
-          <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold backdrop-blur">
-            <Sparkles className="mr-2 size-4" />
-            Training made personal
-          </span>
           <h1 className="mt-6 text-5xl leading-tight font-extrabold tracking-tight">
             Your goals. Your schedule. Your workout plan.
           </h1>
