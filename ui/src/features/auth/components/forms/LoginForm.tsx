@@ -30,7 +30,7 @@ export function LoginForm() {
   return (
     <AuthFormCard
       title="Sign in to FitX"
-      description="Welcome back. Pick up your week where you left off."
+      description="Welcome back. Pick up where you left off."
       footer={
         <>
           Don&apos;t have an account?{" "}

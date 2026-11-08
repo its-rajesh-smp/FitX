@@ -14,20 +14,20 @@ export const PasswordInput = React.forwardRef<
       <Input
         ref={ref}
         type={isVisible ? "text" : "password"}
-        className={cn("pr-11", className)}
+        className={cn("pr-9", className)}
         {...props}
       />
       <button
         type="button"
         onClick={() => setIsVisible((visible) => !visible)}
-        className="text-muted-foreground hover:text-foreground focus-visible:ring-primary absolute inset-y-0 right-0 flex w-11 cursor-pointer items-center justify-center rounded-r-xl transition-colors outline-none focus-visible:ring-2"
+        className="text-muted-foreground hover:text-foreground focus-visible:ring-primary absolute inset-y-0 right-0 flex w-9 cursor-pointer items-center justify-center rounded-r-md transition-colors outline-none focus-visible:ring-2"
         aria-label={isVisible ? "Hide password" : "Show password"}
         aria-pressed={isVisible}
       >
         {isVisible ? (
-          <EyeOff className="size-4.5" />
+          <EyeOff className="size-3.5" />
         ) : (
-          <Eye className="size-4.5" />
+          <Eye className="size-3.5" />
         )}
       </button>
     </div>

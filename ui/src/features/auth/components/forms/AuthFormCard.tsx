@@ -14,9 +14,9 @@ export function AuthFormCard({
 }) {
   return (
     <div className="w-full max-w-[400px]">
-      <div className="rounded-2xl border border-line bg-surface p-8 shadow-card">
-        <h1 className="text-[17px] font-semibold tracking-[-0.01em] text-ink">{title}</h1>
-        <p className="mt-1 text-[13px] text-muted">{description}</p>
+      <div className="rounded-xl border border-line bg-surface px-6 py-7 shadow-card sm:px-10 sm:py-8">
+        <h1 className="text-center text-[17px] font-semibold tracking-[-0.01em] text-ink">{title}</h1>
+        <p className="mt-1 text-center text-[13px] text-muted">{description}</p>
 
         <div className="mt-6">
           <GoogleButton />
@@ -32,7 +32,7 @@ export function AuthFormCard({
       </div>
 
       {/* The sign-in / sign-up switch lives under the card, not inside it. */}
-      <p className="mt-6 text-center text-[13px] text-muted">{footer}</p>
+      <p className="mt-5 text-center text-[13px] text-muted">{footer}</p>
     </div>
   );
 }
