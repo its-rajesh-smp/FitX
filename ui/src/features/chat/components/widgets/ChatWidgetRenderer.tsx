@@ -40,7 +40,7 @@ export function ChatWidgetRenderer({
     case "user_plan":
       return (
         <PlanShortcut
-          label={widget.label}
+          label={widget.label || "Your workout plan"}
           disabled={disabled}
           onOpen={onOpenPlan}
         />

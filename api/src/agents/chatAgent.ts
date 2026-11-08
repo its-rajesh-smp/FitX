@@ -25,10 +25,9 @@ const chatWidgetSchema = z.object({
     .describe("The type of widget to display."),
   label: z
     .string()
-    .min(1)
     .max(30)
     .describe(
-      "The meaningful label for the widget to show as a title. Under 30 character.",
+      "The meaningful label for the widget to show as a title. Under 30 character. Use an empty string when type is \"none\".",
     ),
 });
 

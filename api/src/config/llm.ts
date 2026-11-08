@@ -8,7 +8,10 @@ const createGeminiModel = () => {
     apiKey: env.GEMINI_API_KEY,
   });
 
-  return aisdk(googleProvider(env.GEMINI_MODEL) as never);
+  // TODO: temporarily hardcoded. Gemini 2.x (e.g. gemini-2.5-flash-lite) rejects
+  // function calling combined with a JSON response schema; Gemini 3.x supports it.
+  // Switch back to env.GEMINI_MODEL once .env points at a 3.x model.
+  return aisdk(googleProvider("gemini-3.5-flash-lite") as never);
 };
 
 const createOpenAIModel = () => {
