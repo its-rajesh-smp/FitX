@@ -1,27 +1,39 @@
-import { LandingFooter } from "@/features/landing/components/LandingFooter";
-import { LandingHeader } from "@/features/landing/components/LandingHeader";
-import {
-  FeaturesSection,
-  HeroSection,
-  HighlightsSection,
-  HowItWorksSection,
-  StartSection,
-} from "@/features/landing/components/LandingSections";
-import { useAuthStore } from "@/features/auth/stores/useAuthStore";
+import { useEffect } from "react";
+import { SiteFooter } from "@/features/landing/components/layouts/SiteFooter";
+import { SiteNav } from "@/features/landing/components/layouts/SiteNav";
+import { ClosingCta } from "@/features/landing/components/ClosingCta";
+import { FactsRow } from "@/features/landing/components/FactsRow";
+import { Faq } from "@/features/landing/components/Faq";
+import { Features } from "@/features/landing/components/features/Features";
+import { Hero } from "@/features/landing/components/hero/Hero";
+import { HowItWorks } from "@/features/landing/components/steps/HowItWorks";
+import { YourWeek } from "@/features/landing/components/week/YourWeek";
+
+const LANDING_TITLE = "FitX: your personal trainer, in a chat";
 
 export function LandingPage() {
-  const isAuthenticated = Boolean(useAuthStore((state) => state.token));
-  const primaryHref = isAuthenticated ? "/chat" : "/register";
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = LANDING_TITLE;
+    return () => {
+      document.title = previousTitle;
+    };
+  }, []);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-white">
-      <LandingHeader isAuthenticated={isAuthenticated} primaryHref={primaryHref} />
-      <HeroSection isAuthenticated={isAuthenticated} primaryHref={primaryHref} />
-      <HighlightsSection />
-      <FeaturesSection />
-      <HowItWorksSection />
-      <StartSection isAuthenticated={isAuthenticated} primaryHref={primaryHref} />
-      <LandingFooter />
-    </main>
+    // `.site` scopes the site palette and fonts so they don't leak into the app.
+    <div className="site min-h-screen">
+      <SiteNav />
+      <main className="-mt-[68px] sm:-mt-[72px]">
+        <Hero />
+        <FactsRow />
+        <HowItWorks />
+        <Features />
+        <YourWeek />
+        <Faq />
+        <ClosingCta />
+      </main>
+      <SiteFooter />
+    </div>
   );
 }

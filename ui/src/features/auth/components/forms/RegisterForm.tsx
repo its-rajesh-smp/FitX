@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { registerUser } from "@/features/auth/services/registerUser";
 import { getAuthError } from "@/features/auth/helpers/getAuthError";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
+import { cn } from "@/lib/utils";
 import { AuthField, AuthFormCard } from "./AuthFormCard";
+import { AUTH_INPUT_CLASS, AUTH_PRIMARY_BUTTON_CLASS } from "./authStyles";
 import { registerSchema, type RegisterValues } from "./authSchemas";
 import { PasswordInput } from "./PasswordInput";
 
@@ -29,12 +31,12 @@ export function RegisterForm() {
 
   return (
     <AuthFormCard
-      title="Start your journey"
-      description="Create your account and build your first workout plan."
+      title="Create your FitX account"
+      description="Build your first weekly plan in a few minutes."
       footer={
         <>
           Already have an account?{" "}
-          <Link className="text-primary font-bold hover:underline" to="/login">
+          <Link className="font-semibold text-ink hover:underline" to="/login">
             Sign in
           </Link>
         </>
@@ -42,13 +44,14 @@ export function RegisterForm() {
     >
       <form
         onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
-        className="mt-7 space-y-4"
+        className="space-y-3.5"
       >
         <AuthField
           label="Full name"
           error={form.formState.errors.name?.message}
         >
           <Input
+            className={AUTH_INPUT_CLASS}
             placeholder="Alex Johnson"
             autoComplete="name"
             {...form.register("name")}
@@ -59,6 +62,7 @@ export function RegisterForm() {
           error={form.formState.errors.email?.message}
         >
           <Input
+            className={AUTH_INPUT_CLASS}
             type="email"
             placeholder="alex@example.com"
             autoComplete="email"
@@ -70,19 +74,20 @@ export function RegisterForm() {
           error={form.formState.errors.password?.message}
         >
           <PasswordInput
+            className={AUTH_INPUT_CLASS}
             placeholder="At least 8 characters"
             autoComplete="new-password"
             {...form.register("password")}
           />
         </AuthField>
         {mutation.error && (
-          <p className="text-destructive text-sm">
+          <p className="text-[12px] text-danger">
             {getAuthError(mutation.error)}
           </p>
         )}
         <Button
           type="submit"
-          className="shadow-primary/20 mt-3 h-12 w-full rounded-xl font-bold shadow-lg"
+          className={cn(AUTH_PRIMARY_BUTTON_CLASS, "mt-2")}
           disabled={mutation.isPending}
         >
           {mutation.isPending ? "Creating account..." : "Create account"}

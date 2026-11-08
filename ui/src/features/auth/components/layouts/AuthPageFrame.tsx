@@ -1,52 +1,44 @@
-import { APP } from "@/constants/app";
-import { Dumbbell } from "lucide-react";
+import { ArrowLeft, Dumbbell } from "lucide-react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { AuthWorkoutIllustration } from "./AuthWorkoutIllustration";
+import { APP } from "@/constants/app";
+import { AuthArtPanel } from "./AuthArtPanel";
 
-export function AuthPageFrame({ children }: { children: React.ReactNode }) {
+function Wordmark() {
   return (
-    <main className="grid min-h-screen lg:grid-cols-2">
-      <section className="bg-primary relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col">
-        <div className="absolute top-1/3 -left-24 size-72 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -top-20 -right-20 size-80 rounded-full bg-white/15 blur-3xl" />
-        <Link
-          to="/"
-          className="relative flex w-fit cursor-pointer items-center gap-3 text-xl font-extrabold"
-        >
-          <span className="flex size-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
-            <Dumbbell />
-          </span>
-          {APP.productName}
-        </Link>
-        <div className="relative my-auto max-w-lg">
-          <h1 className="mt-6 text-5xl leading-tight font-extrabold tracking-tight">
-            Your goals. Your schedule. Your workout plan.
-          </h1>
-          <p className="mt-5 text-lg leading-relaxed text-white/75">
-            FitAI turns your goals, available equipment, and weekly schedule
-            into a practical workout plan you can follow.
-          </p>
-          <div className="mt-6 max-w-md">
-            <AuthWorkoutIllustration />
-          </div>
-        </div>
-        <p className="relative text-sm text-white/60">
-          Train with a plan built around you.
-        </p>
-      </section>
-      <section className="bg-canvas relative flex items-center justify-center overflow-hidden px-4 py-10">
-        <div className="bg-primary/8 absolute top-10 -right-20 size-64 rounded-full blur-3xl" />
-        <div className="bg-primary/6 absolute -bottom-24 left-10 size-72 rounded-full blur-3xl" />
-        <div className="relative w-full max-w-md">
+    <Link to="/" className="flex w-fit items-center gap-2.5 text-ink">
+      <span className="flex size-6 items-center justify-center rounded-full bg-ink text-accent">
+        <Dumbbell aria-hidden className="size-3.5 rotate-45" strokeWidth={2.25} />
+      </span>
+      <span className="font-mono text-[12px] tracking-[0.3em] uppercase">
+        {APP.productName}
+      </span>
+    </Link>
+  );
+}
+
+export function AuthPageFrame({ children }: { children: ReactNode }) {
+  return (
+    // `.site` gives auth the same type and lilac palette as the landing page.
+    <main className="site grid h-dvh grid-rows-1 overflow-hidden lg:grid-cols-[1.4fr_1fr]">
+      <AuthArtPanel wordmark={<Wordmark />} />
+
+      {/* Fixed-height column: it must never scroll, even on short screens. */}
+      <section className="flex h-full flex-col overflow-hidden px-6">
+        <div className="flex h-16 shrink-0 items-center">
           <Link
             to="/"
-            className="mb-10 flex cursor-pointer items-center justify-center gap-2 text-xl font-extrabold lg:hidden"
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted transition-colors hover:text-ink"
           >
-            <span className="bg-primary flex size-9 items-center justify-center rounded-lg text-white">
-              <Dumbbell className="size-5" />
-            </span>
-            {APP.productName}
+            <ArrowLeft aria-hidden className="size-3.5" />
+            Back
           </Link>
+        </div>
+
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center pb-16">
+          <div className="mb-8 lg:hidden">
+            <Wordmark />
+          </div>
           {children}
         </div>
       </section>

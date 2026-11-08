@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { loginUser } from "@/features/auth/services/loginUser";
 import { getAuthError } from "@/features/auth/helpers/getAuthError";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
+import { cn } from "@/lib/utils";
 import { AuthField, AuthFormCard } from "./AuthFormCard";
+import { AUTH_INPUT_CLASS, AUTH_PRIMARY_BUTTON_CLASS } from "./authStyles";
 import { loginSchema, type LoginValues } from "./authSchemas";
 import { PasswordInput } from "./PasswordInput";
 
@@ -27,29 +29,27 @@ export function LoginForm() {
 
   return (
     <AuthFormCard
-      title="Welcome back"
-      description="Sign in to continue your training plan."
+      title="Sign in to FitX"
+      description="Welcome back. Pick up your week where you left off."
       footer={
         <>
-          New to FitAI?{" "}
-          <Link
-            className="text-primary font-bold hover:underline"
-            to="/register"
-          >
-            Create an account
+          Don&apos;t have an account?{" "}
+          <Link className="font-semibold text-ink hover:underline" to="/register">
+            Sign up
           </Link>
         </>
       }
     >
       <form
         onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
-        className="mt-7 space-y-4"
+        className="space-y-3.5"
       >
         <AuthField
           label="Email address"
           error={form.formState.errors.email?.message}
         >
           <Input
+            className={AUTH_INPUT_CLASS}
             type="email"
             placeholder="alex@example.com"
             autoComplete="email"
@@ -61,19 +61,20 @@ export function LoginForm() {
           error={form.formState.errors.password?.message}
         >
           <PasswordInput
+            className={AUTH_INPUT_CLASS}
             placeholder="At least 8 characters"
             autoComplete="current-password"
             {...form.register("password")}
           />
         </AuthField>
         {mutation.error && (
-          <p className="text-destructive text-sm">
+          <p className="text-[12px] text-danger">
             {getAuthError(mutation.error)}
           </p>
         )}
         <Button
           type="submit"
-          className="shadow-primary/20 mt-3 h-12 w-full rounded-xl font-bold shadow-lg"
+          className={cn(AUTH_PRIMARY_BUTTON_CLASS, "mt-2")}
           disabled={mutation.isPending}
         >
           {mutation.isPending ? "Signing in..." : "Sign in"}

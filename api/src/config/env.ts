@@ -20,6 +20,8 @@ export const env = {
   OPENAI_AGENTS_TRACING_ENABLED:
     process.env.OPENAI_AGENTS_TRACING_ENABLED === "true",
 
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
+
   YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY || "",
   MASTER_PASSWORD: process.env.MASTER_PASSWORD || "Apple@17",
 };
