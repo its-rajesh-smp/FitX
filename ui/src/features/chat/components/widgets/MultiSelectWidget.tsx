@@ -1,6 +1,10 @@
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  WIDGET_CHIP_CLASS,
+  WIDGET_CHIP_SELECTED_CLASS,
+} from "@/features/chat/constants/widgetTones";
 import { cn } from "@/lib/utils";
 
 export function MultiSelectWidget({
@@ -31,7 +35,7 @@ export function MultiSelectWidget({
   };
 
   return (
-    <div className="mt-3 rounded-xl border bg-card p-3 shadow-card">
+    <div className="mt-4 rounded-2xl border bg-white p-3 sm:p-4">
       <div className="flex flex-wrap gap-2">
         {options.map((option) => {
           const isSelected = selected.includes(option);
@@ -43,8 +47,8 @@ export function MultiSelectWidget({
               variant="outline"
               size="sm"
               className={cn(
-                "rounded-full capitalize",
-                isSelected && "border-primary bg-primary-soft text-primary",
+                WIDGET_CHIP_CLASS,
+                isSelected && WIDGET_CHIP_SELECTED_CLASS,
               )}
               disabled={disabled}
               aria-pressed={isSelected}
@@ -58,8 +62,7 @@ export function MultiSelectWidget({
       </div>
       <Button
         type="button"
-        size="sm"
-        className="mt-3"
+        className="mt-4 h-9 px-5 text-[13px]"
         disabled={disabled || selected.length === 0}
         onClick={() => onSubmit(selected)}
       >

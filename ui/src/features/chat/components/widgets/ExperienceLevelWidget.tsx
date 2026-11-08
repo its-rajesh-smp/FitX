@@ -1,5 +1,9 @@
 import { ArrowRight, Dumbbell, Flame, Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  WIDGET_OPTION_CLASS,
+  WIDGET_TONES,
+} from "@/features/chat/constants/widgetTones";
 import { cn } from "@/lib/utils";
 
 const EXPERIENCE_OPTIONS = [
@@ -7,19 +11,19 @@ const EXPERIENCE_OPTIONS = [
     label: "Never really worked out before",
     description: "We will keep your first plan simple and approachable.",
     Icon: Sprout,
-    iconClassName: "bg-emerald-500/10 text-emerald-600",
+    iconClassName: WIDGET_TONES.violet,
   },
   {
     label: "Worked out before, but not consistently (less than 6 months)",
     description: "We will help you build a steady routine.",
     Icon: Dumbbell,
-    iconClassName: "bg-amber-500/10 text-amber-600",
+    iconClassName: WIDGET_TONES.iris,
   },
   {
     label: "I work out regularly (6+ months)",
     description: "We can use more variety and challenging movements.",
     Icon: Flame,
-    iconClassName: "bg-red-500/10 text-red-600",
+    iconClassName: WIDGET_TONES.peach,
   },
 ] as const;
 
@@ -31,7 +35,7 @@ export function ExperienceLevelWidget({
   onSubmit: (values: string[]) => void;
 }) {
   return (
-    <div className="bg-card shadow-card mt-3 grid gap-2 rounded-2xl border p-2.5 sm:p-3">
+    <div className="mt-4 grid gap-2">
       {EXPERIENCE_OPTIONS.map(
         ({ label, description, Icon, iconClassName }) => (
         <Button
@@ -39,26 +43,26 @@ export function ExperienceLevelWidget({
           type="button"
           variant="outline"
           disabled={disabled}
-          className="group hover:border-primary/40 hover:bg-primary-soft h-auto min-h-16 justify-start gap-3 rounded-xl px-3 py-3 text-left whitespace-normal"
+          className={WIDGET_OPTION_CLASS}
           onClick={() => onSubmit([label])}
         >
           <span
             className={cn(
-              "flex size-9 shrink-0 items-center justify-center rounded-lg transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:scale-110 group-hover:shadow-md",
+              "flex size-9 shrink-0 items-center justify-center rounded-xl",
               iconClassName,
             )}
           >
-            <Icon className="size-4.5 transition-transform duration-300 ease-out group-hover:-rotate-12 group-hover:scale-110" />
+            <Icon className="size-4.5" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-sm leading-5 font-semibold">
+            <span className="block text-[14px] leading-5 font-semibold">
               {label}
             </span>
-            <span className="text-muted-foreground mt-0.5 block text-xs leading-4 font-normal">
+            <span className="text-muted-foreground mt-0.5 block text-[12px] leading-4 font-normal">
               {description}
             </span>
           </span>
-          <ArrowRight className="text-muted-foreground group-hover:text-primary size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
+          <ArrowRight className="text-subtle group-hover:text-foreground size-4 shrink-0 transition group-hover:translate-x-0.5" />
         </Button>
         ),
       )}

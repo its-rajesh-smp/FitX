@@ -54,7 +54,7 @@ const REGIONS: Region[] = [
 function shapeClass(active: boolean) {
   return cn(
     "transition-all duration-300 stroke-[2] stroke-background",
-    active ? "fill-primary" : "fill-muted",
+    active ? "fill-accent-edge" : "fill-muted",
   );
 }
 

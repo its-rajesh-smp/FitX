@@ -6,6 +6,10 @@ import {
   type EquipmentTarget,
 } from "@/features/chat/constants/equipmentTargets";
 import { EXERCISE_EQUIPMENT } from "@/features/chat/constants/exerciseFilters";
+import {
+  WIDGET_CHIP_CLASS,
+  WIDGET_CHIP_SELECTED_CLASS,
+} from "@/features/chat/constants/widgetTones";
 import { cn } from "@/lib/utils";
 
 const TARGET_DETAILS = {
@@ -58,7 +62,7 @@ export function EquipmentMultiSelectWidget({
   };
 
   return (
-    <div className="bg-card shadow-card mt-3 rounded-2xl border p-3 sm:p-4">
+    <div className="mt-4 rounded-2xl border bg-white p-3 sm:p-4">
       <div className="grid gap-2">
         {(Object.keys(EQUIPMENT_TARGETS) as EquipmentTarget[]).map((target) => {
           const isSelected = selectedTarget === target;
@@ -72,28 +76,28 @@ export function EquipmentMultiSelectWidget({
               disabled={disabled}
               aria-pressed={isSelected}
               className={cn(
-                "h-auto min-h-16 justify-start gap-3 rounded-xl px-3 py-3 text-left whitespace-normal",
+                "hover:border-accent-edge/50 hover:bg-violet-tint/50 h-auto min-h-16 justify-start gap-3 rounded-2xl border-border bg-white px-3 py-3 text-left whitespace-normal",
                 isSelected &&
-                  "border-primary bg-primary-soft text-primary hover:bg-primary-soft",
+                  "border-accent-edge bg-accent hover:bg-accent text-foreground",
               )}
               onClick={() => selectTarget(target)}
             >
               <span
                 className={cn(
-                  "bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg",
-                  isSelected && "bg-primary text-white",
+                  "bg-violet-tint text-violet-ink flex size-9 shrink-0 items-center justify-center rounded-xl",
+                  isSelected && "bg-white text-violet-ink",
                 )}
               >
                 <Icon className="size-4.5" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm leading-5 font-semibold">
+                <span className="block text-[14px] leading-5 font-semibold">
                   {target}
                 </span>
                 <span
                   className={cn(
                     "text-muted-foreground mt-0.5 block text-xs leading-4 font-normal",
-                    isSelected && "text-primary/75",
+                    isSelected && "text-foreground/70",
                   )}
                 >
                   {description}
@@ -102,7 +106,7 @@ export function EquipmentMultiSelectWidget({
               <span
                 className={cn(
                   "flex size-5 shrink-0 items-center justify-center rounded-full border",
-                  isSelected && "border-primary bg-primary text-white",
+                  isSelected && "border-accent-edge bg-accent-edge text-white",
                 )}
               >
                 {isSelected && <Check className="size-3" />}
@@ -117,7 +121,7 @@ export function EquipmentMultiSelectWidget({
         role="switch"
         aria-checked={showAllEquipment}
         disabled={disabled}
-        className="bg-muted hover:bg-muted/70 mt-3 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors disabled:opacity-50"
+        className="bg-secondary hover:bg-violet-tint mt-3 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-[13px] font-medium transition-colors disabled:opacity-50"
         onClick={() => setShowAllEquipment((current) => !current)}
       >
         <span>
@@ -130,7 +134,7 @@ export function EquipmentMultiSelectWidget({
           aria-hidden="true"
           className={cn(
             "bg-muted-foreground/30 relative ml-3 h-5 w-9 shrink-0 rounded-full transition-colors",
-            showAllEquipment && "bg-primary",
+            showAllEquipment && "bg-accent-edge",
           )}
         >
           <span
@@ -155,8 +159,8 @@ export function EquipmentMultiSelectWidget({
                 disabled={disabled}
                 aria-pressed={isSelected}
                 className={cn(
-                  "rounded-full capitalize",
-                  isSelected && "border-primary bg-primary-soft text-primary",
+                  WIDGET_CHIP_CLASS,
+                  isSelected && WIDGET_CHIP_SELECTED_CLASS,
                 )}
                 onClick={() => toggleEquipment(equipment)}
               >
@@ -170,8 +174,7 @@ export function EquipmentMultiSelectWidget({
 
       <Button
         type="button"
-        size="sm"
-        className="mt-3 w-full sm:w-auto"
+        className="mt-4 h-9 w-full px-5 text-[13px] sm:w-auto"
         disabled={disabled || selectedEquipment.length === 0}
         onClick={submit}
       >

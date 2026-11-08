@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { BrandMark } from "@/components/ui/BrandMark";
 import { ChatStatusIndicator } from "@/features/chat/components/ChatStatusIndicator";
 import { MarkdownMessage } from "@/features/chat/components/MarkdownMessage";
 import { QuickAnswers } from "@/features/chat/components/QuickAnswers";
@@ -61,16 +61,13 @@ export function ChatMessageItem({
 
   return (
     <div className={cn("flex gap-3", !isAssistant && "justify-end")}>
-      {isAssistant && !isCompact && (
-        <span className="bg-primary flex size-8 shrink-0 items-center justify-center rounded-lg text-white">
-          <Sparkles className="size-4" />
-        </span>
-      )}
+      {isAssistant && !isCompact && <BrandMark size="sm" className="mt-1" />}
       <div
         className={cn(
-          "rounded-2xl py-3 text-sm leading-7",
-          isCompact ? "max-w-full px-1" : "max-w-[88%] px-4",
-          !isAssistant && "bg-primary rounded-tr-md px-4 text-white",
+          "text-[15px] leading-7",
+          isAssistant && (isCompact ? "max-w-full" : "max-w-[88%] pt-0.5"),
+          !isAssistant &&
+            "bg-secondary max-w-[85%] rounded-[20px] rounded-br-md px-4 py-2.5 leading-6",
           isPendingAssistant && "text-muted-foreground",
           hasPlanWidget &&
             (isCompact ? "w-full max-w-full" : "w-full max-w-xl"),

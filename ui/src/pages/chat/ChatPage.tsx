@@ -79,6 +79,7 @@ export function ChatPage() {
   return (
     <div className="flex h-screen min-h-0 flex-col overflow-hidden bg-white">
       <ChatHeader
+        userName={chat.user?.name}
         hasPlan={hasPlan}
         isDesktop={panels.isDesktop}
         chatCollapsed={panels.chatCollapsed}

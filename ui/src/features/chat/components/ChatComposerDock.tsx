@@ -15,8 +15,8 @@ export function ChatComposerDock({
   onSend,
 }: ChatComposerDockProps) {
   return (
-    <div className="sticky bottom-0 border-t bg-white/95 p-4 backdrop-blur">
-      <div className="mx-auto max-w-3xl">
+    <div className="sticky bottom-0 bg-linear-to-t from-white via-white to-white/0 px-4 pt-3 pb-3 sm:px-6">
+      <div className="mx-auto max-w-2xl">
         <ChatComposer
           onSend={onSend}
           isPending={isStreaming}
@@ -24,7 +24,7 @@ export function ChatComposerDock({
           highlighted={Boolean(customQuestion)}
           placeholder={customQuestion ? "Type your answer..." : "Message FitX"}
         />
-        <p className="mt-2 text-center text-[10px] text-muted-foreground">
+        <p className="text-muted-foreground/80 mt-2 text-center text-[11px]">
           FitX can make mistakes. Use your judgment for health and training
           decisions.
         </p>

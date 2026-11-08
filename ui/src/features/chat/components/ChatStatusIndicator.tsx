@@ -10,13 +10,19 @@ const icons = {
   updating_plan: Save,
 };
 
+const WAVE_DELAYS = ["[animation-delay:0ms]", "[animation-delay:150ms]", "[animation-delay:300ms]"];
+
 export function ChatStatusIndicator({ status, label }: { status: ChatStatus; label: string }) {
   const Icon = icons[status];
   return (
-    <span className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
-      <Icon className="size-3.5 animate-pulse text-primary" />
+    <span className="text-muted-foreground inline-flex items-center gap-2 text-[13px] font-medium">
+      <Icon className="text-accent-edge size-3.5" />
       {label}
-      <span className="flex gap-1"><i className="size-1 animate-bounce rounded-full bg-primary [animation-delay:-.2s]" /><i className="size-1 animate-bounce rounded-full bg-primary [animation-delay:-.1s]" /><i className="size-1 animate-bounce rounded-full bg-primary" /></span>
+      <span aria-hidden className="flex items-center gap-1">
+        {WAVE_DELAYS.map((delay) => (
+          <i key={delay} className={`bg-accent-edge animate-wave size-1 rounded-full ${delay}`} />
+        ))}
+      </span>
     </span>
   );
 }

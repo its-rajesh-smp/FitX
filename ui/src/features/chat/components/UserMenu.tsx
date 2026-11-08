@@ -1,18 +1,31 @@
-import { LogOut, RotateCcw, UserRound } from "lucide-react";
+import { LogOut, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { NewSessionDialog } from "@/features/chat/components/NewSessionDialog";
 
-export function UserMenu({ onLogout }: { onLogout: () => void }) {
+const getInitial = (name?: string) => name?.trim().charAt(0).toUpperCase() || "?";
+
+export function UserMenu({
+  userName,
+  onLogout,
+}: {
+  userName?: string;
+  onLogout: () => void;
+}) {
   const [newSessionDialogOpen, setNewSessionDialogOpen] = useState(false);
 
   return (
     <>
       <DropdownMenu
         trigger={
-          <Button variant="ghost" size="icon" aria-label="Open user menu">
-            <UserRound />
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Open user menu"
+            className="border-violet-edge bg-violet-tint text-violet-ink hover:bg-violet-edge/60 border text-[13px] font-semibold"
+          >
+            {getInitial(userName)}
           </Button>
         }
         items={[
